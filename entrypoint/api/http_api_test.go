@@ -2,13 +2,14 @@ package api
 
 import (
 	"bytes"
-	"github.com/vechain/networkhub/hub"
-	"github.com/vechain/networkhub/network"
-	"github.com/vechain/networkhub/preset"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/vechain/networkhub/hub"
+	"github.com/vechain/networkhub/network"
+	"github.com/vechain/networkhub/preset"
 
 	"github.com/vechain/networkhub/environments/noop"
 )

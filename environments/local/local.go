@@ -81,7 +81,6 @@ func (l *Local) Info() error {
 }
 
 func hashObject(obj interface{}) string {
-
 	// Serialize the object to JSON
 	jsonData, err := json.Marshal(obj)
 	if err != nil {

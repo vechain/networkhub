@@ -1,13 +1,14 @@
 package preset
 
 import (
+	"math/big"
+
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/thor/genesis"
 	"github.com/vechain/thor/thor"
-	"math/big"
 )
 
 var LocalThreeMasterNodesNetwork = &network.Network{

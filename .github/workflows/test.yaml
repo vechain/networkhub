@@ -1,0 +1,21 @@
+name: Unit Tests
+
+on:
+  # Should only be used by other workflows
+  workflow_call:
+
+jobs:
+  unit_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.19.x
+
+      - name: Make Test
+        id: unit-test
+        run: go test ./... -count=1

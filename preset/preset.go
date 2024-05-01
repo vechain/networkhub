@@ -2,6 +2,7 @@ package preset
 
 import (
 	"fmt"
+
 	"github.com/vechain/networkhub/network"
 )
 

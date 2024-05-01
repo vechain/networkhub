@@ -1,0 +1,19 @@
+name: Pull Request CI
+
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  run-unit-tests:
+    name: Run Unit Tests
+    uses: ./.github/workflows/test.yaml
+
+  lint:
+    name: Lint
+    uses: ./.github/workflows/lint-go.yaml
+

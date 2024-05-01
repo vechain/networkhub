@@ -3,12 +3,12 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/vechain/networkhub/hub"
-	"github.com/vechain/networkhub/preset"
 	"net/http"
 	"strings"
 
+	"github.com/vechain/networkhub/hub"
 	"github.com/vechain/networkhub/network"
+	"github.com/vechain/networkhub/preset"
 )
 
 type Server struct {
@@ -63,8 +63,7 @@ func (s *Server) presetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, fmt.Sprintf("{\"networkId\": \"%s\"}", networkID))
-
+	fmt.Fprintf(w, "{\"networkId\": \"%s\"}", networkID)
 }
 
 func (s *Server) configHandler(w http.ResponseWriter, r *http.Request) {
@@ -86,8 +85,7 @@ func (s *Server) configHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, fmt.Sprintf("{\"networkId\": \"%s\"}", networkID))
-
+	fmt.Fprintf(w, "{\"networkId\": \"%s\"}", networkID)
 }
 
 func (s *Server) startHandler(w http.ResponseWriter, r *http.Request) {
