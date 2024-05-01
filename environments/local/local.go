@@ -1,17 +1,17 @@
 package local
 
 import (
-	"bytes"
 	"crypto/sha256"
-	"encoding/gob"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
-	"github.com/vechain/networkhub/network/node"
 )
 
 type Local struct {
@@ -28,23 +28,38 @@ func NewLocalEnv() environments.Actions {
 
 func (l *Local) LoadConfig(cfg *network.Network) (string, error) {
 	l.networkCfg = cfg
-	l.id = hashObject(cfg)
+	l.id = hashObject(l.networkCfg)
+	baseTmpDir := filepath.Join(os.TempDir(), l.id)
+
+	// ensure paths exist, use temp dirs if not defined
+	for _, n := range l.networkCfg.Nodes {
+		if n.ConfigDir == "" {
+			n.ConfigDir = filepath.Join(baseTmpDir, n.ID, "config")
+		}
+
+		if n.DataDir == "" {
+			n.DataDir = filepath.Join(baseTmpDir, n.ID, "data")
+		}
+	}
+
 	return l.id, nil
 }
 
 func (l *Local) StartNetwork() error {
+	// speed up p2p bootstrap
 	var enodes []string
 	for _, node := range l.networkCfg.Nodes {
 		enodes = append(enodes, node.Enode)
 	}
-
 	enodeString := strings.Join(enodes, ",")
-	for _, node := range l.networkCfg.Nodes {
-		localNode, err := l.startNode(node, enodeString)
-		if err != nil {
+
+	for _, nodeCfg := range l.networkCfg.Nodes {
+		localNode := NewLocalNode(nodeCfg, enodeString)
+		if err := localNode.Start(); err != nil {
 			return fmt.Errorf("unable to start node - %w", err)
 		}
-		l.localNodes[node.ID] = localNode
+
+		l.localNodes[nodeCfg.ID] = localNode
 	}
 
 	return nil
@@ -65,26 +80,17 @@ func (l *Local) Info() error {
 	panic("implement me")
 }
 
-func (l *Local) startNode(nodeCfg *node.Node, enodeString string) (*Node, error) {
-	localNode := NewLocalNode(nodeCfg, enodeString)
-	return localNode, localNode.Start()
-}
-
 func hashObject(obj interface{}) string {
-	// Create a buffer to hold the encoded data
-	var buf bytes.Buffer
 
-	// New encoder that writes to the buffer
-	encoder := gob.NewEncoder(&buf)
-
-	// Encode the object; handle errors
-	if err := encoder.Encode(obj); err != nil {
-		log.Fatalf("Failed to encode object: %v", err)
+	// Serialize the object to JSON
+	jsonData, err := json.Marshal(obj)
+	if err != nil {
+		log.Fatalf("Failed to JSON encode object: %v", err)
 	}
 
-	// Compute SHA-256 checksum on the buffer's bytes
+	// Compute SHA-256 checksum on the JSON data
 	hash := sha256.New()
-	hash.Write(buf.Bytes())
+	hash.Write(jsonData)
 	hashBytes := hash.Sum(nil)
 
 	// Convert hash bytes to hex string

@@ -2,6 +2,7 @@ package local
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -25,18 +26,39 @@ func NewLocalNode(nodeCfg *node.Node, enodes string) *Node {
 }
 
 func (n *Node) Start() error {
+	// ensure directories exist
+	if err := os.MkdirAll(n.nodeCfg.ConfigDir, 0777); err != nil {
+		return fmt.Errorf("unable to create configDir - %w", err)
+	}
+	if err := os.MkdirAll(n.nodeCfg.DataDir, 0777); err != nil {
+		return fmt.Errorf("unable to create configDir - %w", err)
+	}
+
+	// write keys to disk
 	if n.nodeCfg.Type == "masterNode" && n.nodeCfg.Key != "" {
 		err := os.WriteFile(filepath.Join(n.nodeCfg.ConfigDir, "master.key"), []byte(n.nodeCfg.Key), 0644)
 		if err != nil {
-			return fmt.Errorf("failed to write to file %s: %w", filepath.Join(n.nodeCfg.ConfigDir, "master.key"), err)
+			return fmt.Errorf("failed to write master key file - %w", err)
 		}
+	}
+
+	// write genesis to disk
+	genesisPath := filepath.Join(n.nodeCfg.ConfigDir, "genesis.json")
+	genesisBytes, err := json.Marshal(n.nodeCfg.Genesis)
+	if err != nil {
+		return fmt.Errorf("unable to marshal genesis - %w", err)
+	}
+
+	err = os.WriteFile(genesisPath, genesisBytes, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write genesis file - %w", err)
 	}
 
 	cmd := &exec.Cmd{
 		Path: "/Users/pedro/go/src/github.com/vechain/thor/bin/thor",
 		Args: []string{
 			"thor",
-			"--network", n.nodeCfg.Genesis,
+			"--network", genesisPath,
 			"--data-dir", n.nodeCfg.DataDir,
 			"--config-dir", n.nodeCfg.ConfigDir,
 			"--api-addr", n.nodeCfg.APIAddr,
