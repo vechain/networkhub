@@ -8,3 +8,7 @@ type Actions interface {
 	StopNetwork() error
 	Info() error
 }
+
+const (
+	Local = "local"
+)

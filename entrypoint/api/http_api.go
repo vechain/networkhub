@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/vechain/networkhub/hub"
+	"github.com/vechain/networkhub/preset"
 	"net/http"
 	"strings"
 
@@ -12,15 +13,18 @@ import (
 
 type Server struct {
 	entrypoint *hub.NetworkHub
+	presets    *preset.Networks
 }
 
-func New(envMgr *hub.NetworkHub) *Server {
+func New(envMgr *hub.NetworkHub, presets *preset.Networks) *Server {
 	return &Server{
 		entrypoint: envMgr,
+		presets:    presets,
 	}
 }
 
 func (s *Server) Start() error {
+	http.HandleFunc("/preset", s.presetHandler)
 	http.HandleFunc("/config", s.configHandler)
 	http.HandleFunc("/start", s.startHandler)
 	http.HandleFunc("/stop", s.stopHandler)
@@ -31,6 +35,36 @@ func (s *Server) Start() error {
 		fmt.Println("Error starting server:", err)
 	}
 	return nil
+}
+
+func (s *Server) presetHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Extract the part of the path after "/preset/"
+	networkPresetID := strings.TrimPrefix(r.URL.Path, "/preset/")
+	if networkPresetID == "" {
+		http.Error(w, "Network preset ID must be specified", http.StatusBadRequest)
+		return
+	}
+
+	networkCfg, err := s.presets.Load(networkPresetID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("unable to load network preset - %s", err), http.StatusBadRequest)
+		return
+	}
+
+	networkID, err := s.entrypoint.LoadNetworkConfig(networkCfg)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to load network config - %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, fmt.Sprintf("{\"networkId\": \"%s\"}", networkID))
+
 }
 
 func (s *Server) configHandler(w http.ResponseWriter, r *http.Request) {

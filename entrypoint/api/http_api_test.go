@@ -3,6 +3,8 @@ package api
 import (
 	"bytes"
 	"github.com/vechain/networkhub/hub"
+	"github.com/vechain/networkhub/network"
+	"github.com/vechain/networkhub/preset"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -59,11 +61,31 @@ func TestStartStopHandler(t *testing.T) {
 			wantStatus: http.StatusInternalServerError,
 			wantBody:   "Unable to stop network - network no-exist is not configured\n",
 		},
+		{
+			name:       "Load existing preset network",
+			target:     "/preset/noop-network",
+			payload:    "{}",
+			method:     http.MethodGet,
+			wantStatus: http.StatusOK,
+			wantBody:   "{\"networkId\": \"noop\"}",
+		},
+		{
+			name:       "Load non-preset network",
+			target:     "/preset/noop-network-no-exist",
+			payload:    "{}",
+			method:     http.MethodGet,
+			wantStatus: http.StatusBadRequest,
+			wantBody:   "unable to load network preset - unable to find preset with id noop-network-no-exist",
+		},
 	}
 
 	envManager := hub.NewNetworkHub()
 	envManager.RegisterEnvironment("noop", noop.NewNoopEnv)
-	api := New(envManager)
+
+	presets := preset.NewPresetNetworks()
+	presets.Register("noop-network", &network.Network{Environment: "noop"})
+
+	api := New(envManager, presets)
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -72,6 +94,8 @@ func TestStartStopHandler(t *testing.T) {
 			var handler http.HandlerFunc
 
 			switch {
+			case strings.Contains(tc.target, "/preset"):
+				handler = api.presetHandler
 			case strings.Contains(tc.target, "/config"):
 				handler = api.configHandler
 			case strings.Contains(tc.target, "/start"):

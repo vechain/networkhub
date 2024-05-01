@@ -1,5 +1,10 @@
 package node
 
+const (
+	MasterNode  = "MasterNode"
+	RegularNode = "RegularNode"
+)
+
 type Node struct {
 	ID            string      `json:"id"`                //TODO this is a mandatory field
 	Genesis       interface{} `json:"genesis,omitempty"` //TODO would be nice to have validation in this format

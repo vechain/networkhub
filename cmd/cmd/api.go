@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/vechain/networkhub/hub"
+	"github.com/vechain/networkhub/preset"
 
 	"github.com/vechain/networkhub/entrypoint/api"
 	"github.com/vechain/networkhub/environments/local"
@@ -18,7 +19,11 @@ var apiCmd = &cobra.Command{
 
 		envManager := hub.NewNetworkHub()
 		envManager.RegisterEnvironment("local", local.NewLocalEnv)
-		httpAPI := api.New(envManager)
+
+		presets := preset.NewPresetNetworks()
+		presets.Register("threeMasterNodesNetwork", preset.LocalThreeMasterNodesNetwork)
+
+		httpAPI := api.New(envManager, presets)
 
 		if err := httpAPI.Start(); err != nil {
 			fmt.Println("Shutting down.. Unexpected error in api - %w", err)
