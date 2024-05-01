@@ -11,11 +11,11 @@ func NewNoopEnv() environments.Actions {
 	return &Noop{}
 }
 
-func (n Noop) LoadConfig() error {
-	return nil
+func (n Noop) LoadConfig(*network.Network) (string, error) {
+	return "noop", nil
 }
 
-func (n Noop) StartNetwork(cfg *network.Network) error {
+func (n Noop) StartNetwork() error {
 	return nil
 }
 

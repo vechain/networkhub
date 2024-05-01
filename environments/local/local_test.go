@@ -60,8 +60,10 @@ func TestLocal(t *testing.T) {
 
 	fmt.Println(networkCfg)
 	localEnv := NewLocalEnv()
+	_, err = localEnv.LoadConfig(networkCfg)
+	require.NoError(t, err)
 
-	err = localEnv.StartNetwork(networkCfg)
+	err = localEnv.StartNetwork()
 	require.NoError(t, err)
 
 	time.Sleep(30 * time.Second)
@@ -71,7 +73,7 @@ func TestLocal(t *testing.T) {
 
 	fmt.Println(account)
 
-	time.Sleep(time.Hour)
+	//time.Sleep(time.Hour)
 	//client1 := network1.GetNode(nodeID).GetClient()
 	//
 	//account1, err := client1.GetAccount(acc1)

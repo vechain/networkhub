@@ -2,12 +2,12 @@ package api
 
 import (
 	"bytes"
+	"github.com/vechain/networkhub/hub"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/environments/noop"
 )
 
@@ -21,10 +21,18 @@ func TestStartStopHandler(t *testing.T) {
 		payload    string
 	}{
 		{
+			name:       "Config Network",
+			target:     "/config",
+			payload:    "{\"environment\":\"noop\"}",
+			method:     http.MethodPost,
+			wantStatus: http.StatusOK,
+			wantBody:   "{\"networkId\": \"noop\"}",
+		},
+		{
 			name:       "Start Network",
 			target:     "/start/noop",
 			payload:    "{}",
-			method:     http.MethodPost,
+			method:     http.MethodGet,
 			wantStatus: http.StatusOK,
 			wantBody:   "Network Started\n",
 		},
@@ -35,7 +43,27 @@ func TestStartStopHandler(t *testing.T) {
 			wantStatus: http.StatusOK,
 			wantBody:   "Network Stopped\n",
 		},
+		{
+			name:       "Start non-existent network",
+			target:     "/start/no-exist",
+			payload:    "{}",
+			method:     http.MethodGet,
+			wantStatus: http.StatusInternalServerError,
+			wantBody:   "Unable to start network - network no-exist is not configured\n",
+		},
+		{
+			name:       "Stop non-existent network",
+			target:     "/stop/no-exist",
+			payload:    "{}",
+			method:     http.MethodGet,
+			wantStatus: http.StatusInternalServerError,
+			wantBody:   "Unable to stop network - network no-exist is not configured\n",
+		},
 	}
+
+	envManager := hub.NewNetworkHub()
+	envManager.RegisterEnvironment("noop", noop.NewNoopEnv)
+	api := New(envManager)
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -43,12 +71,10 @@ func TestStartStopHandler(t *testing.T) {
 			recorder := httptest.NewRecorder()
 			var handler http.HandlerFunc
 
-			envManager := environments.NewEnvManager()
-			envManager.RegisterEnv("noop", noop.NewNoopEnv())
-			api := New(envManager)
-
 			switch {
-			case strings.Contains(tc.target, "/start/"):
+			case strings.Contains(tc.target, "/config"):
+				handler = api.configHandler
+			case strings.Contains(tc.target, "/start"):
 				handler = api.startHandler
 			case strings.Contains(tc.target, "/stop"):
 				handler = api.stopHandler

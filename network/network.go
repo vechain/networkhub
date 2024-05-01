@@ -7,7 +7,8 @@ import (
 )
 
 type Network struct {
-	Nodes []*node.Node `json:"nodes"`
+	Nodes       []*node.Node `json:"nodes"`
+	Environment string       `json:"environment"`
 }
 type Builder struct {
 }

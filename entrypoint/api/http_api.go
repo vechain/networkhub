@@ -3,25 +3,25 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/vechain/networkhub/hub"
 	"net/http"
 	"strings"
 
-	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
 )
 
 type Server struct {
-	envMgr *environments.EnvManager
+	entrypoint *hub.NetworkHub
 }
 
-func New(envMgr *environments.EnvManager) *Server {
+func New(envMgr *hub.NetworkHub) *Server {
 	return &Server{
-		envMgr: envMgr,
+		entrypoint: envMgr,
 	}
 }
 
 func (s *Server) Start() error {
-	http.HandleFunc("/config", configHandler)
+	http.HandleFunc("/config", s.configHandler)
 	http.HandleFunc("/start", s.startHandler)
 	http.HandleFunc("/stop", s.stopHandler)
 
@@ -33,21 +33,7 @@ func (s *Server) Start() error {
 	return nil
 }
 
-func configHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-}
-
-func (s *Server) startHandler(w http.ResponseWriter, r *http.Request) {
-	// Extract the part of the path after "/start/"
-	envName := strings.TrimPrefix(r.URL.Path, "/start/")
-	if envName == "" {
-		http.Error(w, "Environment type must be specified", http.StatusBadRequest)
-		return
-	}
-
+func (s *Server) configHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -59,15 +45,34 @@ func (s *Server) startHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	env := s.envMgr.Env(envName)
-	if env == nil {
-		http.Error(w, fmt.Sprintf("Environment type %s does not exist", envName), http.StatusBadRequest)
+	networkID, err := s.entrypoint.LoadNetworkConfig(&networkCfg)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to load network config - %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 
-	err := env.StartNetwork(&networkCfg)
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, fmt.Sprintf("{\"networkId\": \"%s\"}", networkID))
+
+}
+
+func (s *Server) startHandler(w http.ResponseWriter, r *http.Request) {
+	// GET /start/NETWORKID
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Extract the part of the path after "/start/"
+	networkID := strings.TrimPrefix(r.URL.Path, "/start/")
+	if networkID == "" {
+		http.Error(w, "Network ID must be specified", http.StatusBadRequest)
+		return
+	}
+
+	err := s.entrypoint.StartNetwork(networkID)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to start environment - %s", err.Error()), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Unable to start network - %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 
@@ -76,22 +81,22 @@ func (s *Server) startHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) stopHandler(w http.ResponseWriter, r *http.Request) {
-	// Extract the part of the path after "/stop/"
-	envName := strings.TrimPrefix(r.URL.Path, "/stop/")
-	if envName == "" {
-		http.Error(w, "Environment type must be specified", http.StatusBadRequest)
+	// GET /stop/NETWORKID
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	env := s.envMgr.Env(envName)
-	if env == nil {
-		http.Error(w, fmt.Sprintf("Environment type %s does not exist", envName), http.StatusBadRequest)
+	// Extract the part of the path after "/start/"
+	networkID := strings.TrimPrefix(r.URL.Path, "/stop/")
+	if networkID == "" {
+		http.Error(w, "Network ID must be specified", http.StatusBadRequest)
 		return
 	}
 
-	err := env.StopNetwork()
+	err := s.entrypoint.StopNetwork(networkID)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to stop environment - %s", err.Error()), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Unable to stop network - %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 

@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/vechain/networkhub/hub"
 
 	"github.com/vechain/networkhub/entrypoint/api"
-	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/environments/local"
 
 	"github.com/spf13/cobra"
@@ -16,8 +16,8 @@ var apiCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("api called")
 
-		envManager := environments.NewEnvManager()
-		envManager.RegisterEnv("local", local.NewLocalEnv())
+		envManager := hub.NewNetworkHub()
+		envManager.RegisterEnvironment("local", local.NewLocalEnv)
 		httpAPI := api.New(envManager)
 
 		if err := httpAPI.Start(); err != nil {
