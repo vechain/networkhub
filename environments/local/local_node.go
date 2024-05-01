@@ -11,20 +11,20 @@ import (
 	"github.com/vechain/networkhub/network/node"
 )
 
-type LocalNode struct {
+type Node struct {
 	nodeCfg *node.Node
 	cmdExec *exec.Cmd
 	enodes  string
 }
 
-func NewLocalNode(nodeCfg *node.Node, enodes string) *LocalNode {
-	return &LocalNode{
+func NewLocalNode(nodeCfg *node.Node, enodes string) *Node {
+	return &Node{
 		nodeCfg: nodeCfg,
 		enodes:  enodes,
 	}
 }
 
-func (n *LocalNode) Start() error {
+func (n *Node) Start() error {
 	if n.nodeCfg.Type == "masterNode" && n.nodeCfg.Key != "" {
 		err := os.WriteFile(filepath.Join(n.nodeCfg.ConfigDir, "master.key"), []byte(n.nodeCfg.Key), 0644)
 		if err != nil {
@@ -59,7 +59,7 @@ func (n *LocalNode) Start() error {
 	return nil
 }
 
-func (n *LocalNode) Stop() error {
+func (n *Node) Stop() error {
 	// Send an interrupt signal
 	if err := n.cmdExec.Process.Signal(os.Interrupt); err != nil {
 		return fmt.Errorf("failed to send interrupt signal - %w", err)

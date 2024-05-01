@@ -10,12 +10,12 @@ import (
 )
 
 type Local struct {
-	localNodes map[string]*LocalNode
+	localNodes map[string]*Node
 }
 
 func NewLocalEnv() environments.Actions {
 	return &Local{
-		localNodes: map[string]*LocalNode{},
+		localNodes: map[string]*Node{},
 	}
 }
 
@@ -57,7 +57,7 @@ func (l *Local) Info() error {
 	panic("implement me")
 }
 
-func (l *Local) startNode(nodeCfg *node.Node, enodeString string) (*LocalNode, error) {
+func (l *Local) startNode(nodeCfg *node.Node, enodeString string) (*Node, error) {
 	localNode := NewLocalNode(nodeCfg, enodeString)
 	return localNode, localNode.Start()
 }
