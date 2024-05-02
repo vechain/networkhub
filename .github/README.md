@@ -1,97 +1,96 @@
-# Project<!-- Project Title -->
-
-<!-- Find and replace elements that start with '<!--' and remove this line -->
-
-![Project Logo](project-logo.png)
+# networkHub
 
 ## Introduction
+networkHub is a versatile framework designed to streamline the process of launching custom Vechain networks across various environments. It is tailored specifically for protocol and dapp development teams, providing a robust toolset to configure, start, stop, and manage blockchain networks with ease.
 
-A brief description of your project, its purpose, and main features.
+## Purpose and Scope
+networkHub enables teams to quickly deploy custom networks, facilitating development and testing in a controlled environment. This framework is especially beneficial for protocol and dapp teams looking to experiment with network configurations and behaviors without the overhead of setting up infrastructure from scratch.
 
-This is a template repository, that allows you to quickly create new repos with the following templates:
-1. [README.md](README.md)
-2. [CONTRIBUTING.md](CONTRIBUTING.md)
-3. [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
-4. [CODEOWNERS](CODEOWNERS)
-5. [LICENSE.md](LICENSE.md)
+## Technical Requirements
+- **Git**: For cloning the repository.
+- **Golang**: Version 1.19 or higher.
 
-Consider turning on branch protection for `main` as follows:
-1. Require a pull request before merging.
-  1. Require 1 approval.
-  2. Dismiss stale pull request approvals when new commits are pushed.
-  3. Require review from Code Owners.
-  4. Require approval of the most recent reviewable push.
-2. Require status checks to pass before merging.
-3. Require branches to be up to date before merging.
-4. Require conversation resolution before merging.
-5. Require deployments to succeed before merging.
+## Setup
+To setup networkHub, follow these steps:
 
-## Table of Contents
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/vechain/networkhub
+   ```
+2. Build the application:
+   ```bash
+   go build -o networkHub ./cmd/main.go
+   ```
+3. To run networkHub, execute:
+   ```bash
+   ./networkHub
+   ```
+   or
+   ```bash
+   go run ./cmd/main.go
+   ```
+   This will display the available command-line options.
 
-- [Project](#project)
-  - [Introduction](#introduction)
-  - [Table of Contents](#table-of-contents)
-  - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Installation](#installation)
-    - [Configuration](#configuration)
-    - [Usage](#usage)
-    - [Documentation](#documentation)
-    - [Contributing](#contributing)
-    - [Roadmap](#roadmap)
-    - [Changelog](#changelog)
-    - [License](#license)
-    - [Credits](#credits)
-
-## Getting Started
-
-### Prerequisites
-
-List the required software, libraries, or tools needed to use or contribute to the project.
-
-### Installation
-
-Provide step-by-step instructions for installing the project, including any required dependencies.
-
+### Running the API
+To launch the framework in API mode, use the following command:
 ```bash
-# Example installation commands
+./networkHub api
+```
+or
+```bash
+go run ./cmd/main.go api
 ```
 
-### Configuration
+## Usage Examples
+Below are some example `curl` requests to interact with the networkHub via its HTTP API. 
+(Note: Replace `<api-url>` with the actual URL where networkHub API is hosted.)
 
-Explain how to configure the project, if necessary.
+- **Configure Network**:
+  ```bash
+  # Request
+  curl -X POST <api-url>/config -d '{...}' # {...} is a network config json
+  
+  # Response
+  {"networkId": "8b38927893d1fc841b7bedcbaebb03821000908cfa1ee07a09002bc0e0ed3caf"}
+  ```
+  
 
-### Usage
+- **Start Network**:
+  ```bash
+  # Request
+  curl -X POST <api-url>/start/8b38927893d1fc841b7bedcbaebb03821000908cfa1ee07a09002bc0e0ed3caf
+  
+  # Response
+  Network Started
+  ```
 
-Include code examples or usage instructions to help users get started quickly.
+- **Stop Network**:
+  ```bash
+  # Request
+  curl -X POST <api-url>/stop/8b38927893d1fc841b7bedcbaebb03821000908cfa1ee07a09002bc0e0ed3caf
+  
+   # Response
+  Network Stopped
+  ```
 
-### Documentation
+- **Launch Pre-configured Network (ThreeMasterNodeNetwork)**:
+  ```bash
+  # Request
+  curl -X POST <api-url>/preset/threeMasterNodesNetwork
+  
+   # Response
+  {"networkId": "localthreeMasterNodes"}
+  
+  # Request
+  curl -X POST <api-url>/start/localthreeMasterNodes
+  
+  # Response
+  Network Started
+  ```
 
-Link to any additional documentation or tutorials, either within your repository or hosted externally.
+## Project Structure
+- **Entrypoints**: Interface to interact with the framework. Currently implemented as an HTTP API server.
+- **Actions**: Domain-specific language (DSL) that allows users to configure, start, stop, and request information on networks.
+- **Environments**: Interface for running networks in different environments, with the Local environment currently implemented.
 
-### Contributing
-
-Explain how others can contribute to the project. Include information on:
-
-    How to submit bug reports or feature requests.
-    The process for submitting pull requests.
-    Any specific coding standards or guidelines.
-    The best way to get in touch with the maintainers, if needed.
-    
-You may use [a separate `CONTRIBUTING` file](CONTRIBUTING.md) to keep your `README.md` short.
-
-### Roadmap
-
-Share the project's development roadmap, if available, including planned features and improvements.
-
-### Changelog
-
-Keep a log of all notable changes and updates in the project.
-
-### License
-
-This project is licensed under <!-- update the license name --> [the LICENSE](LICENSE.md).
-
-### Credits
-
-Recognize any significant contributors, sponsors, or organizations that have supported the project.
+```
