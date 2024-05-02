@@ -1,11 +1,7 @@
 package local
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -28,7 +24,7 @@ func NewLocalEnv() environments.Actions {
 
 func (l *Local) LoadConfig(cfg *network.Network) (string, error) {
 	l.networkCfg = cfg
-	l.id = hashObject(l.networkCfg)
+	l.id = l.networkCfg.Environment + l.networkCfg.ID
 	baseTmpDir := filepath.Join(os.TempDir(), l.id)
 
 	// ensure paths exist, use temp dirs if not defined
@@ -78,20 +74,4 @@ func (l *Local) StopNetwork() error {
 func (l *Local) Info() error {
 	//TODO implement me
 	panic("implement me")
-}
-
-func hashObject(obj interface{}) string {
-	// Serialize the object to JSON
-	jsonData, err := json.Marshal(obj)
-	if err != nil {
-		log.Fatalf("Failed to JSON encode object: %v", err)
-	}
-
-	// Compute SHA-256 checksum on the JSON data
-	hash := sha256.New()
-	hash.Write(jsonData)
-	hashBytes := hash.Sum(nil)
-
-	// Convert hash bytes to hex string
-	return hex.EncodeToString(hashBytes)
 }

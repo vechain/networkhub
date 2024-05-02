@@ -84,7 +84,7 @@ func TestStartStopHandler(t *testing.T) {
 	envManager.RegisterEnvironment("noop", noop.NewNoopEnv)
 
 	presets := preset.NewPresetNetworks()
-	presets.Register("noop-network", &network.Network{Environment: "noop"})
+	presets.Register("noop-network", &network.Network{Environment: "noop", ID: "noop"})
 
 	api := New(envManager, presets)
 

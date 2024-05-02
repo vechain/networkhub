@@ -7,11 +7,12 @@ import (
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
-	"github.com/vechain/thor/genesis"
-	"github.com/vechain/thor/thor"
+	"github.com/vechain/thor/v2/genesis"
+	"github.com/vechain/thor/v2/thor"
 )
 
 var LocalThreeMasterNodesNetwork = &network.Network{
+	ID:          "threeMasterNodes",
 	Environment: environments.Local,
 	Nodes: []*node.Node{
 		{
@@ -48,6 +49,12 @@ var LocalThreeMasterNodesNetwork = &network.Network{
 }
 
 var localThreeMasterEndorser = thor.MustParseAddress("0x0000000000000000000000004578656375746f72")
+
+func convToHexOrDecimal256(i *big.Int) *genesis.HexOrDecimal256 {
+	tmp := genesis.HexOrDecimal256(*i)
+	return &tmp
+}
+
 var localThreeMasterNodesNetworkGenesis = &genesis.CustomGenesis{
 	LaunchTime: 1703180212,
 	GasLimit:   10000000,
@@ -55,8 +62,8 @@ var localThreeMasterNodesNetworkGenesis = &genesis.CustomGenesis{
 	Accounts: []genesis.Account{
 		{
 			Address: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
-			Balance: (*genesis.HexOrDecimal256)(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  (*genesis.HexOrDecimal256)(big.NewInt(0)),
+			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Energy:  convToHexOrDecimal256(big.NewInt(0)),
 			Code:    "0x6060604052600256",
 			Storage: map[string]thor.Bytes32{
 				"0x0000000000000000000000000000000000000000000000000000000000000001": thor.MustParseBytes32("0x0000000000000000000000000000000000000000000000000000000000000002"),
@@ -64,8 +71,8 @@ var localThreeMasterNodesNetworkGenesis = &genesis.CustomGenesis{
 		},
 		{
 			Address: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
-			Balance: (*genesis.HexOrDecimal256)(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  (*genesis.HexOrDecimal256)(big.NewInt(0)),
+			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Energy:  convToHexOrDecimal256(big.NewInt(0)),
 			Code:    "0x6060604052600256",
 			Storage: map[string]thor.Bytes32{
 				"0x0000000000000000000000000000000000000000000000000000000000000001": thor.MustParseBytes32("0x0000000000000000000000000000000000000000000000000000000000000002"),
@@ -73,18 +80,18 @@ var localThreeMasterNodesNetworkGenesis = &genesis.CustomGenesis{
 		},
 		{
 			Address: thor.MustParseAddress("0x61fF580B63D3845934610222245C116E013717ec"),
-			Balance: (*genesis.HexOrDecimal256)(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  (*genesis.HexOrDecimal256)(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
 		},
 		{
 			Address: thor.MustParseAddress("0x327931085B4cCbCE0baABb5a5E1C678707C51d90"),
-			Balance: (*genesis.HexOrDecimal256)(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  (*genesis.HexOrDecimal256)(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
 		},
 		{
 			Address: thor.MustParseAddress("0x084E48c8AE79656D7e27368AE5317b5c2D6a7497"),
-			Balance: (*genesis.HexOrDecimal256)(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  (*genesis.HexOrDecimal256)(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
 		},
 	},
 	Authority: []genesis.Authority{
@@ -105,9 +112,9 @@ var localThreeMasterNodesNetworkGenesis = &genesis.CustomGenesis{
 		},
 	},
 	Params: genesis.Params{
-		RewardRatio:         (*genesis.HexOrDecimal256)(big.NewInt(300000000000000000)),
-		BaseGasPrice:        (*genesis.HexOrDecimal256)(big.NewInt(1000000000000000)),
-		ProposerEndorsement: (*genesis.HexOrDecimal256)(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+		RewardRatio:         convToHexOrDecimal256(big.NewInt(300000000000000000)),
+		BaseGasPrice:        convToHexOrDecimal256(big.NewInt(1000000000000000)),
+		ProposerEndorsement: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
 		ExecutorAddress:     &localThreeMasterEndorser,
 	},
 	Executor: genesis.Executor{

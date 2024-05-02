@@ -9,6 +9,7 @@ import (
 type Network struct {
 	Environment string       `json:"environment"`
 	Nodes       []*node.Node `json:"nodes"`
+	ID          string       `json:"id"`
 }
 type Builder struct {
 }

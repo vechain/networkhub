@@ -8,14 +8,14 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/vechain/networkhub/utils/client/http"
 	"github.com/vechain/networkhub/utils/common"
-	"github.com/vechain/thor/api/accounts"
-	"github.com/vechain/thor/api/blocks"
-	"github.com/vechain/thor/api/events"
-	"github.com/vechain/thor/api/node"
-	"github.com/vechain/thor/api/transactions"
-	"github.com/vechain/thor/api/transfers"
-	"github.com/vechain/thor/thor"
-	"github.com/vechain/thor/tx"
+	"github.com/vechain/thor/v2/api/accounts"
+	"github.com/vechain/thor/v2/api/blocks"
+	"github.com/vechain/thor/v2/api/events"
+	"github.com/vechain/thor/v2/api/node"
+	"github.com/vechain/thor/v2/api/transactions"
+	"github.com/vechain/thor/v2/api/transfers"
+	"github.com/vechain/thor/v2/thor"
+	"github.com/vechain/thor/v2/tx"
 )
 
 type Client struct {

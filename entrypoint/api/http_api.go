@@ -24,10 +24,10 @@ func New(envMgr *hub.NetworkHub, presets *preset.Networks) *Server {
 }
 
 func (s *Server) Start() error {
-	http.HandleFunc("/preset", s.presetHandler)
-	http.HandleFunc("/config", s.configHandler)
-	http.HandleFunc("/start", s.startHandler)
-	http.HandleFunc("/stop", s.stopHandler)
+	http.HandleFunc("/preset/", s.presetHandler)
+	http.HandleFunc("/config/", s.configHandler)
+	http.HandleFunc("/start/", s.startHandler)
+	http.HandleFunc("/stop/", s.stopHandler)
 
 	fmt.Println("Server started on :8080")
 	err := http.ListenAndServe(":8080", nil)

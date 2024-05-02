@@ -12,6 +12,7 @@ import (
 )
 
 var networkJSON = `{
+  "id": "local_test",
   "nodes": [
     {
       "id": "node1",
@@ -254,6 +255,7 @@ var networkJSON = `{
 }`
 
 func TestLocal(t *testing.T) {
+	//t.Skip()
 	networkCfg, err := network.NewNetwork(
 		network.WithJSON(networkJSON),
 	)
