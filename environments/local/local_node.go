@@ -55,7 +55,7 @@ func (n *Node) Start() error {
 	}
 
 	cmd := &exec.Cmd{
-		Path: "/Users/pedro/go/src/github.com/vechain/thor/bin/thor",
+		Path: n.nodeCfg.ExecArtifact,
 		Args: []string{
 			"thor",
 			"--network", genesisPath,

@@ -18,4 +18,5 @@ type Node struct {
 	Type          string                 `json:"type"`
 	Key           string                 `json:"key"`
 	Enode         string                 `json:"enode"`
+	ExecArtifact  string                 `json:"execArtifact"` // used to determine the executing version of the node ( path, dockerImage, etc)
 }

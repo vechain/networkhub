@@ -24,6 +24,8 @@ func WithJSON(s string) BuilderOptionsFunc {
 			return err
 		}
 		n.Nodes = network.Nodes
+		n.ID = network.ID
+		n.Environment = network.Environment
 		return nil
 	}
 }

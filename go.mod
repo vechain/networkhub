@@ -4,8 +4,6 @@ replace github.com/syndtr/goleveldb => github.com/vechain/goleveldb v1.0.1-0.202
 
 replace github.com/ethereum/go-ethereum => github.com/vechain/go-ethereum v1.8.15-0.20240308194045-2f457f0512c5
 
-replace github.com/vechain/thor/v2 => /Users/pedro/go/src/github.com/vechain/thor
-
 require (
 	github.com/ethereum/go-ethereum v1.14.0
 	github.com/spf13/cobra v1.8.0

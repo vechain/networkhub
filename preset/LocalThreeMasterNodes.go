@@ -17,6 +17,7 @@ var LocalThreeMasterNodesNetwork = &network.Network{
 	Nodes: []*node.Node{
 		{
 			ID:            "node1",
+			ExecArtifact:  "/Users/pedro/go/src/github.com/vechain/thor/bin/thor",
 			Genesis:       localThreeMasterNodesNetworkGenesis,
 			P2PListenPort: 8081,
 			APIAddr:       "127.0.0.1:8181",
@@ -27,6 +28,7 @@ var LocalThreeMasterNodesNetwork = &network.Network{
 		},
 		{
 			ID:            "node2",
+			ExecArtifact:  "/Users/pedro/go/src/github.com/vechain/thor/bin/thor",
 			Genesis:       localThreeMasterNodesNetworkGenesis,
 			P2PListenPort: 8082,
 			APIAddr:       "127.0.0.1:8182",
@@ -37,6 +39,7 @@ var LocalThreeMasterNodesNetwork = &network.Network{
 		},
 		{
 			ID:            "node3",
+			ExecArtifact:  "/Users/pedro/go/src/github.com/vechain/thor/bin/thor",
 			Genesis:       localThreeMasterNodesNetworkGenesis,
 			P2PListenPort: 8083,
 			APIAddr:       "127.0.0.1:8183",

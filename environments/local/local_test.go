@@ -1,7 +1,9 @@
 package local
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/vechain/networkhub/preset"
 	"testing"
 	"time"
 
@@ -16,6 +18,7 @@ var networkJSON = `{
   "nodes": [
     {
       "id": "node1",
+      "execArtifact": "/Users/pedro/go/src/github.com/vechain/thor/bin/thor",
       "p2pListenPort": 8081,
       "apiAddr": "127.0.0.1:8181",
       "apiCORS": "*",
@@ -95,6 +98,7 @@ var networkJSON = `{
     },
     {
       "id": "node2",
+	  "execArtifact": "/Users/pedro/go/src/github.com/vechain/thor/bin/thor",
       "p2pListenPort": 8082,
       "apiAddr": "127.0.0.1:8182",
       "apiCORS": "*",
@@ -174,6 +178,7 @@ var networkJSON = `{
     },
     {
       "id": "node3",
+	  "execArtifact": "/Users/pedro/go/src/github.com/vechain/thor/bin/thor",
       "p2pListenPort": 8083,
       "apiAddr": "127.0.0.1:8183",
       "apiCORS": "*",
@@ -276,12 +281,36 @@ func TestLocal(t *testing.T) {
 
 	fmt.Println(account)
 
-	//time.Sleep(time.Hour)
-	//client1 := network1.GetNode(nodeID).GetClient()
-	//
-	//account1, err := client1.GetAccount(acc1)
-	//require.NoError(t, err)
-	//
+	err = localEnv.StopNetwork()
+	require.NoError(t, err)
+}
+
+func TestSixNodeLocal(t *testing.T) {
+	//t.Skip()
+	sixNodeJson, err := json.Marshal(preset.LocalSixNodesNetwork)
+	require.NoError(t, err)
+
+	networkCfg, err := network.NewNetwork(
+		network.WithJSON(string(sixNodeJson)),
+	)
+	require.NoError(t, err)
+
+	fmt.Println(networkCfg)
+	localEnv := NewLocalEnv()
+	_, err = localEnv.LoadConfig(networkCfg)
+	require.NoError(t, err)
+
+	err = localEnv.StartNetwork()
+	require.NoError(t, err)
+
+	time.Sleep(30 * time.Second)
+	c := client.NewClient("http://" + networkCfg.Nodes[0].APIAddr)
+	account, err := c.GetAccount(datagen.RandAccount().Address)
+	require.NoError(t, err)
+
+	fmt.Println(account)
+
+	time.Sleep(time.Hour)
 	err = localEnv.StopNetwork()
 	require.NoError(t, err)
 }

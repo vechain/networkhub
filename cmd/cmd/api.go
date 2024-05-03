@@ -23,6 +23,7 @@ var apiCmd = &cobra.Command{
 
 		presets := preset.NewPresetNetworks()
 		presets.Register("threeMasterNodesNetwork", preset.LocalThreeMasterNodesNetwork)
+		presets.Register("sixNodesNetwork", preset.LocalSixNodesNetwork)
 
 		httpAPI := api.New(envManager, presets)
 
