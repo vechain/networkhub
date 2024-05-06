@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
@@ -47,10 +46,9 @@ func (l *Local) StartNetwork() error {
 	for _, node := range l.networkCfg.Nodes {
 		enodes = append(enodes, node.Enode)
 	}
-	enodeString := strings.Join(enodes, ",")
 
 	for _, nodeCfg := range l.networkCfg.Nodes {
-		localNode := NewLocalNode(nodeCfg, enodeString)
+		localNode := NewLocalNode(nodeCfg, enodes)
 		if err := localNode.Start(); err != nil {
 			return fmt.Errorf("unable to start node - %w", err)
 		}

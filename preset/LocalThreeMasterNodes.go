@@ -12,7 +12,7 @@ import (
 )
 
 var LocalThreeMasterNodesNetwork = &network.Network{
-	ID:          "threeMasterNodes",
+	ID:          "threeMaster",
 	Environment: environments.Local,
 	Nodes: []*node.Node{
 		{
@@ -23,7 +23,7 @@ var LocalThreeMasterNodesNetwork = &network.Network{
 			APIAddr:       "127.0.0.1:8181",
 			APICORS:       "*",
 			Type:          node.MasterNode,
-			Key:           "01a4107bfb7d5141ec519e75788c34295741a1eefbfe460320efd2ada944071e",
+			Key:           "01a4107bfb7d5141ec519e75788c34295741a1eefbfe460320efd2ada944071e", // 0x61fF580B63D3845934610222245C116E013717ec
 			Enode:         "enode://2ac08a2c35f090e5c47fe99bb0b2956d5b3366c61a83ef30719d393b5984227f4a5bb35b42fef94c3c03c1797ddd97546bb6eeb627b040c4c8dd554b4289024d@127.0.0.1:8081",
 		},
 		{
@@ -34,7 +34,7 @@ var LocalThreeMasterNodesNetwork = &network.Network{
 			APIAddr:       "127.0.0.1:8182",
 			APICORS:       "*",
 			Type:          node.MasterNode,
-			Key:           "7072249b800ddac1d29a3cd06468cc1a917cbcd110dde358a905d03dad51748d",
+			Key:           "7072249b800ddac1d29a3cd06468cc1a917cbcd110dde358a905d03dad51748d", // 0x327931085B4cCbCE0baABb5a5E1C678707C51d90
 			Enode:         "enode://ca36cbb2e9ad0ed582350ee04f49408f4fa409a8ca39982a34e4d5bb82418c45f3fd74bc4861f5aaecd986f1697f28010e1f6af7fadf08c6f529188752f47bee@127.0.0.1:8082",
 		},
 		{
@@ -45,7 +45,7 @@ var LocalThreeMasterNodesNetwork = &network.Network{
 			APIAddr:       "127.0.0.1:8183",
 			APICORS:       "*",
 			Type:          node.MasterNode,
-			Key:           "c55455943bf026dc44fcf189e8765eb0587c94e66029d580bae795386c0b737a",
+			Key:           "c55455943bf026dc44fcf189e8765eb0587c94e66029d580bae795386c0b737a", // 0x084E48c8AE79656D7e27368AE5317b5c2D6a7497
 			Enode:         "enode://2d5b5f39e906dd717d721e3f039326e55163697e99e0a9998193eddfbb42e21a457ab877c355ee89c2bdf2562c86f6946b1e98119e945c091cab1a5ded8ca027@127.0.0.1:8083",
 		},
 	},
@@ -61,17 +61,8 @@ func convToHexOrDecimal256(i *big.Int) *genesis.HexOrDecimal256 {
 var localThreeMasterNodesNetworkGenesis = &genesis.CustomGenesis{
 	LaunchTime: 1703180212,
 	GasLimit:   10000000,
-	ExtraData:  "Local Three Master Nodes Network",
+	ExtraData:  "",
 	Accounts: []genesis.Account{
-		{
-			Address: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(big.NewInt(0)),
-			Code:    "0x6060604052600256",
-			Storage: map[string]thor.Bytes32{
-				"0x0000000000000000000000000000000000000000000000000000000000000001": thor.MustParseBytes32("0x0000000000000000000000000000000000000000000000000000000000000002"),
-			},
-		},
 		{
 			Address: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
 			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
@@ -84,17 +75,17 @@ var localThreeMasterNodesNetworkGenesis = &genesis.CustomGenesis{
 		{
 			Address: thor.MustParseAddress("0x61fF580B63D3845934610222245C116E013717ec"),
 			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
 		},
 		{
 			Address: thor.MustParseAddress("0x327931085B4cCbCE0baABb5a5E1C678707C51d90"),
 			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
 		},
 		{
 			Address: thor.MustParseAddress("0x084E48c8AE79656D7e27368AE5317b5c2D6a7497"),
 			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
 		},
 	},
 	Authority: []genesis.Authority{

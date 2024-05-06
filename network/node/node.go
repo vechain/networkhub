@@ -3,8 +3,8 @@ package node
 import "github.com/vechain/thor/v2/genesis"
 
 const (
-	MasterNode  = "MasterNode"
-	RegularNode = "RegularNode"
+	MasterNode  = "masterNode"
+	RegularNode = "regularNode"
 )
 
 type Node struct {
@@ -19,4 +19,5 @@ type Node struct {
 	Key           string                 `json:"key"`
 	Enode         string                 `json:"enode"`
 	ExecArtifact  string                 `json:"execArtifact"` // used to determine the executing version of the node ( path, dockerImage, etc)
+	Verbosity     int                    `json:"verbosity"`
 }

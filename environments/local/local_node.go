@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/vechain/networkhub/network/node"
@@ -15,10 +17,10 @@ import (
 type Node struct {
 	nodeCfg *node.Node
 	cmdExec *exec.Cmd
-	enodes  string
+	enodes  []string
 }
 
-func NewLocalNode(nodeCfg *node.Node, enodes string) *Node {
+func NewLocalNode(nodeCfg *node.Node, enodes []string) *Node {
 	return &Node{
 		nodeCfg: nodeCfg,
 		enodes:  enodes,
@@ -35,7 +37,7 @@ func (n *Node) Start() error {
 	}
 
 	// write keys to disk
-	if n.nodeCfg.Type == "masterNode" && n.nodeCfg.Key != "" {
+	if n.nodeCfg.Key != "" {
 		err := os.WriteFile(filepath.Join(n.nodeCfg.ConfigDir, "master.key"), []byte(n.nodeCfg.Key), 0644)
 		if err != nil {
 			return fmt.Errorf("failed to write master key file - %w", err)
@@ -48,11 +50,18 @@ func (n *Node) Start() error {
 	if err != nil {
 		return fmt.Errorf("unable to marshal genesis - %w", err)
 	}
-
-	err = os.WriteFile(genesisPath, genesisBytes, 0644)
+	err = os.WriteFile(genesisPath, genesisBytes, 0777)
 	if err != nil {
 		return fmt.Errorf("failed to write genesis file - %w", err)
 	}
+
+	cleanEnode := []string{} // todo theres a clever way of doing this
+	for _, enode := range n.enodes {
+		if n.nodeCfg.Enode != enode {
+			cleanEnode = append(cleanEnode, enode)
+		}
+	}
+	enodeString := strings.Join(cleanEnode, ",")
 
 	cmd := &exec.Cmd{
 		Path: n.nodeCfg.ExecArtifact,
@@ -64,12 +73,17 @@ func (n *Node) Start() error {
 			"--api-addr", n.nodeCfg.APIAddr,
 			"--api-cors", n.nodeCfg.APICORS,
 			"--p2p-port", fmt.Sprintf("%d", n.nodeCfg.P2PListenPort),
-			"--bootnode", n.enodes,
+			"--bootnode", enodeString,
 		},
 		Stdout: os.Stdout, // Directing stdout to the same stdout of the Go program
 		Stderr: os.Stderr, // Directing stderr to the same stderr of the Go program
 	}
 
+	if n.nodeCfg.Verbosity != 0 {
+		cmd.Args = append(cmd.Args, "--verbosity", strconv.Itoa(n.nodeCfg.Verbosity))
+	}
+
+	fmt.Println(cmd)
 	// Start the command and check for errors
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("failed to start thor command: %w", err)
