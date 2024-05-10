@@ -76,13 +76,13 @@ Below are some example `curl` requests to interact with the networkHub via its H
 - **Launch Pre-configured Network (ThreeMasterNodeNetwork)**:
   ```bash
   # Request
-  curl -X POST <api-url>/preset/threeMasterNodesNetwork
+  curl -X GET <api-url>/preset/threeMasterNodesNetwork
   
    # Response
   {"networkId": "localthreeMasterNodes"}
   
   # Request
-  curl -X POST <api-url>/start/localthreeMasterNodes
+  curl -X GET <api-url>/start/localthreeMasterNodes
   
   # Response
   Network Started

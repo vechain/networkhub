@@ -17,10 +17,10 @@ var LocalSixNodesNetwork = &network.Network{
 	Nodes: []*node.Node{
 		{
 			ID:            "node1",
-			ExecArtifact:  "/Users/pedro/go/src/github.com/vechain/thor/bin/thor",
+			ExecArtifact:  "/app/thor",
 			Genesis:       localSixNodesNetworkGenesis,
 			P2PListenPort: 8081,
-			APIAddr:       "127.0.0.1:8181",
+			APIAddr:       "0.0.0.0:8181",
 			APICORS:       "*",
 			Type:          node.MasterNode,
 			Verbosity:     4,
@@ -29,10 +29,10 @@ var LocalSixNodesNetwork = &network.Network{
 		},
 		{
 			ID:            "node2",
-			ExecArtifact:  "/Users/pedro/go/src/github.com/vechain/thor/bin/thor",
+			ExecArtifact:  "/app/thor",
 			Genesis:       localSixNodesNetworkGenesis,
 			P2PListenPort: 8082,
-			APIAddr:       "127.0.0.1:8182",
+			APIAddr:       "0.0.0.0:8182",
 			APICORS:       "*",
 			Type:          node.MasterNode,
 			Verbosity:     4,
@@ -41,10 +41,10 @@ var LocalSixNodesNetwork = &network.Network{
 		},
 		{
 			ID:            "node3",
-			ExecArtifact:  "/Users/pedro/go/src/github.com/vechain/thor/bin/thor",
+			ExecArtifact:  "/app/thor",
 			Genesis:       localSixNodesNetworkGenesis,
 			P2PListenPort: 8083,
-			APIAddr:       "127.0.0.1:8183",
+			APIAddr:       "0.0.0.0:8183",
 			APICORS:       "*",
 			Type:          node.RegularNode,
 			Key:           "1b310ea04afd6d14a8f142158873fc70bfd4ba12a19138cc5b309fce7c77105e", // 0x1b1c0055065b3ADee4B9a9e8297142Ba2cD34EfE
@@ -52,10 +52,10 @@ var LocalSixNodesNetwork = &network.Network{
 		},
 		{
 			ID:            "node4",
-			ExecArtifact:  "/Users/pedro/go/src/github.com/vechain/thor/bin/thor",
+			ExecArtifact:  "/app/thor",
 			Genesis:       localSixNodesNetworkGenesis,
 			P2PListenPort: 8084,
-			APIAddr:       "127.0.0.1:8184",
+			APIAddr:       "0.0.0.0:8184",
 			APICORS:       "*",
 			Type:          node.MasterNode,
 			Verbosity:     4,
@@ -64,10 +64,10 @@ var LocalSixNodesNetwork = &network.Network{
 		},
 		{
 			ID:            "node5",
-			ExecArtifact:  "/Users/pedro/go/src/github.com/vechain/thor/bin/thor",
+			ExecArtifact:  "/app/thor",
 			Genesis:       localSixNodesNetworkGenesis,
 			P2PListenPort: 8085,
-			APIAddr:       "127.0.0.1:8185",
+			APIAddr:       "0.0.0.0:8185",
 			APICORS:       "*",
 			Type:          node.MasterNode,
 			Verbosity:     4,
@@ -76,10 +76,10 @@ var LocalSixNodesNetwork = &network.Network{
 		},
 		{
 			ID:            "node6",
-			ExecArtifact:  "/Users/pedro/go/src/github.com/vechain/thor/bin/thor",
+			ExecArtifact:  "/app/thor",
 			Genesis:       localSixNodesNetworkGenesis,
 			P2PListenPort: 8086,
-			APIAddr:       "127.0.0.1:8186",
+			APIAddr:       "0.0.0.0:8186",
 			APICORS:       "*",
 			Type:          node.RegularNode,
 			Key:           "92ad65923d6782a43e6a1be01a8e52bce701967d78937e73da746a58f293ba30", // 0x9C2871C411CCe579B987E9b932C484dA8b901075
