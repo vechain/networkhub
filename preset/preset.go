@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"math/big"
+	"os"
 
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/thor/v2/genesis"
@@ -15,6 +16,14 @@ type APIConfigPayload struct {
 
 type Networks struct {
 	presets map[string]*network.Network
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return err == nil
 }
 
 func NewPresetNetworks() *Networks {
@@ -37,6 +46,11 @@ func (p *Networks) Load(id string, configPayload *APIConfigPayload) (*network.Ne
 	if configPayload == nil || configPayload.ArtifactPath == "" {
 		return nil, fmt.Errorf("preset config must be set")
 	}
+
+	if !fileExists(configPayload.ArtifactPath) {
+		return nil, fmt.Errorf("file does not exist at location: %s", configPayload.ArtifactPath)
+	}
+
 	// override the default path
 	for _, node := range preset.Nodes {
 		node.ExecArtifact = configPayload.ArtifactPath

@@ -63,12 +63,20 @@ func TestStartStopHandler(t *testing.T) {
 			wantBody:   "Unable to stop network - network no-exist is not configured\n",
 		},
 		{
-			name:       "Load existing preset network",
+			name:       "Load existing preset network with valid artifact path",
 			target:     "/preset/noop-network",
-			payload:    "{ \"artifactPath\": \"noop/dir\" }",
+			payload:    "{ \"artifactPath\": \"http_api_test.go\" }",
 			method:     http.MethodPost,
 			wantStatus: http.StatusOK,
 			wantBody:   "{\"networkId\": \"noop\"}",
+		},
+		{
+			name:       "Load existing preset network with invalid artifact path",
+			target:     "/preset/noop-network",
+			payload:    "{ \"artifactPath\": \"blob\" }",
+			method:     http.MethodPost,
+			wantStatus: http.StatusBadRequest,
+			wantBody:   "file does not exist at location: blob",
 		},
 		{
 			name:       "Load existing preset network no config",
