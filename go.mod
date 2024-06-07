@@ -16,6 +16,7 @@ require (
 	github.com/aristanetworks/goarista v0.0.0-20180222005525-c41ed3986faa // indirect
 	github.com/btcsuite/btcd v0.0.0-20171128150713-2e60448ffcc6 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
@@ -34,6 +35,7 @@ require (
 	github.com/pkg/errors v0.8.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/qianbin/directcache v0.9.7 // indirect
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a // indirect
 	github.com/vechain/go-ecvrf v0.0.0-20220525125849-96fa0442e765 // indirect

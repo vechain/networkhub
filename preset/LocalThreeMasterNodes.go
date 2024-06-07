@@ -53,11 +53,6 @@ var LocalThreeMasterNodesNetwork = &network.Network{
 
 var localThreeMasterEndorser = thor.MustParseAddress("0x0000000000000000000000004578656375746f72")
 
-func convToHexOrDecimal256(i *big.Int) *genesis.HexOrDecimal256 {
-	tmp := genesis.HexOrDecimal256(*i)
-	return &tmp
-}
-
 var localThreeMasterNodesNetworkGenesis = &genesis.CustomGenesis{
 	LaunchTime: 1703180212,
 	GasLimit:   10000000,

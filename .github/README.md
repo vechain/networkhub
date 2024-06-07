@@ -6,6 +6,32 @@ networkHub is a versatile framework designed to streamline the process of launch
 ## Purpose and Scope
 networkHub enables teams to quickly deploy custom networks, facilitating development and testing in a controlled environment. This framework is especially beneficial for protocol and dapp teams looking to experiment with network configurations and behaviors without the overhead of setting up infrastructure from scratch.
 
+## Quick start
+- **Launch Pre-configured Network (ThreeMasterNodeNetwork)**:
+  ```bash
+  # Start the networkhub api
+  go run ./cmd/main.go api
+  
+  # Response
+  api called
+  Server started on :8080
+  
+  # Start a local pre-setup configured network 
+  # Must specify the path to thor locally
+  curl -X POST http://localhost:8080/preset/threeMasterNodesNetwork \
+     -d '{"artifactPath":"/Users/pedro/go/src/github.com/vechain/thor/bin/thor"}'
+  
+   # Response
+  {"networkId": "localthreeMasterNodes"}
+  
+  # Start the network
+  curl -X GET http://localhost:8080/start/localthreeMasterNodes
+  
+  # Response
+  Network Started
+  ```
+
+
 ## Technical Requirements
 - **Git**: For cloning the repository.
 - **Golang**: Version 1.19 or higher.
@@ -73,20 +99,7 @@ Below are some example `curl` requests to interact with the networkHub via its H
   Network Stopped
   ```
 
-- **Launch Pre-configured Network (ThreeMasterNodeNetwork)**:
-  ```bash
-  # Request
-  curl -X GET <api-url>/preset/threeMasterNodesNetwork
-  
-   # Response
-  {"networkId": "localthreeMasterNodes"}
-  
-  # Request
-  curl -X GET <api-url>/start/localthreeMasterNodes
-  
-  # Response
-  Network Started
-  ```
+
 
 ## Project Structure
 - **Entrypoints**: Interface to interact with the framework. Currently implemented as an HTTP API server.

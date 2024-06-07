@@ -38,7 +38,7 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) presetHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
+	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
@@ -50,7 +50,14 @@ func (s *Server) presetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	networkCfg, err := s.presets.Load(networkPresetID)
+	// retrieve the base path for the artifact
+	var presetConfig preset.APIConfigPayload
+	if err := json.NewDecoder(r.Body).Decode(&presetConfig); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	networkCfg, err := s.presets.Load(networkPresetID, &presetConfig)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("unable to load network preset - %s", err), http.StatusBadRequest)
 		return
