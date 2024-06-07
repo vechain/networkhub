@@ -3,11 +3,24 @@
 ## Introduction
 networkHub is a versatile framework designed to streamline the process of launching custom Vechain networks across various environments. It is tailored specifically for protocol and dapp development teams, providing a robust toolset to configure, start, stop, and manage blockchain networks with ease.
 
-## Purpose and Scope
-networkHub enables teams to quickly deploy custom networks, facilitating development and testing in a controlled environment. This framework is especially beneficial for protocol and dapp teams looking to experiment with network configurations and behaviors without the overhead of setting up infrastructure from scratch.
+# Quick start
+### **Launch Pre-configured Network via command line**:
+  ```bash
+  # Setup the preset network
+  > go run cmd/main.go cmd preset threeMasterNodesNetwork /Users/pedro/go/src/github.com/vechain/thor/bin/thor
+  ...
+  2024/06/07 17:31:43 INFO preset network config was successful... networkId=localthreeMaster
+  
+  # Start preset network
+  > go run cmd/main.go cmd start localthreeMaster
+  2024/06/07 17:31:57 INFO Registered preset network networkId=threeMasterNodesNetwork
+  2024/06/07 17:31:57 INFO Registered preset network networkId=sixNodesNetwork
+  2024/06/07 17:31:57 INFO Starting network... ID=localthreeMaster
+  ...
+  ```
 
-## Quick start
-- **Launch Pre-configured Network (ThreeMasterNodeNetwork)**:
+
+### **Launch Pre-configured Network via API server**:
   ```bash
   # Start the networkhub api
   go run ./cmd/main.go api
@@ -30,6 +43,9 @@ networkHub enables teams to quickly deploy custom networks, facilitating develop
   # Response
   Network Started
   ```
+
+## Purpose and Scope
+networkHub enables teams to quickly deploy custom networks, facilitating development and testing in a controlled environment. This framework is especially beneficial for protocol and dapp teams looking to experiment with network configurations and behaviors without the overhead of setting up infrastructure from scratch.
 
 
 ## Technical Requirements

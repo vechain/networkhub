@@ -12,13 +12,13 @@ import (
 )
 
 type Server struct {
-	entrypoint *hub.NetworkHub
+	networkHub *hub.NetworkHub
 	presets    *preset.Networks
 }
 
 func New(envMgr *hub.NetworkHub, presets *preset.Networks) *Server {
 	return &Server{
-		entrypoint: envMgr,
+		networkHub: envMgr,
 		presets:    presets,
 	}
 }
@@ -63,7 +63,7 @@ func (s *Server) presetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	networkID, err := s.entrypoint.LoadNetworkConfig(networkCfg)
+	networkID, err := s.networkHub.LoadNetworkConfig(networkCfg)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to load network config - %s", err.Error()), http.StatusInternalServerError)
 		return
@@ -85,7 +85,7 @@ func (s *Server) configHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	networkID, err := s.entrypoint.LoadNetworkConfig(&networkCfg)
+	networkID, err := s.networkHub.LoadNetworkConfig(&networkCfg)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to load network config - %s", err.Error()), http.StatusInternalServerError)
 		return
@@ -109,7 +109,7 @@ func (s *Server) startHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := s.entrypoint.StartNetwork(networkID)
+	err := s.networkHub.StartNetwork(networkID)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to start network - %s", err.Error()), http.StatusInternalServerError)
 		return
@@ -133,7 +133,7 @@ func (s *Server) stopHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := s.entrypoint.StopNetwork(networkID)
+	err := s.networkHub.StopNetwork(networkID)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to stop network - %s", err.Error()), http.StatusInternalServerError)
 		return

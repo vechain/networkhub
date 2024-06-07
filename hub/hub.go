@@ -8,14 +8,16 @@ import (
 )
 
 type NetworkHub struct {
-	envFuncs map[string]func() environments.Actions
-	networks map[string]environments.Actions
+	envFuncs           map[string]func() environments.Actions
+	configuredNetworks map[string]environments.Actions
+	networks           map[string]*network.Network
 }
 
 func NewNetworkHub() *NetworkHub {
 	return &NetworkHub{
-		envFuncs: map[string]func() environments.Actions{},
-		networks: map[string]environments.Actions{},
+		envFuncs:           map[string]func() environments.Actions{},
+		configuredNetworks: map[string]environments.Actions{},
+		networks:           map[string]*network.Network{},
 	}
 }
 
@@ -30,13 +32,14 @@ func (e *NetworkHub) LoadNetworkConfig(cfg *network.Network) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("unable to load config - %w", err)
 	}
-	e.networks[networkID] = env
+	e.configuredNetworks[networkID] = env
+	e.networks[networkID] = cfg
 
 	return networkID, nil
 }
 
 func (e *NetworkHub) StartNetwork(networkID string) error {
-	netwk, ok := e.networks[networkID]
+	netwk, ok := e.configuredNetworks[networkID]
 	if !ok {
 		return fmt.Errorf("network %s is not configured", networkID)
 	}
@@ -44,7 +47,7 @@ func (e *NetworkHub) StartNetwork(networkID string) error {
 }
 
 func (e *NetworkHub) StopNetwork(networkID string) error {
-	netwk, ok := e.networks[networkID]
+	netwk, ok := e.configuredNetworks[networkID]
 	if !ok {
 		return fmt.Errorf("network %s is not configured", networkID)
 	}
@@ -52,7 +55,7 @@ func (e *NetworkHub) StopNetwork(networkID string) error {
 }
 
 func (e *NetworkHub) InfoNetwork(networkID string) error {
-	netwk, ok := e.networks[networkID]
+	netwk, ok := e.configuredNetworks[networkID]
 	if !ok {
 		return fmt.Errorf("network %s is not configured", networkID)
 	}
@@ -61,4 +64,12 @@ func (e *NetworkHub) InfoNetwork(networkID string) error {
 
 func (e *NetworkHub) RegisterEnvironment(id string, env func() environments.Actions) {
 	e.envFuncs[id] = env
+}
+
+func (e *NetworkHub) GetNetwork(id string) (*network.Network, error) {
+	loadedNetwork, ok := e.networks[id]
+	if !ok {
+		return nil, fmt.Errorf("network not found")
+	}
+	return loadedNetwork, nil
 }

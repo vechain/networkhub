@@ -30,3 +30,5 @@ package.json
 coverage.out
 
 .idea
+network.json
+networks_db.json

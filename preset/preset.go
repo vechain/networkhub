@@ -2,6 +2,7 @@ package preset
 
 import (
 	"fmt"
+	"log/slog"
 	"math/big"
 
 	"github.com/vechain/networkhub/network"
@@ -24,6 +25,7 @@ func NewPresetNetworks() *Networks {
 
 func (p *Networks) Register(id string, preset *network.Network) {
 	p.presets[id] = preset
+	slog.Info("Registered preset network", "networkId", id)
 }
 
 func (p *Networks) Load(id string, configPayload *APIConfigPayload) (*network.Network, error) {

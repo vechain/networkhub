@@ -122,12 +122,13 @@ var networkJSON = fmt.Sprintf(`{
 }`, genesis, genesis, genesis)
 
 func TestLocal(t *testing.T) {
-	t.Skip()
+	//t.Skip()
 	networkCfg, err := network.NewNetwork(
 		network.WithJSON(networkJSON),
 	)
 	require.NoError(t, err)
 
+	fmt.Println(networkJSON)
 	localEnv := NewLocalEnv()
 	_, err = localEnv.LoadConfig(networkCfg)
 	require.NoError(t, err)
