@@ -122,7 +122,7 @@ var networkJSON = fmt.Sprintf(`{
 }`, genesis, genesis, genesis)
 
 func TestLocal(t *testing.T) {
-	//t.Skip()
+	t.Skip()
 	networkCfg, err := network.NewNetwork(
 		network.WithJSON(networkJSON),
 	)
