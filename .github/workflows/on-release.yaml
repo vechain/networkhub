@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - '*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release'
+        required: true
+        default: 'v0.0.0'
 
 permissions:
   contents: write
@@ -22,7 +28,7 @@ jobs:
             goos: darwin
           - os: windows-latest
             goos: windows
-        goarch: [ amd64, 386 ]
+        goarch: [ 386, amd64, arm, arm64 ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -44,5 +50,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name }}
-          file: networkHub-${{ matrix.goos }}-${{ matrix.goarch }}
+          tag_name: ${{ github.ref_name || inputs.tag }}
+          file: networkHub-${{ matrix.goos }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' }}
