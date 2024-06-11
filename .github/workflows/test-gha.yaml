@@ -1,0 +1,17 @@
+name: Test Re-usable actions
+
+on:
+  # Should trigger on a push to any branch
+  push:
+    branches:
+      - "*"
+
+jobs:
+  test-os:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Test Re-usable Action
+        uses: vechain/networkhub@add-reusable-action
