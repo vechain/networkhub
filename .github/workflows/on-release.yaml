@@ -39,7 +39,7 @@ jobs:
         run: |
           go build -v -o networkHub-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/main.go
 
-      - name: Upload ZIP to release
+      - name: Upload Executable
         uses: xresloader/upload-to-github-release@v1.6.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
