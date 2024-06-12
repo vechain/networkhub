@@ -30754,9 +30754,7 @@ async function setup() {
         return
     }
     // Download the specific version of the tool, e.g. as a tarball
-    const pathToCLI = await tc.downloadTool(await getDownloadURL(version), undefined, undefined, {
-        authorization: `Bearer ${token}`
-    });
+    const pathToCLI = await tc.downloadTool(await getDownloadURL(version), undefined, token);
 
     // Expose the tool by adding it to the PATH
     core.addPath(pathToCLI)
