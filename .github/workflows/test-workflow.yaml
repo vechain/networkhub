@@ -10,10 +10,13 @@ jobs:
   test-action:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install action
-        uses: vechain/networkhub@v0.0.1
+        uses: vechain/networkhub@v0.0.3
+        with:
+          version: 'v0.0.3'
+          token: ${{ secrets.GITHUB_TOKEN }}
 
