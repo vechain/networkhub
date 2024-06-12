@@ -30693,13 +30693,39 @@ const tc = __nccwpck_require__(7784);
  * @returns {Promise<string>}
  */
 async function getDownloadURL(version) {
-    // Get the platform (i.e. linux, darwin, win32)
-    const platform = process.platform;
-    // Get the architecture (i.e. x64, arm64)
-    const arch = process.arch;
+    let platform;
 
-    core.info(`Platform: ${platform}, Arch: ${arch}`)
-    const url = `https://github.com/vechain/networkhub/releases/download/${version}/network-hub-${platform}-${arch}${platform === 'win32' ? '.exe' : ''}`;
+    switch (process.platform) {
+        case 'win32':
+            platform = 'windows';
+            break;
+        case 'darwin':
+            platform = 'macos';
+            break;
+        case 'linux':
+            platform = 'linux';
+            break;
+        default:
+            throw new Error(`Unsupported platform: ${process.platform}`);
+    }
+
+    let arch;
+
+    switch (process.arch) {
+        case 'x64':
+            arch = 'amd64';
+            break;
+        case 'arm64':
+            arch = 'arm64';
+            break;
+        default:
+            throw new Error(`Unsupported architecture: ${process.arch}`);
+    }
+
+    core.info(`Platform: ${platform}`)
+    core.info(`Arch: ${arch}`)
+
+    const url = `https://github.com/vechain/networkhub/releases/download/${version}/network-hub-${platform}-${arch}${process.platform === 'win32' ? '.exe' : ''}`;
     core.info(`Download URL: ${url}`)
     return url;
 }
