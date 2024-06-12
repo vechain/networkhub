@@ -27,15 +27,9 @@ jobs:
           - os: ubuntu-latest
             goos: linux
             goarch: amd64
-          - os: ubuntu-latest
-            goos: linux
-            goarch: arm64
           - os: windows-latest
             goos: windows
             goarch: amd64
-          - os: windows-latest
-            goos: windows
-            goarch: arm64
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
@@ -51,13 +45,13 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          go build -v -o networkHub-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/main.go
+          go build -v -o networkHub-${{ matrix.goos }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' || '' }} ./cmd/main.go
 
       - name: Upload Executable
         uses: xresloader/upload-to-github-release@v1.6.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name || inputs.tag }}
+          tag_name: ${{ inputs.tag || github.ref_name }}
           file: networkHub-${{ matrix.goos }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' || '' }}
           overwrite: true
