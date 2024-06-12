@@ -41,19 +41,12 @@ jobs:
         with:
           go-version: 1.22.x
 
-      - name: Setup Executable Name
-        # Examples:
-        # - 'network-hub-linux-amd64'
-        # - 'network-hub-windows-amd64.exe'
-        # - 'network-hub-macos-arm64'
-        run: echo "EXECUTABLE_NAME=network-hub-${{ matrix.goos == 'darwin' && 'macos' || matrix.goos }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' || '' }}" >> $GITHUB_ENV
-
       - name: Build binary
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          go build -v -o ${{ env.EXECUTABLE_NAME }} ./cmd/main.go
+          go build -v -o network-hub-${{ matrix.goos == 'darwin' && 'macos' || matrix.goos }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' || '' }} ./cmd/main.go
 
       - name: Upload Executable
         uses: xresloader/upload-to-github-release@v1.6.0
@@ -61,5 +54,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ inputs.tag || github.ref_name }}
-          file: ${{ env.EXECUTABLE_NAME }}
+          file: network-hub-${{ matrix.goos == 'darwin' && 'macos' || matrix.goos }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' || '' }}
           overwrite: true
