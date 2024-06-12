@@ -1,5 +1,7 @@
 module github.com/vechain/networkhub
 
+go 1.22
+
 replace github.com/syndtr/goleveldb => github.com/vechain/goleveldb v1.0.1-0.20220809091043-51eb019c8655
 
 replace github.com/ethereum/go-ethereum => github.com/vechain/go-ethereum v1.8.15-0.20240308194045-2f457f0512c5
@@ -9,7 +11,6 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
 	github.com/vechain/thor/v2 v2.1.2-0.20240502163859-34dbe10a5c97
-
 )
 
 require (
@@ -43,5 +44,3 @@ require (
 	gopkg.in/karalabe/cookiejar.v2 v2.0.0-20150724131613-8dcd6a7f4951 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-go 1.21
