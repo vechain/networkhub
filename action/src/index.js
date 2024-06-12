@@ -37,4 +37,7 @@ async function setup() {
     core.addPath(pathToCLI)
 }
 
-module.exports = setup
+setup().catch((error) => {
+    core.error(error)
+    core.setFailed(error);
+});

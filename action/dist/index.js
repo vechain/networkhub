@@ -1,53 +1,6 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 5790:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-const core = __nccwpck_require__(2186);
-const tc = __nccwpck_require__(7784);
-
-/**
- * Get the download URL for the tool to be installed
- * @param {string} version - The version of the tool to be installed
- * @returns {Promise<string>}
- */
-async function getDownloadURL(version) {
-    // Get the platform (i.e. linux, darwin, win32)
-    const platform = process.platform;
-    // Get the architecture (i.e. x64, arm64)
-    const arch = process.arch;
-
-    core.info(`Platform: ${platform}, Arch: ${arch}`)
-    const url = `https://github.com/vechain/networkhub/releases/download/${version}/networkHub-${platform}-${arch}${platform === 'win32' ? '.exe' : ''}`;
-    core.info(`Download URL: ${url}`)
-    return url;
-}
-
-async function setup() {
-    // Get version of tool to be installed
-    const version = core.getInput('version');
-    if (!tc.isExplicitVersion(version)) {
-        core.setFailed('No version specified')
-        return
-    }
-
-    core.setOutput('version', version)
-
-    core.info(`Installing networkHub version ${version}`)
-
-    // Download the specific version of the tool, e.g. as a tarball
-    const pathToCLI = await tc.downloadTool(await getDownloadURL(version));
-
-    // Expose the tool by adding it to the PATH
-    core.addPath(pathToCLI)
-}
-
-module.exports = setup
-
-
-/***/ }),
-
 /***/ 7351:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -30728,12 +30681,55 @@ module.exports = parseParams
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(5790);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+const core = __nccwpck_require__(2186);
+const tc = __nccwpck_require__(7784);
+
+/**
+ * Get the download URL for the tool to be installed
+ * @param {string} version - The version of the tool to be installed
+ * @returns {Promise<string>}
+ */
+async function getDownloadURL(version) {
+    // Get the platform (i.e. linux, darwin, win32)
+    const platform = process.platform;
+    // Get the architecture (i.e. x64, arm64)
+    const arch = process.arch;
+
+    core.info(`Platform: ${platform}, Arch: ${arch}`)
+    const url = `https://github.com/vechain/networkhub/releases/download/${version}/networkHub-${platform}-${arch}${platform === 'win32' ? '.exe' : ''}`;
+    core.info(`Download URL: ${url}`)
+    return url;
+}
+
+async function setup() {
+    // Get version of tool to be installed
+    const version = core.getInput('version');
+    if (!tc.isExplicitVersion(version)) {
+        core.setFailed('No version specified')
+        return
+    }
+
+    core.setOutput('version', version)
+
+    core.info(`Installing networkHub version ${version}`)
+
+    // Download the specific version of the tool, e.g. as a tarball
+    const pathToCLI = await tc.downloadTool(await getDownloadURL(version));
+
+    // Expose the tool by adding it to the PATH
+    core.addPath(pathToCLI)
+}
+
+setup().catch((error) => {
+    core.error(error)
+    core.setFailed(error);
+});
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
