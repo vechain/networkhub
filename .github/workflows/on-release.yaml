@@ -20,19 +20,25 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # TODO: Add support for arm based runners when GH makes them generally available
           - runner: macos-latest
             goos: darwin
             goarch: arm64
-            distro: macos
           - runner: ubuntu-latest
             goos: linux
             goarch: amd64
-            distro: ubuntu
           - runner: windows-latest
             goos: windows
             goarch: amd64
-            distro: windows
     runs-on: ${{ matrix.runner }}
+    env:
+      GOOS: ${{ matrix.goos }}
+      GOARCH: ${{ matrix.goarch }}
+      # Examples:
+      # - 'network-hub-linux-amd64'
+      # - 'network-hub-windows-amd64.exe'
+      # - 'network-hub-macos-arm64'
+      EXECUTABLE_NAME: network-hub-${{ matrix.goos == 'darwin' && 'macos' || matrix.goos }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' || '' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -47,7 +53,7 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          go build -v -o network-hub-${{ matrix.distro }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' || '' }} ./cmd/main.go
+          go build -v -o $EXECUTABLE_NAME ./cmd/main.go
 
       - name: Upload Executable
         uses: xresloader/upload-to-github-release@v1.6.0
@@ -55,5 +61,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ inputs.tag || github.ref_name }}
-          file: network-hub-${{ matrix.goos }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' || '' }}
+          file: $EXECUTABLE_NAME
           overwrite: true
