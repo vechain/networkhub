@@ -19,4 +19,6 @@ jobs:
         with:
           version: 'v0.0.3'
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run CLI
+        run: network-hub
 
