@@ -1,0 +1,19 @@
+name: Test Custom Action
+
+on:
+  #push to any branch
+  push:
+    branches:
+      - '*'
+
+jobs:
+  test-action:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install action
+        uses: vechain/networkhub@v0.0.1
+

@@ -1,0 +1,15 @@
+name: 'Setup network-hub CLI'
+description: 'Set up the network-hub CLI for use in actions by downloading the latest version from GitHub Releases.'
+author: 'VeChain'
+inputs:
+  version:
+    description: 'The version of the network-hub CLI to install.'
+    required: true
+    default: 'latest'
+  token:
+    description: 'The GitHub token to use for downloading the network-hub CLI.'
+    required: true
+runs:
+  using: 'node20'
+  main: 'action/index.js'
+  post-if: success()
