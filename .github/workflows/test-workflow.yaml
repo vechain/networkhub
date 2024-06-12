@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install action
-        uses: vechain/networkhub@v0.0.3
+        uses: vechain/networkhub@add-release-step-2
         with:
           version: 'v0.0.3'
           token: ${{ secrets.GITHUB_TOKEN }}
