@@ -11,5 +11,5 @@ inputs:
     required: true
 runs:
   using: 'node20'
-  main: 'action/index.js'
+  main: 'action/dist/index.js'
   post-if: success()
