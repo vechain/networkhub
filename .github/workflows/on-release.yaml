@@ -24,6 +24,18 @@ jobs:
           - os: macos-latest
             goos: darwin
             goarch: arm64
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+          - os: ubuntu-latest
+            goos: linux
+            goarch: arm64
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+          - os: windows-latest
+            goos: windows
+            goarch: arm64
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
@@ -48,3 +60,4 @@ jobs:
         with:
           tag_name: ${{ github.ref_name || inputs.tag }}
           file: networkHub-${{ matrix.goos }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' || '' }}
+          overwrite: true
