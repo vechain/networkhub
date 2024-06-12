@@ -7,9 +7,8 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to release'
+        description: 'Tag to release, eg. v0.0.1'
         required: true
-        default: 'v0.0.0'
 
 permissions:
   contents: write
@@ -17,18 +16,23 @@ permissions:
 jobs:
   build:
     name: Build
-    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
         include:
-          - os: ubuntu-latest
-            goos: linux
-          - os: macos-latest
+          - runner: macos-latest
             goos: darwin
-          - os: windows-latest
+            goarch: arm64
+            distro: macos
+          - runner: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            distro: ubuntu
+          - runner: windows-latest
             goos: windows
-        goarch: [ 386, amd64, arm, arm64 ]
+            goarch: amd64
+            distro: windows
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,19 +40,20 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.19.x
+          go-version: 1.22.x
 
       - name: Build binary
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          go build -v -o networkHub-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/main.go
+          go build -v -o network-hub-${{ matrix.distro }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' || '' }} ./cmd/main.go
 
       - name: Upload Executable
         uses: xresloader/upload-to-github-release@v1.6.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name || inputs.tag }}
-          file: networkHub-${{ matrix.goos }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' }}
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          file: network-hub-${{ matrix.goos }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' || '' }}
+          overwrite: true
