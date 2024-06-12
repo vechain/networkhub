@@ -33153,10 +33153,11 @@ function setup() {
             accept: 'application/octet-stream'
         });
         core.info(`Successfully downloaded network-hub to ${binPath}`);
-        let extractArgs = core.getMultilineInput("extractArgs");
-        let extractedPath = yield tc.extractTar(binPath, undefined, extractArgs);
-        core.info(`Successfully extracted network-hub to ${extractedPath}`);
-        core.addPath(extractedPath);
+        //
+        // let extractArgs = core.getMultilineInput("extractArgs");
+        // let extractedPath = await tc.extractTar(binPath, undefined, extractArgs);
+        // core.info(`Successfully extracted network-hub to ${extractedPath}`)
+        core.addPath(binPath);
     });
 }
 setup().catch((error) => {
