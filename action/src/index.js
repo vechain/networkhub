@@ -12,12 +12,9 @@ async function getDownloadURL(version) {
     // Get the architecture (i.e. x64, arm64)
     const arch = process.arch;
 
-    console.log(`Platform: ${platform}, Arch: ${arch}`);
-
+    core.info(`Platform: ${platform}, Arch: ${arch}`)
     const url = `https://github.com/vechain/networkhub/releases/download/${version}/networkHub-${platform}-${arch}${platform === 'win32' ? '.exe' : ''}`;
-
-    console.log(`Download URL: ${url}`);
-
+    core.info(`Download URL: ${url}`)
     return url;
 }
 
@@ -29,11 +26,10 @@ async function setup() {
         return
     }
 
-    // Download the specific version of the tool, e.g. as a tarball
-    const pathToTarball = await tc.downloadTool(await getDownloadURL(version));
+    core.info(`Installing networkHub version ${version}`)
 
-    // Extract the tarball onto the runner
-    const pathToCLI = await tc.extractTar(pathToTarball);
+    // Download the specific version of the tool, e.g. as a tarball
+    const pathToCLI = await tc.downloadTool(await getDownloadURL(version));
 
     // Expose the tool by adding it to the PATH
     core.addPath(pathToCLI)
