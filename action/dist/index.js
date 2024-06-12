@@ -32,6 +32,8 @@ async function setup() {
         return
     }
 
+    core.setOutput('version', version)
+
     core.info(`Installing networkHub version ${version}`)
 
     // Download the specific version of the tool, e.g. as a tarball

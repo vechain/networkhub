@@ -9,6 +9,9 @@ inputs:
   token:
     description: 'The GitHub token to use for downloading the network-hub CLI.'
     required: true
+outputs:
+  version:
+    description: 'The version of the network-hub CLI that was installed.'
 runs:
   using: 'node20'
   main: 'action/dist/index.js'
