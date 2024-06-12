@@ -39,6 +39,11 @@ async function getDownloadURL(version) {
     core.info(`Platform: ${platform}`)
     core.info(`Arch: ${arch}`)
 
+    // https://github.com/vechain/networkhub/releases/download/v0.0.3/network-hub-macos-arm64
+
+    // https://github.com/vechain/networkhub/releases/download/v0.0.3/network-hub-macos-arm64
+
+
     const url = `https://github.com/vechain/networkhub/releases/download/${version}/network-hub-${platform}-${arch}${process.platform === 'win32' ? '.exe' : ''}`;
     core.info(`Download URL: ${url}`)
     return url;
@@ -56,8 +61,16 @@ async function setup() {
 
     core.info(`Installing networkHub version ${version}`)
 
+    //create an auth header using the token provided
+    const token = core.getInput('token');
+    if (!token) {
+        core.setFailed('No token specified')
+        return
+    }
     // Download the specific version of the tool, e.g. as a tarball
-    const pathToCLI = await tc.downloadTool(await getDownloadURL(version));
+    const pathToCLI = await tc.downloadTool(await getDownloadURL(version), undefined, undefined, {
+        authorization: `Bearer ${token}`
+    });
 
     // Expose the tool by adding it to the PATH
     core.addPath(pathToCLI)
