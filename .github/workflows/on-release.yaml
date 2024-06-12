@@ -21,33 +21,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
-            goos: linux
-            goarch: 386
-          - os: ubuntu-latest
-            goos: linux
-            goarch: amd64
-          - os: ubuntu-latest
-            goos: linux
-            goarch: arm
-          - os: ubuntu-latest
-            goos: linux
-            goarch: arm64
           - os: macos-latest
             goos: darwin
-            goarch: amd64  # Only build for amd64 on macOS
-          - os: windows-latest
-            goos: windows
-            goarch: 386
-          - os: windows-latest
-            goos: windows
             goarch: amd64
-          - os: windows-latest
-            goos: windows
-            goarch: arm
-          - os: windows-latest
-            goos: windows
-            goarch: arm64
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
