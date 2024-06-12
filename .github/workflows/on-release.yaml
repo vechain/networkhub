@@ -7,9 +7,8 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to release'
+        description: 'Tag to release, eg. v0.0.1'
         required: true
-        default: 'v0.0.1'
 
 permissions:
   contents: write
@@ -21,16 +20,19 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macos-latest
+          - runner: macos-latest
             goos: darwin
             goarch: arm64
-          - os: ubuntu-latest
+            distro: macos
+          - runner: ubuntu-latest
             goos: linux
             goarch: amd64
-          - os: windows-latest
+            distro: ubuntu
+          - runner: windows-latest
             goos: windows
             goarch: amd64
-    runs-on: ${{ matrix.os }}
+            distro: windows
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -45,7 +47,7 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          go build -v -o networkHub-${{ matrix.goos }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' || '' }} ./cmd/main.go
+          go build -v -o network-hub-${{ matrix.distro }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' || '' }} ./cmd/main.go
 
       - name: Upload Executable
         uses: xresloader/upload-to-github-release@v1.6.0
@@ -53,5 +55,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ inputs.tag || github.ref_name }}
-          file: networkHub-${{ matrix.goos }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' || '' }}
+          file: network-hub-${{ matrix.goos }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' || '' }}
           overwrite: true
