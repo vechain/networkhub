@@ -47,4 +47,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref_name || inputs.tag }}
-          file: networkHub-${{ matrix.goos }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' }}
+          file: networkHub-${{ matrix.goos }}-${{ matrix.goarch }}${{ runner.os == 'Windows' && '.exe' || '' }}
