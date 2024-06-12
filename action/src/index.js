@@ -13,7 +13,7 @@ async function getDownloadURL(version) {
     const arch = process.arch;
 
     core.info(`Platform: ${platform}, Arch: ${arch}`)
-    const url = `https://github.com/vechain/networkhub/releases/download/${version}/networkHub-${platform}-${arch}${platform === 'win32' ? '.exe' : ''}`;
+    const url = `https://github.com/vechain/networkhub/releases/download/${version}/network-hub-${platform}-${arch}${platform === 'win32' ? '.exe' : ''}`;
     core.info(`Download URL: ${url}`)
     return url;
 }
