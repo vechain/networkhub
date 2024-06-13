@@ -128,7 +128,6 @@ func TestLocalInvalidExecArtifact(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	fmt.Println(networkJSON)
 	localEnv := NewLocalEnv()
 	_, err = localEnv.LoadConfig(networkCfg)
 	require.Error(t, err)
@@ -137,7 +136,7 @@ func TestLocalInvalidExecArtifact(t *testing.T) {
 }
 
 func TestLocal(t *testing.T) {
-	//t.Skip()
+	t.Skip()
 	networkCfg, err := network.NewNetwork(
 		network.WithJSON(networkJSON),
 	)

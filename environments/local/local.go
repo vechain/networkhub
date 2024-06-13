@@ -45,9 +45,8 @@ func (l *Local) LoadConfig(cfg *network.Network) (string, error) {
 		}
 
 		// check if the exec artifact path exists
-		execArtifactPath := n.ExecArtifact
-		if !fileExists(execArtifactPath) {
-			return "", fmt.Errorf("file does not exist at path: %s", execArtifactPath)
+		if !fileExists(n.ExecArtifact) {
+			return "", fmt.Errorf("file does not exist at path: %s", n.ExecArtifact)
 		}
 	}
 
