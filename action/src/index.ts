@@ -98,7 +98,7 @@ async function setup() {
     // let extractArgs = core.getMultilineInput("extractArgs");
     // let extractedPath = await tc.extractTar(binPath, undefined, extractArgs);
     // core.info(`Successfully extracted network-hub to ${extractedPath}`)
-    core.addPath(destination);
+    core.addPath(__dirname);
 }
 
 setup().catch((error) => {
