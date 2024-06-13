@@ -33155,12 +33155,14 @@ function setup() {
         const binPath = yield tc.downloadTool(asset.url, destination, `token ${token}`, {
             accept: 'application/octet-stream'
         });
+        core.info(`Successfully downloaded network-hub to ${binPath}`);
+        core.info(`Destination: ${destination}`);
         // list the files in the binPath
         fs.readdirSync(__dirname).forEach(file => {
             core.info(file);
         });
-        core.info(`Successfully downloaded network-hub to ${binPath}`);
-        fs.chmodSync(binPath, '755');
+        core.info(`Defining permissions for ${destination}`);
+        fs.chmodSync(destination, '755');
         //
         // let extractArgs = core.getMultilineInput("extractArgs");
         // let extractedPath = await tc.extractTar(binPath, undefined, extractArgs);
