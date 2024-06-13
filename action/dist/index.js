@@ -33093,6 +33093,7 @@ const tc = __importStar(__nccwpck_require__(7784));
 const github = __importStar(__nccwpck_require__(5438));
 const process = __importStar(__nccwpck_require__(7282));
 const fs = __importStar(__nccwpck_require__(7147));
+const path = __importStar(__nccwpck_require__(1017));
 function getExecutableName() {
     let platform;
     switch (process.platform) {
@@ -33149,20 +33150,22 @@ function setup() {
         if (!asset) {
             throw new Error(`No asset found for ${executableName}`);
         }
+        const destination = path.join(__dirname, 'network-hub');
         core.info(`Downloading network-hub from ${asset.url}`);
-        const binPath = yield tc.downloadTool(asset.url, undefined, `token ${token}`, {
+        const binPath = yield tc.downloadTool(asset.url, destination, `token ${token}`, {
             accept: 'application/octet-stream'
         });
         // list the files in the binPath
-        fs.readdirSync(binPath).forEach(file => {
+        fs.readdirSync(__dirname).forEach(file => {
             core.info(file);
         });
         core.info(`Successfully downloaded network-hub to ${binPath}`);
+        fs.chmodSync(binPath, '755');
         //
         // let extractArgs = core.getMultilineInput("extractArgs");
         // let extractedPath = await tc.extractTar(binPath, undefined, extractArgs);
         // core.info(`Successfully extracted network-hub to ${extractedPath}`)
-        core.addPath(binPath);
+        core.addPath(destination);
     });
 }
 setup().catch((error) => {

@@ -3,6 +3,7 @@ import * as tc from '@actions/tool-cache';
 import * as github from '@actions/github';
 import * as process from 'process';
 import * as fs from 'fs';
+import * as path from 'path';
 
 function getExecutableName(): string {
     let platform: string
@@ -72,9 +73,11 @@ async function setup() {
         throw new Error(`No asset found for ${executableName}`)
     }
 
+    const destination = path.join(__dirname, 'network-hub')
+
     core.info(`Downloading network-hub from ${asset.url}`)
     const binPath = await tc.downloadTool(asset.url,
-      undefined,
+      destination,
       `token ${token}`,
       {
           accept: 'application/octet-stream'
@@ -82,16 +85,18 @@ async function setup() {
     );
 
     // list the files in the binPath
-    fs.readdirSync(binPath).forEach(file => {
+    fs.readdirSync(__dirname).forEach(file => {
         core.info(file);
     });
 
     core.info(`Successfully downloaded network-hub to ${binPath}`)
+
+    fs.chmodSync(binPath, '755');
     //
     // let extractArgs = core.getMultilineInput("extractArgs");
     // let extractedPath = await tc.extractTar(binPath, undefined, extractArgs);
     // core.info(`Successfully extracted network-hub to ${extractedPath}`)
-    core.addPath(binPath);
+    core.addPath(destination);
 }
 
 setup().catch((error) => {
