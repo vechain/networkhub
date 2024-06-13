@@ -44,10 +44,10 @@ func (l *Local) LoadConfig(cfg *network.Network) (string, error) {
 			n.DataDir = filepath.Join(baseTmpDir, n.ID, "data")
 		}
 
-		// check if the artifactPath exists
-		artifactPath := n.ExecArtifact
-		if !fileExists(artifactPath) {
-			return "", fmt.Errorf("file does not exist at path: %s", artifactPath)
+		// check if the exec artifact path exists
+		execArtifactPath := n.ExecArtifact
+		if !fileExists(execArtifactPath) {
+			return "", fmt.Errorf("file does not exist at path: %s", execArtifactPath)
 		}
 	}
 
