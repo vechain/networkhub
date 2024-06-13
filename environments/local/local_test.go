@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/vechain/networkhub/preset"
+	"strings"
 	"testing"
 	"time"
 
@@ -120,6 +121,20 @@ var networkJSON = fmt.Sprintf(`{
     }
   ]
 }`, genesis, genesis, genesis)
+
+func TestLocalInvalidExecArtifact(t *testing.T) {
+	networkCfg, err := network.NewNetwork(
+		network.WithJSON(networkJSON),
+	)
+	require.NoError(t, err)
+
+	fmt.Println(networkJSON)
+	localEnv := NewLocalEnv()
+	_, err = localEnv.LoadConfig(networkCfg)
+	require.Error(t, err)
+
+	require.True(t, strings.HasPrefix(err.Error(), "file does not exist at path"))
+}
 
 func TestLocal(t *testing.T) {
 	//t.Skip()

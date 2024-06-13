@@ -15,6 +15,14 @@ type Local struct {
 	id         string
 }
 
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return err == nil
+}
+
 func NewLocalEnv() environments.Actions {
 	return &Local{
 		localNodes: map[string]*Node{},
@@ -34,6 +42,12 @@ func (l *Local) LoadConfig(cfg *network.Network) (string, error) {
 
 		if n.DataDir == "" {
 			n.DataDir = filepath.Join(baseTmpDir, n.ID, "data")
+		}
+
+		// check if the artifactPath exists
+		artifactPath := n.ExecArtifact
+		if !fileExists(artifactPath) {
+			return "", fmt.Errorf("file does not exist at path: %s", artifactPath)
 		}
 	}
 
