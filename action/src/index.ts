@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as github from '@actions/github';
 import * as process from 'process';
+import * as fs from 'fs';
 
 function getExecutableName(): string {
     let platform: string
@@ -45,7 +46,6 @@ async function setup() {
     }
 
     core.setOutput('version', version)
-
     core.info(`Installing networkHub version ${version}`)
 
     // set up auth/environment
@@ -80,6 +80,11 @@ async function setup() {
           accept: 'application/octet-stream'
       }
     );
+
+    // list the files in the binPath
+    fs.readdirSync(binPath).forEach(file => {
+        core.info(file);
+    });
 
     core.info(`Successfully downloaded network-hub to ${binPath}`)
     //

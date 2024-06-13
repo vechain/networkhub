@@ -33092,6 +33092,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const tc = __importStar(__nccwpck_require__(7784));
 const github = __importStar(__nccwpck_require__(5438));
 const process = __importStar(__nccwpck_require__(7282));
+const fs = __importStar(__nccwpck_require__(7147));
 function getExecutableName() {
     let platform;
     switch (process.platform) {
@@ -33151,6 +33152,10 @@ function setup() {
         core.info(`Downloading network-hub from ${asset.url}`);
         const binPath = yield tc.downloadTool(asset.url, undefined, `token ${token}`, {
             accept: 'application/octet-stream'
+        });
+        // list the files in the binPath
+        fs.readdirSync(binPath).forEach(file => {
+            core.info(file);
         });
         core.info(`Successfully downloaded network-hub to ${binPath}`);
         //
