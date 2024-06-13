@@ -37,6 +37,7 @@ func (p *Networks) Load(id string, configPayload *APIConfigPayload) (*network.Ne
 	if configPayload == nil || configPayload.ArtifactPath == "" {
 		return nil, fmt.Errorf("preset config must be set")
 	}
+
 	// override the default path
 	for _, node := range preset.Nodes {
 		node.ExecArtifact = configPayload.ArtifactPath
