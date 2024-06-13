@@ -2,7 +2,6 @@ package hub
 
 import (
 	"fmt"
-
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
 )
@@ -43,6 +42,7 @@ func (e *NetworkHub) StartNetwork(networkID string) error {
 	if !ok {
 		return fmt.Errorf("network %s is not configured", networkID)
 	}
+
 	return netwk.StartNetwork()
 }
 

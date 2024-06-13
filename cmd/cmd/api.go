@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/vechain/networkhub/environments/docker"
 
 	"github.com/vechain/networkhub/hub"
 	"github.com/vechain/networkhub/preset"
@@ -20,6 +21,7 @@ var apiCmd = &cobra.Command{
 
 		envManager := hub.NewNetworkHub()
 		envManager.RegisterEnvironment("local", local.NewLocalEnv)
+		envManager.RegisterEnvironment("docker", docker.NewDockerEnv)
 
 		presets := preset.NewPresetNetworks()
 		presets.Register("threeMasterNodesNetwork", preset.LocalThreeMasterNodesNetwork)

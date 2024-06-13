@@ -51,8 +51,8 @@ func (c *Cmd) LoadExistingNetworks() error {
 	return nil
 }
 
-func (c *Cmd) Preset(presetNetwork string, presetConfig string) (string, error) {
-	netCfg, err := c.presets.Load(presetNetwork, &preset.APIConfigPayload{ArtifactPath: presetConfig})
+func (c *Cmd) Preset(presetNetwork string, presetEnv, presetConfig string) (string, error) {
+	netCfg, err := c.presets.Load(presetNetwork, &preset.APIConfigPayload{ArtifactPath: presetConfig, Environment: presetEnv})
 	if err != nil {
 		return "", fmt.Errorf("unable to load network preset: %w", err)
 	}

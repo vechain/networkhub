@@ -7,7 +7,7 @@ networkHub is a versatile framework designed to streamline the process of launch
 ### **Launch Pre-configured Network via command line**:
   ```bash
   # Setup the preset network
-  > go run cmd/main.go cmd preset threeMasterNodesNetwork /Users/pedro/go/src/github.com/vechain/thor/bin/thor
+  > go run cmd/main.go cmd preset local threeMasterNodesNetwork /Users/pedro/go/src/github.com/vechain/thor/bin/thor
   ...
   2024/06/07 17:31:43 INFO preset network config was successful... networkId=localthreeMaster
   
@@ -16,6 +16,21 @@ networkHub is a versatile framework designed to streamline the process of launch
   2024/06/07 17:31:57 INFO Registered preset network networkId=threeMasterNodesNetwork
   2024/06/07 17:31:57 INFO Registered preset network networkId=sixNodesNetwork
   2024/06/07 17:31:57 INFO Starting network... ID=localthreeMaster
+  ...
+  ```
+### **Launch Pre-configured Network via command line using Docker**:
+  ```bash
+  # Setup the preset network
+  > go run cmd/main.go cmd preset docker threeMasterNodesNetwork vechain/thor:latest
+  ...
+  2024/06/13 17:15:18 INFO Configuring network...
+  2024/06/13 17:15:18 INFO Network saved to file filepath=/Users/pedro/go/src/github.com/vechain/networkhub/networks_db.json
+  2024/06/13 17:15:18 INFO preset network config was successful... networkId=dockerthreeMaster
+  
+  # Start preset network
+  > go run cmd/main.go cmd start dockerthreeMaster
+  2024/06/13 17:16:05 INFO Network created networkName=dockerthreeMaster-network
+  2024/06/13 17:16:06 INFO network started successfully...
   ...
   ```
 
@@ -32,7 +47,7 @@ networkHub is a versatile framework designed to streamline the process of launch
   # Start a local pre-setup configured network 
   # Must specify the path to thor locally
   curl -X POST http://localhost:8080/preset/threeMasterNodesNetwork \
-     -d '{"artifactPath":"/Users/pedro/go/src/github.com/vechain/thor/bin/thor"}'
+     -d '{"artifactPath":"/Users/pedro/go/src/github.com/vechain/thor/bin/thor", "environment":"local"}'
   
    # Response
   {"networkId": "localthreeMasterNodes"}

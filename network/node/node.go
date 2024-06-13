@@ -1,6 +1,11 @@
 package node
 
-import "github.com/vechain/thor/v2/genesis"
+import (
+	"fmt"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/p2p/discover"
+	"github.com/vechain/thor/v2/genesis"
+)
 
 const (
 	MasterNode  = "masterNode"
@@ -17,7 +22,16 @@ type Node struct {
 	APICORS       string                 `json:"apiCORS"`
 	Type          string                 `json:"type"`
 	Key           string                 `json:"key"`
-	Enode         string                 `json:"enode"`
+	EnodeData     string                 `json:"enode"`        // todo: this should be a generated method
 	ExecArtifact  string                 `json:"execArtifact"` // used to determine the executing version of the node ( path, dockerImage, etc)
 	Verbosity     int                    `json:"verbosity"`
+}
+
+func (n *Node) Enode(ipAddr string) (string, error) {
+	privKey, err := crypto.HexToECDSA(n.Key)
+	if err != nil {
+		return "", fmt.Errorf("unable to process key for node %s : %w", n.ID, err)
+	}
+
+	return fmt.Sprintf("enode://%x@%s:%v", discover.PubkeyID(&privKey.PublicKey).Bytes(), ipAddr, n.P2PListenPort), nil
 }

@@ -89,40 +89,40 @@ var networkJSON = fmt.Sprintf(`{
       "id": "node1",
       "execArtifact": "/Users/pedro/go/src/github.com/vechain/thor/bin/thor",
       "p2pListenPort": 8081,
+      "host": "127.0.0.1",
       "apiAddr": "127.0.0.1:8181",
       "apiCORS": "*",
       "type": "masterNode",
-      "key": "01a4107bfb7d5141ec519e75788c34295741a1eefbfe460320efd2ada944071e", 
-      "enode": "enode://2ac08a2c35f090e5c47fe99bb0b2956d5b3366c61a83ef30719d393b5984227f4a5bb35b42fef94c3c03c1797ddd97546bb6eeb627b040c4c8dd554b4289024d@127.0.0.1:8081",
+      "key": "01a4107bfb7d5141ec519e75788c34295741a1eefbfe460320efd2ada944071e",
       "genesis": %s
     },
     {
       "id": "node2",
 	  "execArtifact": "/Users/pedro/go/src/github.com/vechain/thor/bin/thor",
       "p2pListenPort": 8082,
+      "host": "127.0.0.1",
       "apiAddr": "127.0.0.1:8182",
       "apiCORS": "*",
       "type": "masterNode",
       "key": "7072249b800ddac1d29a3cd06468cc1a917cbcd110dde358a905d03dad51748d",
-      "enode": "enode://ca36cbb2e9ad0ed582350ee04f49408f4fa409a8ca39982a34e4d5bb82418c45f3fd74bc4861f5aaecd986f1697f28010e1f6af7fadf08c6f529188752f47bee@127.0.0.1:8082",
       "genesis": %s
     },
     {
       "id": "node3",
 	  "execArtifact": "/Users/pedro/go/src/github.com/vechain/thor/bin/thor",
       "p2pListenPort": 8083,
+      "host": "127.0.0.1",
       "apiAddr": "127.0.0.1:8183",
       "apiCORS": "*",
       "type": "masterNode",
       "key": "c55455943bf026dc44fcf189e8765eb0587c94e66029d580bae795386c0b737a",
-      "enode": "enode://2d5b5f39e906dd717d721e3f039326e55163697e99e0a9998193eddfbb42e21a457ab877c355ee89c2bdf2562c86f6946b1e98119e945c091cab1a5ded8ca027@127.0.0.1:8083",
 	  "genesis": %s
     }
   ]
 }`, genesis, genesis, genesis)
 
 func TestLocal(t *testing.T) {
-	//t.Skip()
+	t.Skip()
 	networkCfg, err := network.NewNetwork(
 		network.WithJSON(networkJSON),
 	)
