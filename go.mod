@@ -6,6 +6,7 @@ replace github.com/ethereum/go-ethereum => github.com/vechain/go-ethereum v1.8.1
 
 require (
 	github.com/docker/docker v26.1.1-0.20240611113813-87794b3030c8+incompatible
+	github.com/docker/go-connections v0.5.0
 	github.com/ethereum/go-ethereum v1.14.0
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
@@ -22,7 +23,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
-	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
@@ -67,4 +67,4 @@ require (
 	gotest.tools/v3 v3.5.1 // indirect
 )
 
-go 1.22.4
+go 1.21
