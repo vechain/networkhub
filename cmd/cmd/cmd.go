@@ -119,7 +119,6 @@ var presetCmd = &cobra.Command{
 		presetArtifactPath := args[2]
 
 		slog.Info("Configuring network...")
-
 		networkID, err := cmdManager.Preset(presetNetwork, presetEnv, presetArtifactPath)
 		if err != nil {
 			slog.Error("unable to config preset network", "err", err)
