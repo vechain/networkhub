@@ -2,18 +2,17 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log/slog"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"syscall"
 
+	"github.com/spf13/cobra"
+	"github.com/vechain/networkhub/environments/docker"
 	"github.com/vechain/networkhub/environments/local"
 	"github.com/vechain/networkhub/hub"
 	"github.com/vechain/networkhub/preset"
-
-	"github.com/spf13/cobra"
 
 	cmdentrypoint "github.com/vechain/networkhub/entrypoint/cmd"
 )
@@ -21,6 +20,7 @@ import (
 func setup() *cmdentrypoint.Cmd {
 	envManager := hub.NewNetworkHub()
 	envManager.RegisterEnvironment("local", local.NewLocalEnv)
+	envManager.RegisterEnvironment("docker", docker.NewDockerEnv)
 
 	presets := preset.NewPresetNetworks()
 	presets.Register("threeMasterNodesNetwork", preset.LocalThreeMasterNodesNetwork)
@@ -87,7 +87,7 @@ var configureCmd = &cobra.Command{
 		cmdManager := setup()
 
 		// Read from the specified file
-		data, err := ioutil.ReadFile(args[0])
+		data, err := os.ReadFile(args[0])
 		if err != nil {
 			fmt.Printf("Error reading config file: %v\n", err)
 			os.Exit(1)
@@ -104,19 +104,20 @@ var configureCmd = &cobra.Command{
 	},
 }
 
+// TODO add a preset list
 var presetCmd = &cobra.Command{
-	Use:   "preset [preset-name] [preset-thor-path]",
+	Use:   "preset [environment] [preset-name] [preset-thor-path]",
 	Short: "Configures a preset network",
-	Args:  cobra.MinimumNArgs(2),
+	Args:  cobra.MinimumNArgs(3),
 	Run: func(cmd *cobra.Command, args []string) {
 		cmdManager := setup()
 
-		presetNetwork := args[0]
-		presetArtifactPath := args[1]
+		presetEnv := args[0]
+		presetNetwork := args[1]
+		presetArtifactPath := args[2]
 
 		slog.Info("Configuring network...")
-
-		networkID, err := cmdManager.Preset(presetNetwork, presetArtifactPath)
+		networkID, err := cmdManager.Preset(presetNetwork, presetEnv, presetArtifactPath)
 		if err != nil {
 			slog.Error("unable to config preset network", "err", err)
 			return
@@ -126,7 +127,6 @@ var presetCmd = &cobra.Command{
 }
 
 func init() {
-
 	cmdCmd.AddCommand(startCmd, configureCmd, presetCmd)
 	rootCmd.AddCommand(cmdCmd)
 }

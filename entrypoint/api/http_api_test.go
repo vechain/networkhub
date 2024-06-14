@@ -65,7 +65,7 @@ func TestStartStopHandler(t *testing.T) {
 		{
 			name:       "Load existing preset network",
 			target:     "/preset/noop-network",
-			payload:    "{ \"artifactPath\": \"noop/dir\" }",
+			payload:    "{ \"artifactPath\": \"noop/dir\", \"environment\":\"noop\" }",
 			method:     http.MethodPost,
 			wantStatus: http.StatusOK,
 			wantBody:   "{\"networkId\": \"noop\"}",

@@ -42,6 +42,10 @@ func (n *Node) Start() error {
 		if err != nil {
 			return fmt.Errorf("failed to write master key file - %w", err)
 		}
+		err = os.WriteFile(filepath.Join(n.nodeCfg.ConfigDir, "p2p.key"), []byte(n.nodeCfg.Key), 0644)
+		if err != nil {
+			return fmt.Errorf("failed to p2p master key file - %w", err)
+		}
 	}
 
 	// write genesis to disk
@@ -57,7 +61,11 @@ func (n *Node) Start() error {
 
 	cleanEnode := []string{} // todo theres a clever way of doing this
 	for _, enode := range n.enodes {
-		if n.nodeCfg.Enode != enode {
+		nodeEnode, err := n.nodeCfg.Enode("127.0.0.1")
+		if err != nil {
+			return err
+		}
+		if nodeEnode != enode {
 			cleanEnode = append(cleanEnode, enode)
 		}
 	}
@@ -72,6 +80,8 @@ func (n *Node) Start() error {
 			"--config-dir", n.nodeCfg.ConfigDir,
 			"--api-addr", n.nodeCfg.APIAddr,
 			"--api-cors", n.nodeCfg.APICORS,
+			"--verbosity", "4",
+			"--nat", "none",
 			"--p2p-port", fmt.Sprintf("%d", n.nodeCfg.P2PListenPort),
 			"--bootnode", enodeString,
 		},

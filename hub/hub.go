@@ -43,6 +43,7 @@ func (e *NetworkHub) StartNetwork(networkID string) error {
 	if !ok {
 		return fmt.Errorf("network %s is not configured", networkID)
 	}
+
 	return netwk.StartNetwork()
 }
 

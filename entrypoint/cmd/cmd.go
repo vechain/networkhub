@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/vechain/networkhub/hub"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/preset"
@@ -51,8 +52,8 @@ func (c *Cmd) LoadExistingNetworks() error {
 	return nil
 }
 
-func (c *Cmd) Preset(presetNetwork string, presetConfig string) (string, error) {
-	netCfg, err := c.presets.Load(presetNetwork, &preset.APIConfigPayload{ArtifactPath: presetConfig})
+func (c *Cmd) Preset(presetNetwork string, environment, artifactPath string) (string, error) {
+	netCfg, err := c.presets.Load(presetNetwork, &preset.APIConfigPayload{Environment: environment, ArtifactPath: artifactPath})
 	if err != nil {
 		return "", fmt.Errorf("unable to load network preset: %w", err)
 	}

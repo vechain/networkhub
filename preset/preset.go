@@ -11,6 +11,7 @@ import (
 
 type APIConfigPayload struct {
 	ArtifactPath string `json:"artifactPath"`
+	Environment  string `json:"environment"`
 }
 
 type Networks struct {
@@ -42,6 +43,8 @@ func (p *Networks) Load(id string, configPayload *APIConfigPayload) (*network.Ne
 	for _, node := range preset.Nodes {
 		node.ExecArtifact = configPayload.ArtifactPath
 	}
+	// override the default environment
+	preset.Environment = configPayload.Environment
 	return preset, nil
 }
 

@@ -57,7 +57,11 @@ func (l *Local) StartNetwork() error {
 	// speed up p2p bootstrap
 	var enodes []string
 	for _, node := range l.networkCfg.Nodes {
-		enodes = append(enodes, node.Enode)
+		enode, err := node.Enode("127.0.0.1")
+		if err != nil {
+			return err
+		}
+		enodes = append(enodes, enode)
 	}
 
 	for _, nodeCfg := range l.networkCfg.Nodes {

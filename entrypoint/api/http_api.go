@@ -16,9 +16,9 @@ type Server struct {
 	presets    *preset.Networks
 }
 
-func New(envMgr *hub.NetworkHub, presets *preset.Networks) *Server {
+func New(networkHub *hub.NetworkHub, presets *preset.Networks) *Server {
 	return &Server{
-		networkHub: envMgr,
+		networkHub: networkHub,
 		presets:    presets,
 	}
 }
