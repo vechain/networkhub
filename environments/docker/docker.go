@@ -3,14 +3,13 @@ package docker
 import (
 	"context"
 	"fmt"
-	"github.com/docker/docker/api/types"
+	"log/slog"
 	"strconv"
 	"strings"
 
 	"github.com/docker/docker/client"
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
-	"log/slog"
 
 	dockernetwork "github.com/docker/docker/api/types/network"
 )
@@ -127,7 +126,7 @@ func (d *Docker) checkOrCreateNetwork(networkName, subnet string) error {
 	defer cli.Close()
 
 	// List existing networks
-	networks, err := cli.NetworkList(context.Background(), types.NetworkListOptions{})
+	networks, err := cli.NetworkList(context.Background(), dockernetwork.ListOptions{})
 	if err != nil {
 		return fmt.Errorf("could not list Docker networks: %v", err)
 	}

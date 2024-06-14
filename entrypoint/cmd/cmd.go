@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/vechain/networkhub/hub"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/preset"

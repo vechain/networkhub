@@ -14,7 +14,7 @@ type IpManager struct {
 }
 
 func NewIPManagerRandom() *IpManager {
-	rand.Seed(time.Now().UnixNano())
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 	// Generate random octets for a Class C subnet
 	a := rand.Intn(128)
 	b := rand.Intn(256)

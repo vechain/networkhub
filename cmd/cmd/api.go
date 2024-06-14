@@ -2,15 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/vechain/networkhub/environments/docker"
-
-	"github.com/vechain/networkhub/hub"
-	"github.com/vechain/networkhub/preset"
-
-	"github.com/vechain/networkhub/entrypoint/api"
-	"github.com/vechain/networkhub/environments/local"
 
 	"github.com/spf13/cobra"
+	"github.com/vechain/networkhub/entrypoint/api"
+	"github.com/vechain/networkhub/environments/docker"
+	"github.com/vechain/networkhub/environments/local"
+	"github.com/vechain/networkhub/hub"
+	"github.com/vechain/networkhub/preset"
 )
 
 var apiCmd = &cobra.Command{

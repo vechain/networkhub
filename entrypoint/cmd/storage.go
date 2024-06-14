@@ -3,10 +3,10 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/vechain/networkhub/network"
-	"io/ioutil"
 	"log/slog"
 	"os"
+
+	"github.com/vechain/networkhub/network"
 )
 
 type StorageJson struct {
@@ -33,7 +33,7 @@ func (s *Storage) Store(networkID string, net *network.Network) error {
 	}
 
 	// Write the updated data back to file
-	err = ioutil.WriteFile(s.path, data, 0644)
+	err = os.WriteFile(s.path, data, 0644)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (s *Storage) LoadExistingNetworks() (map[string]*network.Network, error) {
 	// Check if file exists
 	if _, err := os.Stat(s.path); err == nil {
 		// File exists, load the current data
-		fileData, err := ioutil.ReadFile(s.path)
+		fileData, err := os.ReadFile(s.path)
 		if err != nil {
 			return nil, err
 		}

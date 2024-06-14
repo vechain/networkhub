@@ -2,19 +2,17 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/vechain/networkhub/environments/docker"
-	"io/ioutil"
 	"log/slog"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"syscall"
 
+	"github.com/spf13/cobra"
+	"github.com/vechain/networkhub/environments/docker"
 	"github.com/vechain/networkhub/environments/local"
 	"github.com/vechain/networkhub/hub"
 	"github.com/vechain/networkhub/preset"
-
-	"github.com/spf13/cobra"
 
 	cmdentrypoint "github.com/vechain/networkhub/entrypoint/cmd"
 )
@@ -89,7 +87,7 @@ var configureCmd = &cobra.Command{
 		cmdManager := setup()
 
 		// Read from the specified file
-		data, err := ioutil.ReadFile(args[0])
+		data, err := os.ReadFile(args[0])
 		if err != nil {
 			fmt.Printf("Error reading config file: %v\n", err)
 			os.Exit(1)

@@ -3,14 +3,14 @@ package preset
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/require"
-	"github.com/vechain/thor/v2/genesis"
 	"math/big"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+	"github.com/vechain/thor/v2/genesis"
 )
 
 func TestGenesisUnmarshal(t *testing.T) {
-
 	type derp struct {
 		Hex *genesis.HexOrDecimal256
 	}

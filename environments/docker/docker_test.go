@@ -1,13 +1,14 @@
 package docker_test
 
 import (
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/vechain/networkhub/environments/docker"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/preset"
-	"testing"
-	"time"
 )
 
 func TestDockerNetwork(t *testing.T) {

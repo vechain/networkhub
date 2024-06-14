@@ -2,6 +2,7 @@ package hub
 
 import (
 	"fmt"
+
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
 )

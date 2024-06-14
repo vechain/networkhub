@@ -3,13 +3,13 @@ package local
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/vechain/networkhub/preset"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/vechain/networkhub/network"
+	"github.com/vechain/networkhub/preset"
 	"github.com/vechain/networkhub/utils/client"
 	"github.com/vechain/networkhub/utils/datagen"
 )
@@ -127,6 +127,8 @@ func TestLocalInvalidExecArtifact(t *testing.T) {
 		network.WithJSON(networkJSON),
 	)
 	require.NoError(t, err)
+
+	networkCfg.Nodes[0].ExecArtifact = "/some_fake_dir"
 
 	localEnv := NewLocalEnv()
 	_, err = localEnv.LoadConfig(networkCfg)
