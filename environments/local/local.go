@@ -36,17 +36,17 @@ func (l *Local) LoadConfig(cfg *network.Network) (string, error) {
 
 	// ensure paths exist, use temp dirs if not defined
 	for _, n := range l.networkCfg.Nodes {
-		if n.ConfigDir == "" {
-			n.ConfigDir = filepath.Join(baseTmpDir, n.ID, "config")
+		if n.GetConfigDir() == "" {
+			n.SetConfigDir(filepath.Join(baseTmpDir, n.GetID(), "config"))
 		}
 
-		if n.DataDir == "" {
-			n.DataDir = filepath.Join(baseTmpDir, n.ID, "data")
+		if n.GetDataDir() == "" {
+			n.SetDataDir(filepath.Join(baseTmpDir, n.GetID(), "data"))
 		}
 
 		// check if the exec artifact path exists
-		if !fileExists(n.ExecArtifact) {
-			return "", fmt.Errorf("file does not exist at path: %s", n.ExecArtifact)
+		if !fileExists(n.GetExecArtifact()) {
+			return "", fmt.Errorf("file does not exist at path: %s", n.GetExecArtifact())
 		}
 	}
 
@@ -70,7 +70,7 @@ func (l *Local) StartNetwork() error {
 			return fmt.Errorf("unable to start node - %w", err)
 		}
 
-		l.localNodes[nodeCfg.ID] = localNode
+		l.localNodes[nodeCfg.GetID()] = localNode
 	}
 
 	return nil

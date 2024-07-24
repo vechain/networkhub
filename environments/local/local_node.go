@@ -15,12 +15,12 @@ import (
 )
 
 type Node struct {
-	nodeCfg *node.Node
+	nodeCfg node.Node
 	cmdExec *exec.Cmd
 	enodes  []string
 }
 
-func NewLocalNode(nodeCfg *node.Node, enodes []string) *Node {
+func NewLocalNode(nodeCfg node.Node, enodes []string) *Node {
 	return &Node{
 		nodeCfg: nodeCfg,
 		enodes:  enodes,
@@ -29,28 +29,28 @@ func NewLocalNode(nodeCfg *node.Node, enodes []string) *Node {
 
 func (n *Node) Start() error {
 	// ensure directories exist
-	if err := os.MkdirAll(n.nodeCfg.ConfigDir, 0777); err != nil {
+	if err := os.MkdirAll(n.nodeCfg.GetConfigDir(), 0777); err != nil {
 		return fmt.Errorf("unable to create configDir - %w", err)
 	}
-	if err := os.MkdirAll(n.nodeCfg.DataDir, 0777); err != nil {
+	if err := os.MkdirAll(n.nodeCfg.GetDataDir(), 0777); err != nil {
 		return fmt.Errorf("unable to create configDir - %w", err)
 	}
 
 	// write keys to disk
-	if n.nodeCfg.Key != "" {
-		err := os.WriteFile(filepath.Join(n.nodeCfg.ConfigDir, "master.key"), []byte(n.nodeCfg.Key), 0644)
+	if n.nodeCfg.GetKey() != "" {
+		err := os.WriteFile(filepath.Join(n.nodeCfg.GetConfigDir(), "master.key"), []byte(n.nodeCfg.GetKey()), 0644)
 		if err != nil {
 			return fmt.Errorf("failed to write master key file - %w", err)
 		}
-		err = os.WriteFile(filepath.Join(n.nodeCfg.ConfigDir, "p2p.key"), []byte(n.nodeCfg.Key), 0644)
+		err = os.WriteFile(filepath.Join(n.nodeCfg.GetConfigDir(), "p2p.key"), []byte(n.nodeCfg.GetKey()), 0644)
 		if err != nil {
 			return fmt.Errorf("failed to p2p master key file - %w", err)
 		}
 	}
 
 	// write genesis to disk
-	genesisPath := filepath.Join(n.nodeCfg.ConfigDir, "genesis.json")
-	genesisBytes, err := json.Marshal(n.nodeCfg.Genesis)
+	genesisPath := filepath.Join(n.nodeCfg.GetConfigDir(), "genesis.json")
+	genesisBytes, err := json.Marshal(n.nodeCfg.GetGenesis())
 	if err != nil {
 		return fmt.Errorf("unable to marshal genesis - %w", err)
 	}
@@ -72,28 +72,31 @@ func (n *Node) Start() error {
 	enodeString := strings.Join(cleanEnode, ",")
 
 	cmd := &exec.Cmd{
-		Path: n.nodeCfg.ExecArtifact,
+		Path: n.nodeCfg.GetExecArtifact(),
 		Args: []string{
 			"thor",
 			"--network", genesisPath,
-			"--data-dir", n.nodeCfg.DataDir,
-			"--config-dir", n.nodeCfg.ConfigDir,
-			"--api-addr", n.nodeCfg.APIAddr,
-			"--api-cors", n.nodeCfg.APICORS,
+			"--data-dir", n.nodeCfg.GetDataDir(),
+			"--config-dir", n.nodeCfg.GetConfigDir(),
+			"--api-addr", n.nodeCfg.GetAPIAddr(),
+			"--api-cors", n.nodeCfg.GetAPICORS(),
 			"--verbosity", "4",
 			"--nat", "none",
-			"--p2p-port", fmt.Sprintf("%d", n.nodeCfg.P2PListenPort),
+			"--p2p-port", fmt.Sprintf("%d", n.nodeCfg.GetP2PListenPort()),
 			"--bootnode", enodeString,
 		},
 		Stdout: os.Stdout, // Directing stdout to the same stdout of the Go program
 		Stderr: os.Stderr, // Directing stderr to the same stderr of the Go program
 	}
 
-	if n.nodeCfg.Verbosity != 0 {
-		cmd.Args = append(cmd.Args, "--verbosity", strconv.Itoa(n.nodeCfg.Verbosity))
+	if n.nodeCfg.GetVerbosity() != 0 {
+		cmd.Args = append(cmd.Args, "--verbosity", strconv.Itoa(n.nodeCfg.GetVerbosity()))
 	}
 
 	fmt.Println(cmd)
+	if n.nodeCfg.GetID() == "node1" {
+		return nil
+	}
 	// Start the command and check for errors
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("failed to start thor command: %w", err)

@@ -7,9 +7,9 @@ import (
 )
 
 type Network struct {
-	Environment string       `json:"environment"`
-	Nodes       []*node.Node `json:"nodes"`
-	ID          string       `json:"id"`
+	Environment string      `json:"environment"`
+	Nodes       []node.Node `json:"nodes"`
+	ID          string      `json:"id"`
 }
 type Builder struct {
 }
@@ -23,6 +23,7 @@ func WithJSON(s string) BuilderOptionsFunc {
 		if err != nil {
 			return err
 		}
+
 		n.Nodes = network.Nodes
 		n.ID = network.ID
 		n.Environment = network.Environment
@@ -38,4 +39,53 @@ func NewNetwork(opts ...BuilderOptionsFunc) (*Network, error) {
 		}
 	}
 	return n, nil
+}
+
+// UnmarshalNode function unmarshals JSON data into the appropriate type based on the presence of VIP212
+func UnmarshalNode(data []byte) (node.Node, error) {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return nil, err
+	}
+
+	var nodeType node.Node
+	nodeType = &node.NodePreCoefFork{}
+	if genesis, ok := raw["genesis"].(map[string]interface{}); ok {
+		if forkConfig, ok := genesis["forkConfig"].(map[string]interface{}); ok {
+			if _, exists := forkConfig["VIPGASCOEF"]; exists {
+				nodeType = &node.NodePostCoefFork{}
+			}
+		}
+	}
+
+	if err := json.Unmarshal(data, &nodeType); err != nil {
+		return nil, err
+	}
+
+	return nodeType, nil
+}
+
+// UnmarshalJSON implements custom unmarshalling for Network
+func (n *Network) UnmarshalJSON(data []byte) error {
+	type Alias Network
+	aux := &struct {
+		Nodes []json.RawMessage `json:"nodes"`
+		*Alias
+	}{
+		Alias: (*Alias)(n),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	for _, nodeData := range aux.Nodes {
+		nodeObj, err := UnmarshalNode(nodeData)
+		if err != nil {
+			return err
+		}
+		n.Nodes = append(n.Nodes, nodeObj)
+	}
+
+	return nil
 }

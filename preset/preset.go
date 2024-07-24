@@ -41,7 +41,7 @@ func (p *Networks) Load(id string, configPayload *APIConfigPayload) (*network.Ne
 
 	// override the default path
 	for _, node := range preset.Nodes {
-		node.ExecArtifact = configPayload.ArtifactPath
+		node.SetExecArtifact(configPayload.ArtifactPath)
 	}
 	// override the default environment
 	preset.Environment = configPayload.Environment

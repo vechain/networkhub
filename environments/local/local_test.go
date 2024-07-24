@@ -128,7 +128,7 @@ func TestLocalInvalidExecArtifact(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	networkCfg.Nodes[0].ExecArtifact = "/some_fake_dir"
+	networkCfg.Nodes[0].SetExecArtifact("/some_fake_dir")
 
 	localEnv := NewLocalEnv()
 	_, err = localEnv.LoadConfig(networkCfg)
@@ -153,7 +153,7 @@ func TestLocal(t *testing.T) {
 	require.NoError(t, err)
 
 	time.Sleep(30 * time.Second)
-	c := client.NewClient("http://" + networkCfg.Nodes[0].APIAddr)
+	c := client.NewClient("http://" + networkCfg.Nodes[0].GetAPIAddr())
 	account, err := c.GetAccount(datagen.RandAccount().Address)
 	require.NoError(t, err)
 

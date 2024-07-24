@@ -14,33 +14,39 @@ import (
 var LocalThreeMasterNodesNetwork = &network.Network{
 	ID:          "threeMaster",
 	Environment: environments.Local,
-	Nodes: []*node.Node{
-		{
-			ID:            "node1",
-			Genesis:       LocalThreeMasterNodesNetworkGenesis,
-			P2PListenPort: 8081,
-			APIAddr:       "0.0.0.0:8181",
-			APICORS:       "*",
-			Type:          node.MasterNode,
-			Key:           "01a4107bfb7d5141ec519e75788c34295741a1eefbfe460320efd2ada944071e", // 0x61fF580B63D3845934610222245C116E013717ec
+	Nodes: []node.Node{
+		&node.NodePreCoefFork{
+			BaseNode: node.BaseNode{
+				ID:            "node1",
+				P2PListenPort: 8081,
+				APIAddr:       "0.0.0.0:8181",
+				APICORS:       "*",
+				Type:          node.MasterNode,
+				Key:           "01a4107bfb7d5141ec519e75788c34295741a1eefbfe460320efd2ada944071e", // 0x61fF580B63D3845934610222245C116E013717ec
+			},
+			Genesis: LocalThreeMasterNodesNetworkGenesis,
 		},
-		{
-			ID:            "node2",
-			Genesis:       LocalThreeMasterNodesNetworkGenesis,
-			P2PListenPort: 8082,
-			APIAddr:       "0.0.0.0:8182",
-			APICORS:       "*",
-			Type:          node.MasterNode,
-			Key:           "7072249b800ddac1d29a3cd06468cc1a917cbcd110dde358a905d03dad51748d", // 0x327931085B4cCbCE0baABb5a5E1C678707C51d90
+		&node.NodePreCoefFork{
+			BaseNode: node.BaseNode{
+				ID:            "node2",
+				P2PListenPort: 8082,
+				APIAddr:       "0.0.0.0:8182",
+				APICORS:       "*",
+				Type:          node.MasterNode,
+				Key:           "7072249b800ddac1d29a3cd06468cc1a917cbcd110dde358a905d03dad51748d", // 0x327931085B4cCbCE0baABb5a5E1C678707C51d90
+			},
+			Genesis: LocalThreeMasterNodesNetworkGenesis,
 		},
-		{
-			ID:            "node3",
-			Genesis:       LocalThreeMasterNodesNetworkGenesis,
-			P2PListenPort: 8083,
-			APIAddr:       "0.0.0.0:8183",
-			APICORS:       "*",
-			Type:          node.MasterNode,
-			Key:           "c55455943bf026dc44fcf189e8765eb0587c94e66029d580bae795386c0b737a", // 0x084E48c8AE79656D7e27368AE5317b5c2D6a7497
+		&node.NodePreCoefFork{
+			BaseNode: node.BaseNode{
+				ID:            "node3",
+				P2PListenPort: 8083,
+				APIAddr:       "0.0.0.0:8183",
+				APICORS:       "*",
+				Type:          node.MasterNode,
+				Key:           "c55455943bf026dc44fcf189e8765eb0587c94e66029d580bae795386c0b737a", // 0x084E48c8AE79656D7e27368AE5317b5c2D6a7497
+			},
+			Genesis: LocalThreeMasterNodesNetworkGenesis,
 		},
 	},
 }
