@@ -76,6 +76,10 @@ func (b *BaseNode) SetExecArtifact(artifact string) {
 	b.ExecArtifact = artifact
 }
 
+func (b *BaseNode) GetHTTPAddr() string {
+	return "http://" + b.APIAddr
+}
+
 func (b *BaseNode) Enode(ipAddr string) (string, error) {
 	privKey, err := crypto.HexToECDSA(b.Key)
 	if err != nil {

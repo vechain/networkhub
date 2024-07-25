@@ -138,7 +138,7 @@ func TestLocalInvalidExecArtifact(t *testing.T) {
 }
 
 func TestLocal(t *testing.T) {
-	t.Skip()
+	//t.Skip()
 	networkCfg, err := network.NewNetwork(
 		network.WithJSON(networkJSON),
 	)
@@ -164,7 +164,35 @@ func TestLocal(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestSixNodeLocal(t *testing.T) {
+func TestThreeNodes(t *testing.T) {
+	//t.Skip()
+	var err error
+	networkCfg := preset.LocalThreeMasterNodesNetwork
+
+	// ensure the artifact path is set
+	for _, node := range networkCfg.Nodes {
+		node.SetExecArtifact("/Users/pedro/go/src/github.com/vechain/thor/bin/thor")
+	}
+	localEnv := NewLocalEnv()
+	_, err = localEnv.LoadConfig(networkCfg)
+	require.NoError(t, err)
+
+	err = localEnv.StartNetwork()
+	require.NoError(t, err)
+
+	time.Sleep(30 * time.Second)
+	c := client.NewClient(networkCfg.Nodes[0].GetHTTPAddr())
+	account, err := c.GetAccount(datagen.RandAccount().Address)
+	require.NoError(t, err)
+
+	fmt.Println(account)
+
+	time.Sleep(time.Minute)
+	err = localEnv.StopNetwork()
+	require.NoError(t, err)
+}
+
+func TestSixNode(t *testing.T) {
 	//t.Skip()
 	sixNodeJson, err := json.Marshal(preset.LocalSixNodesNetwork)
 	require.NoError(t, err)

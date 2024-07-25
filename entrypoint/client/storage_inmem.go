@@ -11,7 +11,9 @@ type Storage struct {
 }
 
 func NewInMemStorage() *Storage {
-	return &Storage{}
+	return &Storage{
+		storage: map[string]*network.Network{},
+	}
 }
 
 func (s *Storage) Store(networkID string, net *network.Network) error {

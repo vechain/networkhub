@@ -1,9 +1,7 @@
 package client
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/vechain/networkhub/environments/docker"
 	"github.com/vechain/networkhub/environments/local"
 	"github.com/vechain/networkhub/hub"
 	"github.com/vechain/networkhub/network"
@@ -19,11 +17,11 @@ type Client struct {
 func New() *Client {
 	envManager := hub.NewNetworkHub()
 	envManager.RegisterEnvironment("local", local.NewLocalEnv)
-	envManager.RegisterEnvironment("docker", docker.NewDockerEnv)
+	//envManager.RegisterEnvironment("docker", docker.NewDockerEnv)
 
 	presets := preset.NewPresetNetworks()
-	presets.Register("threeMasterNodesNetwork", preset.LocalThreeMasterNodesNetwork)
-	presets.Register("sixNodesNetwork", preset.LocalSixNodesNetwork)
+	//presets.Register("threeMasterNodesNetwork", preset.LocalThreeMasterNodesNetwork)
+	//presets.Register("sixNodesNetwork", preset.LocalSixNodesNetwork)
 
 	return &Client{
 		networkHub: envManager,
@@ -38,15 +36,6 @@ func (c *Client) Stop(id string) error {
 
 func (c *Client) Start(id string) error {
 	return c.networkHub.StartNetwork(id)
-}
-
-func (c *Client) Config(config string) (string, error) {
-	var netCfg network.Network
-
-	if err := json.Unmarshal([]byte(config), &netCfg); err != nil {
-		return "", err
-	}
-	return c.config(&netCfg)
 }
 
 func (c *Client) LoadExistingNetworks() error {
@@ -74,10 +63,10 @@ func (c *Client) Preset(presetNetwork string, environment, artifactPath string) 
 	if err != nil {
 		return "", fmt.Errorf("unable to load network preset: %w", err)
 	}
-	return c.config(netCfg)
+	return c.Config(netCfg)
 }
 
-func (c *Client) config(netCfg *network.Network) (string, error) {
+func (c *Client) Config(netCfg *network.Network) (string, error) {
 	networkID, err := c.networkHub.LoadNetworkConfig(netCfg)
 	if err != nil {
 		return "", fmt.Errorf("unable to load config: %w", err)
