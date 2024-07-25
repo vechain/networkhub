@@ -3,7 +3,7 @@ package preset
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/vechain/networkhub/consts"
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
@@ -19,7 +19,7 @@ var LocalThreeMasterNodesNetwork = &network.Network{
 			BaseNode: node.BaseNode{
 				ID:            "node1",
 				P2PListenPort: 8081,
-				APIAddr:       "0.0.0.0:8181",
+				APIAddr:       "127.0.0.1:8181",
 				APICORS:       "*",
 				Type:          node.MasterNode,
 				Key:           "01a4107bfb7d5141ec519e75788c34295741a1eefbfe460320efd2ada944071e", // 0x61fF580B63D3845934610222245C116E013717ec
@@ -30,7 +30,7 @@ var LocalThreeMasterNodesNetwork = &network.Network{
 			BaseNode: node.BaseNode{
 				ID:            "node2",
 				P2PListenPort: 8082,
-				APIAddr:       "0.0.0.0:8182",
+				APIAddr:       "127.0.0.1:8182",
 				APICORS:       "*",
 				Type:          node.MasterNode,
 				Key:           "7072249b800ddac1d29a3cd06468cc1a917cbcd110dde358a905d03dad51748d", // 0x327931085B4cCbCE0baABb5a5E1C678707C51d90
@@ -41,7 +41,7 @@ var LocalThreeMasterNodesNetwork = &network.Network{
 			BaseNode: node.BaseNode{
 				ID:            "node3",
 				P2PListenPort: 8083,
-				APIAddr:       "0.0.0.0:8183",
+				APIAddr:       "127.0.0.1:8183",
 				APICORS:       "*",
 				Type:          node.MasterNode,
 				Key:           "c55455943bf026dc44fcf189e8765eb0587c94e66029d580bae795386c0b737a", // 0x084E48c8AE79656D7e27368AE5317b5c2D6a7497
@@ -60,7 +60,7 @@ var LocalThreeMasterNodesNetworkGenesis = &genesis.CustomGenesis{
 	Accounts: []genesis.Account{
 		{
 			Address: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
 			Energy:  convToHexOrDecimal256(big.NewInt(0)),
 			Code:    "0x6060604052600256",
 			Storage: map[string]thor.Bytes32{
@@ -69,18 +69,18 @@ var LocalThreeMasterNodesNetworkGenesis = &genesis.CustomGenesis{
 		},
 		{
 			Address: thor.MustParseAddress("0x61fF580B63D3845934610222245C116E013717ec"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 		{
 			Address: thor.MustParseAddress("0x327931085B4cCbCE0baABb5a5E1C678707C51d90"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 		{
 			Address: thor.MustParseAddress("0x084E48c8AE79656D7e27368AE5317b5c2D6a7497"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 	},
 	Authority: []genesis.Authority{
@@ -103,7 +103,7 @@ var LocalThreeMasterNodesNetworkGenesis = &genesis.CustomGenesis{
 	Params: genesis.Params{
 		RewardRatio:         convToHexOrDecimal256(big.NewInt(300000000000000000)),
 		BaseGasPrice:        convToHexOrDecimal256(big.NewInt(1000000000000000)),
-		ProposerEndorsement: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+		ProposerEndorsement: convToHexOrDecimal256(consts.LargeBigValue),
 		ExecutorAddress:     &localThreeMasterEndorser,
 	},
 	Executor: genesis.Executor{

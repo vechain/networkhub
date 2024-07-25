@@ -1,9 +1,9 @@
 package preset
 
 import (
+	"github.com/vechain/networkhub/consts"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
@@ -19,7 +19,7 @@ var LocalSixNodesNetwork = &network.Network{
 			BaseNode: node.BaseNode{
 				ID:            "node1",
 				P2PListenPort: 8081,
-				APIAddr:       "0.0.0.0:8181",
+				APIAddr:       "127.0.0.1:8181",
 				APICORS:       "*",
 				Type:          node.MasterNode,
 				Verbosity:     4,
@@ -31,7 +31,7 @@ var LocalSixNodesNetwork = &network.Network{
 			BaseNode: node.BaseNode{
 				ID:            "node2",
 				P2PListenPort: 8082,
-				APIAddr:       "0.0.0.0:8182",
+				APIAddr:       "127.0.0.1:8182",
 				APICORS:       "*",
 				Type:          node.MasterNode,
 				Verbosity:     4,
@@ -43,7 +43,7 @@ var LocalSixNodesNetwork = &network.Network{
 			BaseNode: node.BaseNode{
 				ID:            "node3",
 				P2PListenPort: 8083,
-				APIAddr:       "0.0.0.0:8183",
+				APIAddr:       "127.0.0.1:8183",
 				APICORS:       "*",
 				Type:          node.RegularNode,
 				Key:           "1b310ea04afd6d14a8f142158873fc70bfd4ba12a19138cc5b309fce7c77105e", // 0x1b1c0055065b3ADee4B9a9e8297142Ba2cD34EfE
@@ -54,7 +54,7 @@ var LocalSixNodesNetwork = &network.Network{
 			BaseNode: node.BaseNode{
 				ID:            "node4",
 				P2PListenPort: 8084,
-				APIAddr:       "0.0.0.0:8184",
+				APIAddr:       "127.0.0.1:8184",
 				APICORS:       "*",
 				Type:          node.MasterNode,
 				Verbosity:     4,
@@ -66,7 +66,7 @@ var LocalSixNodesNetwork = &network.Network{
 			BaseNode: node.BaseNode{
 				ID:            "node5",
 				P2PListenPort: 8085,
-				APIAddr:       "0.0.0.0:8185",
+				APIAddr:       "127.0.0.1:8185",
 				APICORS:       "*",
 				Type:          node.MasterNode,
 				Verbosity:     4,
@@ -78,7 +78,7 @@ var LocalSixNodesNetwork = &network.Network{
 			BaseNode: node.BaseNode{
 				ID:            "node6",
 				P2PListenPort: 8086,
-				APIAddr:       "0.0.0.0:8186",
+				APIAddr:       "127.0.0.1:8186",
 				APICORS:       "*",
 				Type:          node.RegularNode,
 				Key:           "92ad65923d6782a43e6a1be01a8e52bce701967d78937e73da746a58f293ba30", // 0x9C2871C411CCe579B987E9b932C484dA8b901075
@@ -95,7 +95,7 @@ var localSixNodesNetworkGenesis = &genesis.CustomGenesis{
 	Accounts: []genesis.Account{
 		{
 			Address: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
 			Energy:  convToHexOrDecimal256(big.NewInt(0)),
 			Code:    "0x6060604052600256",
 			Storage: map[string]thor.Bytes32{
@@ -104,78 +104,78 @@ var localSixNodesNetworkGenesis = &genesis.CustomGenesis{
 		},
 		{
 			Address: thor.MustParseAddress("0x5F90f56c7b87E3d1acf9437f0E43E4d687AcEB7e"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 		{
 			Address: thor.MustParseAddress("0x5c29518F6a6124a2BeE89253347c8295f604710A"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 		{
 			Address: thor.MustParseAddress("0x1b1c0055065b3ADee4B9a9e8297142Ba2cD34EfE"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 		{
 			Address: thor.MustParseAddress("0x042306e116Dc301ecd7b83a04F4c8277Fbe41b6c"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 		{
 			Address: thor.MustParseAddress("0x0aeC31606e217895696771961de416Efa185Be66"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 		{
 			Address: thor.MustParseAddress("0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 		{
 			Address: thor.MustParseAddress("0x435933c8064b4Ae76bE665428e0307eF2cCFBD68"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 
 		{
 			Address: thor.MustParseAddress("0x0F872421Dc479F3c11eDd89512731814D0598dB5"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 		{
 			Address: thor.MustParseAddress("0xF370940aBDBd2583bC80bfc19d19bc216C88Ccf0"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 		{
 			Address: thor.MustParseAddress("0x99602e4Bbc0503b8ff4432bB1857F916c3653B85"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 		{
 			Address: thor.MustParseAddress("0x61E7d0c2B25706bE3485980F39A3a994A8207aCf"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 		{
 			Address: thor.MustParseAddress("0x361277D1b27504F36a3b33d3a52d1f8270331b8C"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		}, {
 			Address: thor.MustParseAddress("0xD7f75A0A1287ab2916848909C8531a0eA9412800"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 		{
 			Address: thor.MustParseAddress("0xAbEf6032B9176C186F6BF984f548bdA53349f70a"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 		{
 			Address: thor.MustParseAddress("0x865306084235Bf804c8Bba8a8d56890940ca8F0b"),
-			Balance: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
-			Energy:  convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+			Balance: convToHexOrDecimal256(consts.LargeBigValue),
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 	},
 	Authority: []genesis.Authority{
@@ -203,7 +203,7 @@ var localSixNodesNetworkGenesis = &genesis.CustomGenesis{
 	Params: genesis.Params{
 		RewardRatio:         convToHexOrDecimal256(big.NewInt(300000000000000000)),
 		BaseGasPrice:        convToHexOrDecimal256(big.NewInt(1000000000000000)),
-		ProposerEndorsement: convToHexOrDecimal256(new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))),
+		ProposerEndorsement: convToHexOrDecimal256(consts.LargeBigValue),
 		ExecutorAddress:     &localThreeMasterEndorser,
 	},
 	Executor: genesis.Executor{

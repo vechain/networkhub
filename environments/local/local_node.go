@@ -94,9 +94,9 @@ func (n *Node) Start() error {
 	}
 
 	fmt.Println(cmd)
-	if n.nodeCfg.GetID() == "node1" {
-		return nil
-	}
+	//if n.nodeCfg.GetID() == "node1" {
+	//	return nil
+	//}
 	// Start the command and check for errors
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("failed to start thor command: %w", err)

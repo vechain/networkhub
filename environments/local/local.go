@@ -15,14 +15,6 @@ type Local struct {
 	id         string
 }
 
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return err == nil
-}
-
 func NewLocalEnv() environments.Actions {
 	return &Local{
 		localNodes: map[string]*Node{},
@@ -46,7 +38,7 @@ func (l *Local) LoadConfig(cfg *network.Network) (string, error) {
 
 		// check if the exec artifact path exists
 		if !fileExists(n.GetExecArtifact()) {
-			return "", fmt.Errorf("file does not exist at path: %s", n.GetExecArtifact())
+			return "", fmt.Errorf("exec does not exist at path: %s", n.GetExecArtifact())
 		}
 	}
 
@@ -89,4 +81,12 @@ func (l *Local) StopNetwork() error {
 func (l *Local) Info() error {
 	//TODO implement me
 	panic("implement me")
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return err == nil
 }

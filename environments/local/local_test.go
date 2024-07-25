@@ -165,7 +165,7 @@ func TestLocal(t *testing.T) {
 }
 
 func TestSixNodeLocal(t *testing.T) {
-	t.Skip()
+	//t.Skip()
 	sixNodeJson, err := json.Marshal(preset.LocalSixNodesNetwork)
 	require.NoError(t, err)
 
@@ -174,6 +174,11 @@ func TestSixNodeLocal(t *testing.T) {
 	)
 	require.NoError(t, err)
 
+	// ensure the artifact path is set
+	for _, node := range networkCfg.Nodes {
+		node.SetExecArtifact("/Users/pedro/go/src/github.com/vechain/thor/bin/thor")
+	}
+
 	localEnv := NewLocalEnv()
 	_, err = localEnv.LoadConfig(networkCfg)
 	require.NoError(t, err)
@@ -181,7 +186,14 @@ func TestSixNodeLocal(t *testing.T) {
 	err = localEnv.StartNetwork()
 	require.NoError(t, err)
 
-	time.Sleep(5 * time.Minute)
+	time.Sleep(30 * time.Second) // todo change this to a polling approach
+	for _, node := range networkCfg.Nodes {
+		c := client.NewClient("http://" + node.GetAPIAddr())
+		peers, err := c.GetPeers()
+		require.NoError(t, err)
+
+		require.GreaterOrEqual(t, len(peers), 0)
+	}
 	err = localEnv.StopNetwork()
 	require.NoError(t, err)
 }
