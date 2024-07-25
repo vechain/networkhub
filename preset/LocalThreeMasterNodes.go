@@ -61,11 +61,7 @@ var LocalThreeMasterNodesNetworkGenesis = &genesis.CustomGenesis{
 		{
 			Address: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
 			Balance: convToHexOrDecimal256(consts.LargeBigValue),
-			Energy:  convToHexOrDecimal256(big.NewInt(0)),
-			Code:    "0x6060604052600256",
-			Storage: map[string]thor.Bytes32{
-				"0x0000000000000000000000000000000000000000000000000000000000000001": thor.MustParseBytes32("0x0000000000000000000000000000000000000000000000000000000000000002"),
-			},
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 		{
 			Address: thor.MustParseAddress("0x61fF580B63D3845934610222245C116E013717ec"),
