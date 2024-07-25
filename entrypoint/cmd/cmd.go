@@ -15,6 +15,14 @@ type Cmd struct {
 	storage    *Storage
 }
 
+func New(networkHub *hub.NetworkHub, presets *preset.Networks, storagePath string) *Cmd {
+	return &Cmd{
+		networkHub: networkHub,
+		presets:    presets,
+		storage:    NewStorage(storagePath),
+	}
+}
+
 func (c *Cmd) Stop(id string) error {
 	return c.networkHub.StopNetwork(id)
 }
@@ -58,14 +66,6 @@ func (c *Cmd) Preset(presetNetwork string, environment, artifactPath string) (st
 		return "", fmt.Errorf("unable to load network preset: %w", err)
 	}
 	return c.config(netCfg)
-}
-
-func New(networkHub *hub.NetworkHub, presets *preset.Networks, storagePath string) *Cmd {
-	return &Cmd{
-		networkHub: networkHub,
-		presets:    presets,
-		storage:    NewStorage(storagePath),
-	}
 }
 
 func (c *Cmd) config(netCfg *network.Network) (string, error) {
