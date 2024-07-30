@@ -38,15 +38,15 @@ func (d *Docker) LoadConfig(cfg *network.Network) (string, error) {
 
 	for i, node := range cfg.Nodes {
 		// use preset dirs if not defined
-		if node.ConfigDir == "" {
-			node.ConfigDir = "/home/thor"
+		if node.GetConfigDir() == "" {
+			node.SetConfigDir("/home/thor")
 		}
-		if node.DataDir == "" {
-			node.DataDir = "/home/thor"
+		if node.GetDataDir() == "" {
+			node.SetDataDir("/home/thor")
 		}
 
 		// ensure API ports are exposed to the localhost
-		split := strings.Split(node.APIAddr, ":")
+		split := strings.Split(node.GetAPIAddr(), ":")
 		if len(split) != 2 {
 			return "", fmt.Errorf("unable to parse API Addr")
 		}
@@ -56,7 +56,7 @@ func (d *Docker) LoadConfig(cfg *network.Network) (string, error) {
 			return "", err
 		}
 
-		d.exposedPorts[node.ID] = &exposedPort{
+		d.exposedPorts[node.GetID()] = &exposedPort{
 			hostPort:      fmt.Sprintf("%d", exposedAPIPort+i),
 			containerPort: split[1],
 		}
@@ -73,7 +73,7 @@ func (d *Docker) StartNetwork() error {
 
 	for _, nodeCfg := range d.networkCfg.Nodes {
 		// calculate the node ip address
-		nextIpAddr, err := d.ipManager.NextIP(nodeCfg.ID)
+		nextIpAddr, err := d.ipManager.NextIP(nodeCfg.GetID())
 		if err != nil {
 			return err
 		}
@@ -81,22 +81,22 @@ func (d *Docker) StartNetwork() error {
 		// speed up p2p bootstrap
 		var enodes []string
 		for _, node := range d.networkCfg.Nodes {
-			if node.ID == nodeCfg.ID {
+			if node.GetID() == nodeCfg.GetID() {
 				break
 			}
-			enode, err := node.Enode(d.ipManager.GetNodeIP(node.ID))
+			enode, err := node.Enode(d.ipManager.GetNodeIP(node.GetID()))
 			if err != nil {
 				return err
 			}
 			enodes = append(enodes, enode)
 		}
 
-		dockerNode := NewDockerNode(nodeCfg, enodes, d.networkID, d.exposedPorts[nodeCfg.ID], nextIpAddr)
+		dockerNode := NewDockerNode(nodeCfg, enodes, d.networkID, d.exposedPorts[nodeCfg.GetID()], nextIpAddr)
 		if err := dockerNode.Start(); err != nil {
 			return fmt.Errorf("unable to start node - %w", err)
 		}
 
-		d.dockerNodes[nodeCfg.ID] = dockerNode
+		d.dockerNodes[nodeCfg.GetID()] = dockerNode
 	}
 
 	return nil

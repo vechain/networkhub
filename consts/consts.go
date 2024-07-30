@@ -1,8 +1,9 @@
 package consts
 
 import (
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"math/big"
+
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 var (

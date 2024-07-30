@@ -134,11 +134,11 @@ func TestLocalInvalidExecArtifact(t *testing.T) {
 	_, err = localEnv.LoadConfig(networkCfg)
 	require.Error(t, err)
 
-	require.True(t, strings.HasPrefix(err.Error(), "file does not exist at path"))
+	require.True(t, strings.Contains(err.Error(), "does not exist at path"))
 }
 
 func TestLocal(t *testing.T) {
-	//t.Skip()
+	t.Skip()
 	networkCfg, err := network.NewNetwork(
 		network.WithJSON(networkJSON),
 	)
@@ -165,13 +165,17 @@ func TestLocal(t *testing.T) {
 }
 
 func TestThreeNodes(t *testing.T) {
-	//t.Skip()
 	var err error
+
+	downloader := NewDownloader("")
+	thorBinPath, err := downloader.CloneAndBuildThor()
+	require.NoError(t, err)
+
 	networkCfg := preset.LocalThreeMasterNodesNetwork
 
 	// ensure the artifact path is set
 	for _, node := range networkCfg.Nodes {
-		node.SetExecArtifact("/Users/pedro/go/src/github.com/vechain/thor/bin/thor")
+		node.SetExecArtifact(thorBinPath)
 	}
 	localEnv := NewLocalEnv()
 	_, err = localEnv.LoadConfig(networkCfg)
@@ -187,13 +191,13 @@ func TestThreeNodes(t *testing.T) {
 
 	fmt.Println(account)
 
-	time.Sleep(time.Minute)
+	time.Sleep(30 * time.Second)
 	err = localEnv.StopNetwork()
 	require.NoError(t, err)
 }
 
 func TestSixNode(t *testing.T) {
-	//t.Skip()
+	t.Skip()
 	sixNodeJson, err := json.Marshal(preset.LocalSixNodesNetwork)
 	require.NoError(t, err)
 

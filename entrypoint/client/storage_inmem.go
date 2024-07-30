@@ -1,12 +1,12 @@
 package client
 
 import (
-	"github.com/vechain/networkhub/network"
 	"log/slog"
+
+	"github.com/vechain/networkhub/network"
 )
 
 type Storage struct {
-	path    string
 	storage map[string]*network.Network
 }
 

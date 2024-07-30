@@ -15,7 +15,7 @@ import (
 )
 
 // NewDockerNode initializes a new DockerNode
-func NewDockerNode(cfg *node.Node, enodes []string, networkID string, exposedPorts *exposedPort, ipAddr string) *Node {
+func NewDockerNode(cfg node.Node, enodes []string, networkID string, exposedPorts *exposedPort, ipAddr string) *Node {
 	return &Node{
 		cfg:          cfg,
 		enodes:       enodes,
@@ -27,7 +27,7 @@ func NewDockerNode(cfg *node.Node, enodes []string, networkID string, exposedPor
 
 // Node represents a Docker container node
 type Node struct {
-	cfg          *node.Node
+	cfg          node.Node
 	enodes       []string
 	id           string
 	networkID    string
@@ -44,11 +44,11 @@ func (n *Node) Start() error {
 	}
 
 	// Check if the Docker image is available locally
-	_, _, err = cli.ImageInspectWithRaw(ctx, n.cfg.ExecArtifact)
+	_, _, err = cli.ImageInspectWithRaw(ctx, n.cfg.GetExecArtifact())
 	if err != nil {
 		if client.IsErrNotFound(err) {
 			// Pull the Docker image
-			_, err = cli.ImagePull(ctx, n.cfg.ExecArtifact, image.PullOptions{})
+			_, err = cli.ImagePull(ctx, n.cfg.GetExecArtifact(), image.PullOptions{})
 			if err != nil {
 				return fmt.Errorf("failed to pull Docker image: %w", err)
 			}
@@ -78,15 +78,15 @@ func (n *Node) Start() error {
 			"thor " +
 			"--network genesis.json " +
 			"--nat none " +
-			fmt.Sprintf("--config-dir='%s' ", n.cfg.ConfigDir) +
-			fmt.Sprintf("--api-addr='%s' ", n.cfg.APIAddr) +
-			fmt.Sprintf("--api-cors='%s' ", n.cfg.APICORS) +
-			fmt.Sprintf("--p2p-port=%d ", n.cfg.P2PListenPort) +
+			fmt.Sprintf("--config-dir='%s' ", n.cfg.GetConfigDir()) +
+			fmt.Sprintf("--api-addr='%s' ", n.cfg.GetAPIAddr()) +
+			fmt.Sprintf("--api-cors='%s' ", n.cfg.GetAPICORS()) +
+			fmt.Sprintf("--p2p-port=%d ", n.cfg.GetP2PListenPort()) +
 			fmt.Sprintf("--bootnode=%s", enodeString),
 	}
 
 	//serialize genesis
-	genesisBytes, err := json.Marshal(n.cfg.Genesis)
+	genesisBytes, err := json.Marshal(n.cfg.GetGenesis())
 	if err != nil {
 		return fmt.Errorf("unable to marshal genesis - %w", err)
 	}
@@ -104,12 +104,12 @@ func (n *Node) Start() error {
 
 	// Construct Docker container configuration
 	config := &container.Config{
-		Image:      n.cfg.ExecArtifact,
+		Image:      n.cfg.GetExecArtifact(),
 		Cmd:        cmd,
 		Entrypoint: []string{},
 		Env: []string{
 			fmt.Sprintf("GENESIS=%s", string(genesisBytes)),
-			fmt.Sprintf("PRIVATEKEY=%s", n.cfg.Key),
+			fmt.Sprintf("PRIVATEKEY=%s", n.cfg.GetKey()),
 		},
 		ExposedPorts: exposedPorts,
 	}
@@ -130,7 +130,7 @@ func (n *Node) Start() error {
 	}
 
 	// Create the Docker container
-	resp, err := cli.ContainerCreate(ctx, config, hostConfig, networkConfig, nil, n.cfg.ID)
+	resp, err := cli.ContainerCreate(ctx, config, hostConfig, networkConfig, nil, n.cfg.GetID())
 	if err != nil {
 		return fmt.Errorf("failed to create Docker container: %w", err)
 	}
