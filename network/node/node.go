@@ -20,4 +20,6 @@ type Node interface {
 	GetAPICORS() string
 	GetP2PListenPort() int
 	GetVerbosity() int
+	GetHTTPAddr() string
+	GetFakeExecution() bool
 }

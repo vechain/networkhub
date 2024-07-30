@@ -1,17 +1,19 @@
 package client
 
 import (
-	"github.com/vechain/networkhub/network"
 	"log/slog"
+
+	"github.com/vechain/networkhub/network"
 )
 
 type Storage struct {
-	path    string
 	storage map[string]*network.Network
 }
 
 func NewInMemStorage() *Storage {
-	return &Storage{}
+	return &Storage{
+		storage: map[string]*network.Network{},
+	}
 }
 
 func (s *Storage) Store(networkID string, net *network.Network) error {

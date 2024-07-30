@@ -2,6 +2,8 @@ package node
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/p2p/discover"
 )
@@ -18,6 +20,7 @@ type BaseNode struct {
 	Verbosity     int    `json:"verbosity"`
 	EnodeData     string `json:"enode"` // todo: this should be a generated method
 	Type          string `json:"type"`
+	FakeExecution bool   `json:"fakeExecution"`
 }
 
 func (b *BaseNode) GetVerbosity() int {
@@ -74,6 +77,18 @@ func (b *BaseNode) GetExecArtifact() string {
 
 func (b *BaseNode) SetExecArtifact(artifact string) {
 	b.ExecArtifact = artifact
+}
+
+func (b *BaseNode) GetHTTPAddr() string {
+	//todo make this smarter
+	if strings.Contains(b.APIAddr, "0.0.0.0") {
+		return "http://" + strings.ReplaceAll(b.APIAddr, "0.0.0.0", "127.0.0.1")
+	}
+	return "http://" + b.APIAddr
+}
+
+func (b *BaseNode) GetFakeExecution() bool {
+	return b.FakeExecution
 }
 
 func (b *BaseNode) Enode(ipAddr string) (string, error) {

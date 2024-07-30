@@ -7,7 +7,8 @@ import (
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
-	"github.com/vechain/thor/v2/genesis"
+	"github.com/vechain/networkhub/network/node/genesis"
+	thorgenesis "github.com/vechain/thor/v2/genesis"
 	"github.com/vechain/thor/v2/thor"
 )
 
@@ -53,19 +54,15 @@ var LocalThreeMasterNodesNetwork = &network.Network{
 
 var localThreeMasterEndorser = thor.MustParseAddress("0x0000000000000000000000004578656375746f72")
 
-var LocalThreeMasterNodesNetworkGenesis = &genesis.CustomGenesis{
+var LocalThreeMasterNodesNetworkGenesis = &genesis.PreCoefForkGenesis{
 	LaunchTime: 1703180212,
 	GasLimit:   10000000,
 	ExtraData:  "",
-	Accounts: []genesis.Account{
+	Accounts: []thorgenesis.Account{
 		{
 			Address: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
 			Balance: convToHexOrDecimal256(consts.LargeBigValue),
-			Energy:  convToHexOrDecimal256(big.NewInt(0)),
-			Code:    "0x6060604052600256",
-			Storage: map[string]thor.Bytes32{
-				"0x0000000000000000000000000000000000000000000000000000000000000001": thor.MustParseBytes32("0x0000000000000000000000000000000000000000000000000000000000000002"),
-			},
+			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 		{
 			Address: thor.MustParseAddress("0x61fF580B63D3845934610222245C116E013717ec"),
@@ -83,7 +80,7 @@ var LocalThreeMasterNodesNetworkGenesis = &genesis.CustomGenesis{
 			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
 	},
-	Authority: []genesis.Authority{
+	Authority: []thorgenesis.Authority{
 		{
 			MasterAddress:   thor.MustParseAddress("0x61fF580B63D3845934610222245C116E013717ec"),
 			EndorsorAddress: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
@@ -100,21 +97,21 @@ var LocalThreeMasterNodesNetworkGenesis = &genesis.CustomGenesis{
 			Identity:        thor.MustParseBytes32("0x0000000000000068747470733a2f2f617070732e7665636861696e2e6f72672f"),
 		},
 	},
-	Params: genesis.Params{
+	Params: thorgenesis.Params{
 		RewardRatio:         convToHexOrDecimal256(big.NewInt(300000000000000000)),
 		BaseGasPrice:        convToHexOrDecimal256(big.NewInt(1000000000000000)),
 		ProposerEndorsement: convToHexOrDecimal256(consts.LargeBigValue),
 		ExecutorAddress:     &localThreeMasterEndorser,
 	},
-	Executor: genesis.Executor{
-		Approvers: []genesis.Approver{
+	Executor: thorgenesis.Executor{
+		Approvers: []thorgenesis.Approver{
 			{
 				Address:  thor.MustParseAddress("0x199b836d8a57365baccd4f371c1fabb7be77d389"),
 				Identity: thor.MustParseBytes32("0x00000000000067656e6572616c20707572706f736520626c6f636b636861696e"),
 			},
 		},
 	},
-	ForkConfig: &thor.ForkConfig{
+	ForkConfig: &genesis.PreCoefForkConfig{
 		VIP191:    0,
 		ETH_CONST: 0,
 		BLOCKLIST: 0,
