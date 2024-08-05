@@ -1,4 +1,4 @@
-name: Unit Tests
+name: Build cmd
 
 on:
   # Should only be used by other workflows
@@ -16,6 +16,6 @@ jobs:
         with:
           go-version: 1.22.x
 
-      - name: Make Test
-        id: unit-test
-        run: go test ./... -count=1
+      - name: Build cmd
+        id: build-cmd
+        run: go build cmd
