@@ -11,6 +11,7 @@ import (
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
 
+	dockertypes "github.com/docker/docker/api/types"
 	dockernetwork "github.com/docker/docker/api/types/network"
 )
 
@@ -126,7 +127,7 @@ func (d *Docker) checkOrCreateNetwork(networkName, subnet string) error {
 	defer cli.Close()
 
 	// List existing networks
-	networks, err := cli.NetworkList(context.Background(), dockernetwork.ListOptions{})
+	networks, err := cli.NetworkList(context.Background(), dockertypes.NetworkListOptions{})
 	if err != nil {
 		return fmt.Errorf("could not list Docker networks: %v", err)
 	}
@@ -145,7 +146,7 @@ func (d *Docker) checkOrCreateNetwork(networkName, subnet string) error {
 
 	// Network does not exist, create it
 	// Define the network configuration
-	networkCreate := dockernetwork.CreateOptions{
+	networkCreate := dockertypes.NetworkCreate{
 		Driver: "bridge",
 		IPAM: &dockernetwork.IPAM{
 			Driver: "default",
