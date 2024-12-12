@@ -133,11 +133,38 @@ Below are some example `curl` requests to interact with the networkHub via its H
   Network Stopped
   ```
 
+## Thorbuilder Package
+The `thorbuilder` package is a key component of the networkHub framework. It simplifies building the Thor binary from a specified branch, ensuring that developers can easily work with customized or updated versions of the Thor client.
 
+### Features:
+- **Download Thor Source**: Fetches the Thor source code from the specified branch.
+- **Build Thor Binary**: Compiles the source code into a working binary.
 
-## Project Structure
-- **Entrypoints**: Interface to interact with the framework. Currently implemented as an HTTP API server.
-- **Actions**: Domain-specific language (DSL) that allows users to configure, start, stop, and request information on networks.
-- **Environments**: Interface for running networks in different environments, with the Local environment currently implemented.
+### Example Usage:
 
+#### Building the Thor Binary:
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+	"github.com/vechain/networkhub/thorbuilder"
+)
+
+func main() {
+	branch := "master"
+	builder := thorbuilder.New(branch)
+
+	if err := builder.Download(); err != nil {
+		log.Fatalf("Failed to download source: %v", err)
+	}
+
+	thorBinaryPath, err := builder.Build()
+	if err != nil {
+		log.Fatalf("Failed to build binary: %v", err)
+	}
+
+	fmt.Printf("Thor binary built successfully at: %s\n", thorBinaryPath)
+}
 ```
