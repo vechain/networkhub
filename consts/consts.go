@@ -7,5 +7,5 @@ import (
 )
 
 var (
-	LargeBigValue = new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
+	LargeBigValue = new(big.Int).SetBytes(hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
 )
