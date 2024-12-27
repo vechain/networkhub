@@ -3,6 +3,7 @@ package local
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/vechain/networkhub/thorbuilder"
 	"strings"
 	"testing"
 	"time"
@@ -167,11 +168,12 @@ func TestLocal(t *testing.T) {
 func TestThreeNodes(t *testing.T) {
 	var err error
 
-	downloader := NewDownloader("")
-	thorBinPath, err := downloader.CloneAndBuildThor()
+	thorBuilder := thorbuilder.New("master", true)
+	require.NoError(t, thorBuilder.Download())
+	thorBinPath, err := thorBuilder.Build()
 	require.NoError(t, err)
 
-	networkCfg := preset.LocalThreeMasterNodesNetwork
+	networkCfg := preset.LocalThreeMasterNodesNetwork()
 
 	// ensure the artifact path is set
 	for _, node := range networkCfg.Nodes {
@@ -197,8 +199,7 @@ func TestThreeNodes(t *testing.T) {
 }
 
 func TestSixNode(t *testing.T) {
-	t.Skip()
-	sixNodeJson, err := json.Marshal(preset.LocalSixNodesNetwork)
+	sixNodeJson, err := json.Marshal(preset.LocalSixNodesNetwork())
 	require.NoError(t, err)
 
 	networkCfg, err := network.NewNetwork(
@@ -206,9 +207,14 @@ func TestSixNode(t *testing.T) {
 	)
 	require.NoError(t, err)
 
+	thorBuilder := thorbuilder.New("master", true)
+	require.NoError(t, thorBuilder.Download())
+	thorBinPath, err := thorBuilder.Build()
+	require.NoError(t, err)
+
 	// ensure the artifact path is set
 	for _, node := range networkCfg.Nodes {
-		node.SetExecArtifact("/Users/pedro/go/src/github.com/vechain/thor/bin/thor")
+		node.SetExecArtifact(thorBinPath)
 	}
 
 	localEnv := NewLocalEnv()

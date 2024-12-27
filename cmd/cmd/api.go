@@ -22,8 +22,8 @@ var apiCmd = &cobra.Command{
 		envManager.RegisterEnvironment("docker", docker.NewDockerEnv)
 
 		presets := preset.NewPresetNetworks()
-		presets.Register("threeMasterNodesNetwork", preset.LocalThreeMasterNodesNetwork)
-		presets.Register("sixNodesNetwork", preset.LocalSixNodesNetwork)
+		presets.Register("threeMasterNodesNetwork", preset.LocalThreeMasterNodesNetwork())
+		presets.Register("sixNodesNetwork", preset.LocalSixNodesNetwork())
 
 		httpAPI := api.New(envManager, presets)
 

@@ -2,6 +2,7 @@ package node
 
 import (
 	"fmt"
+	"github.com/vechain/networkhub/network/node/genesis"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/crypto"
@@ -9,18 +10,19 @@ import (
 )
 
 type BaseNode struct {
-	ID            string `json:"id"` //TODO this is a mandatory field
-	Key           string `json:"key"`
-	APIAddr       string `json:"apiAddr"`
-	APICORS       string `json:"apiCORS"`
-	ConfigDir     string `json:"configDir,omitempty"`
-	DataDir       string `json:"dataDir,omitempty"`
-	ExecArtifact  string `json:"execArtifact"` // used to determine the executing version of the node ( path, dockerImage, etc)
-	P2PListenPort int    `json:"p2pListenPort"`
-	Verbosity     int    `json:"verbosity"`
-	EnodeData     string `json:"enode"` // todo: this should be a generated method
-	Type          string `json:"type"`
-	FakeExecution bool   `json:"fakeExecution"`
+	ID            string                 `json:"id"` //TODO this is a mandatory field
+	Key           string                 `json:"key"`
+	APIAddr       string                 `json:"apiAddr"`
+	APICORS       string                 `json:"apiCORS"`
+	ConfigDir     string                 `json:"configDir,omitempty"`
+	DataDir       string                 `json:"dataDir,omitempty"`
+	ExecArtifact  string                 `json:"execArtifact"` // used to determine the executing version of the node ( path, dockerImage, etc)
+	P2PListenPort int                    `json:"p2pListenPort"`
+	Verbosity     int                    `json:"verbosity"`
+	EnodeData     string                 `json:"enode"` // todo: this should be a generated method
+	Type          string                 `json:"type"`
+	FakeExecution bool                   `json:"fakeExecution"`
+	Genesis       *genesis.CustomGenesis `json:"genesis"`
 }
 
 func (b *BaseNode) GetVerbosity() int {
@@ -37,10 +39,6 @@ func (b *BaseNode) GetAPIAddr() string {
 
 func (b *BaseNode) GetAPICORS() string {
 	return b.APICORS
-}
-
-func (b *BaseNode) GetGenesis() any {
-	return b.GetExecArtifact()
 }
 
 func (b *BaseNode) GetKey() string {
@@ -98,4 +96,8 @@ func (b *BaseNode) Enode(ipAddr string) (string, error) {
 	}
 
 	return fmt.Sprintf("enode://%x@%s:%v", discover.PubkeyID(&privKey.PublicKey).Bytes(), ipAddr, b.P2PListenPort), nil
+}
+
+func (b *BaseNode) GetGenesis() *genesis.CustomGenesis {
+	return b.Genesis
 }

@@ -23,8 +23,8 @@ func setup() *cmdentrypoint.Cmd {
 	envManager.RegisterEnvironment("docker", docker.NewDockerEnv)
 
 	presets := preset.NewPresetNetworks()
-	presets.Register("threeMasterNodesNetwork", preset.LocalThreeMasterNodesNetwork)
-	presets.Register("sixNodesNetwork", preset.LocalSixNodesNetwork)
+	presets.Register("threeMasterNodesNetwork", preset.LocalThreeMasterNodesNetwork())
+	presets.Register("sixNodesNetwork", preset.LocalSixNodesNetwork())
 
 	execDir, err := os.Getwd() // TODO might want to make this configurable in the future ?
 	if err != nil {
