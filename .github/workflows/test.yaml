@@ -16,6 +16,14 @@ jobs:
         with:
           go-version: 1.22.x
 
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y make git build-essential    
+
+      - name: Pull Docker Image
+        run: docker pull vechain/thor:latest
+        
       - name: Make Test
         id: unit-test
         run: go test ./... -count=1

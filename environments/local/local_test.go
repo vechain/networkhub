@@ -3,7 +3,6 @@ package local
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/vechain/networkhub/thorbuilder"
 	"log/slog"
 	"strings"
 	"testing"
@@ -12,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/preset"
+	"github.com/vechain/networkhub/thorbuilder"
 	"github.com/vechain/networkhub/utils/client"
 	"github.com/vechain/networkhub/utils/datagen"
 )

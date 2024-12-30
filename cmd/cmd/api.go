@@ -28,7 +28,7 @@ var apiCmd = &cobra.Command{
 		httpAPI := api.New(envManager, presets)
 
 		if err := httpAPI.Start(); err != nil {
-			slog.Error("Shutting down.. Unexpected error in api - %w", err)
+			slog.Error("Shutting down.. Unexpected error in api", "err", err)
 			return
 		}
 		slog.Info("Shutting down..")

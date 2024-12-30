@@ -50,9 +50,7 @@ func TestBuilder(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, filepath.Join(builder.downloadPath, "bin", "thor"), thorBinaryPath)
 	})
-}
 
-func TestErrorHandling(t *testing.T) {
 	t.Run("Invalid Branch", func(t *testing.T) {
 		branch := "invalid-branch"
 		builder := New(branch, false)

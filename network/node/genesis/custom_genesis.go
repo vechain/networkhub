@@ -2,6 +2,7 @@ package genesis
 
 import (
 	"fmt"
+
 	"github.com/vechain/thor/v2/genesis"
 	"github.com/vechain/thor/v2/thor"
 )

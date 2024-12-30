@@ -2,11 +2,11 @@ package node
 
 import (
 	"fmt"
-	"github.com/vechain/networkhub/network/node/genesis"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/p2p/discover"
+	"github.com/vechain/networkhub/network/node/genesis"
 )
 
 type BaseNode struct {

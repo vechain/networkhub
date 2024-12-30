@@ -49,8 +49,7 @@ func UnmarshalNode(data []byte) (node.Node, error) {
 		return nil, err
 	}
 
-	var nodeType node.Node
-	nodeType = &node.BaseNode{}
+	nodeType := &node.BaseNode{}
 	if genesisData, ok := raw["genesis"].(map[string]interface{}); ok {
 		if forkConfig, ok := genesisData["forkConfig"].(map[string]interface{}); ok {
 			// Handle AdditionalFields

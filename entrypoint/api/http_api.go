@@ -33,7 +33,7 @@ func (s *Server) Start() error {
 	slog.Info("Server started on :8080")
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
-		slog.Error("Error starting server:", err)
+		slog.Error("Error starting server", "err", err)
 	}
 	return nil
 }

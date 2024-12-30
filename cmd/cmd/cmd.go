@@ -90,7 +90,7 @@ var configureCmd = &cobra.Command{
 		// Read from the specified file
 		data, err := os.ReadFile(args[0])
 		if err != nil {
-			slog.Error("Error reading config file: %v\n", err)
+			slog.Error("Error reading config file", "err", err)
 			os.Exit(1)
 		}
 
