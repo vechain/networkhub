@@ -1,6 +1,7 @@
 package thorbuilder
 
 import (
+	"bytes"
 	"fmt"
 	"log/slog"
 	"os"
@@ -56,6 +57,10 @@ func (b *Builder) Download() error {
 
 // Build runs the make command in the downloadPath and returns the path to the thor binary.
 func (b *Builder) Build() (string, error) {
+	if _, err := os.Stat(b.downloadPath); os.IsNotExist(err) {
+		return "", fmt.Errorf("download directory does not exist: %s", b.downloadPath)
+	}
+
 	if b.reusable {
 		// Check if the binary exists and if it does return the path
 		thorBinaryPath := filepath.Join(b.downloadPath, "bin", "thor")
@@ -67,10 +72,18 @@ func (b *Builder) Build() (string, error) {
 
 	makeCmd := exec.Command("make")
 	makeCmd.Dir = b.downloadPath
-	makeCmd.Stdout = os.Stdout
-	makeCmd.Stderr = os.Stderr
+	// Capture output
+	var stdout, stderr bytes.Buffer
+	makeCmd.Stdout = &stdout
+	makeCmd.Stderr = &stderr
 
 	if err := makeCmd.Run(); err != nil {
+		slog.Error("Make command failed",
+			"stdout", stdout.String(),
+			"stderr", stderr.String(),
+			"error", err,
+		)
+		slog.Error("extra deets:", "str", makeCmd.String(), "path", makeCmd.Path, "dir", makeCmd.Dir)
 		return "", fmt.Errorf("failed to build project: %w", err)
 	}
 
