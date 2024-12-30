@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -93,9 +94,9 @@ func (n *Node) Start() error {
 		cmd.Args = append(cmd.Args, "--verbosity", strconv.Itoa(n.nodeCfg.GetVerbosity()))
 	}
 
-	fmt.Println(cmd)
+	slog.Info(cmd.String())
 	if n.nodeCfg.GetFakeExecution() {
-		fmt.Println("FakeExecution enabled - Not starting node: ", n.nodeCfg.GetID())
+		slog.Info("FakeExecution enabled - Not starting node: ", "id", n.nodeCfg.GetID())
 		return nil
 	}
 	// Start the command and check for errors
@@ -105,7 +106,7 @@ func (n *Node) Start() error {
 
 	n.cmdExec = cmd
 
-	fmt.Println("Thor command executed successfully")
+	slog.Info("Thor command executed successfully")
 	return nil
 }
 
@@ -130,12 +131,12 @@ func (n *Node) Stop() error {
 		if err := n.cmdExec.Process.Kill(); err != nil {
 			return fmt.Errorf("failed to kill process - %w", err)
 		}
-		fmt.Println("Process killed as timeout reached")
+		slog.Error("Process killed as timeout reached")
 	case err := <-done:
 		if err != nil {
 			return fmt.Errorf("process exited with error - %w", err)
 		}
-		fmt.Println("Process stopped gracefully")
+		slog.Info("Process stopped gracefully")
 	}
 	return nil
 }

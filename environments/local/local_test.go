@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/vechain/networkhub/thorbuilder"
+	"log/slog"
 	"strings"
 	"testing"
 	"time"
@@ -145,7 +146,7 @@ func TestLocal(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	fmt.Println(networkJSON)
+	slog.Info(networkJSON)
 	localEnv := NewLocalEnv()
 	_, err = localEnv.LoadConfig(networkCfg)
 	require.NoError(t, err)
@@ -158,7 +159,7 @@ func TestLocal(t *testing.T) {
 	account, err := c.GetAccount(datagen.RandAccount().Address)
 	require.NoError(t, err)
 
-	fmt.Println(account)
+	slog.Info("Account", "acc", account)
 
 	time.Sleep(time.Minute)
 	err = localEnv.StopNetwork()
@@ -191,7 +192,7 @@ func TestThreeNodes(t *testing.T) {
 	account, err := c.GetAccount(datagen.RandAccount().Address)
 	require.NoError(t, err)
 
-	fmt.Println(account)
+	slog.Info("account:", "acc", account)
 
 	time.Sleep(30 * time.Second)
 	err = localEnv.StopNetwork()

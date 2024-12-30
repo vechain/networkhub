@@ -61,6 +61,7 @@ var startCmd = &cobra.Command{
 			err := cmdManager.Start(networkID)
 			if err != nil {
 				slog.Error("unable to start network", "err", err)
+				close(sigChan)
 				return
 			}
 			slog.Info("network started successfully...")
@@ -89,7 +90,7 @@ var configureCmd = &cobra.Command{
 		// Read from the specified file
 		data, err := os.ReadFile(args[0])
 		if err != nil {
-			fmt.Printf("Error reading config file: %v\n", err)
+			slog.Error("Error reading config file: %v\n", err)
 			os.Exit(1)
 		}
 

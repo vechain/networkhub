@@ -2,6 +2,7 @@ package thorbuilder
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -32,7 +33,7 @@ func (b *Builder) Download() error {
 	if b.reusable {
 		// Check if the folder exists and ensure it contains a cloned repository
 		if _, err := os.Stat(filepath.Join(b.downloadPath, ".git")); err == nil {
-			fmt.Printf("Reusable directory with repository exists: %s\n", b.downloadPath)
+			slog.Info("Reusable directory with repository exists: ", "path", b.downloadPath)
 			return nil
 		}
 	}
@@ -59,7 +60,7 @@ func (b *Builder) Build() (string, error) {
 		// Check if the binary exists and if it does return the path
 		thorBinaryPath := filepath.Join(b.downloadPath, "bin", "thor")
 		if _, err := os.Stat(thorBinaryPath); err == nil {
-			fmt.Printf("Reusable binary exists: %s\n", thorBinaryPath)
+			slog.Info("Reusable binary exists: ", "path", thorBinaryPath)
 			return thorBinaryPath, nil
 		}
 	}
