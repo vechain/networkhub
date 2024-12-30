@@ -23,7 +23,7 @@ jobs:
 
       - name: Pull Docker Image
         run: docker pull vechain/thor:latest
-        
+
       - name: Make Test
         id: unit-test
         run: go test ./... -count=1

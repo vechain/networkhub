@@ -20,8 +20,8 @@ func LocalThreeMasterNodesNetwork() *network.Network {
 		Nodes: []node.Node{
 			&node.BaseNode{
 				ID:            "node1",
-				P2PListenPort: 8081,
-				APIAddr:       "127.0.0.1:8181",
+				P2PListenPort: 8031,
+				APIAddr:       "127.0.0.1:8131",
 				APICORS:       "*",
 				Type:          node.MasterNode,
 				Key:           "01a4107bfb7d5141ec519e75788c34295741a1eefbfe460320efd2ada944071e", // 0x61fF580B63D3845934610222245C116E013717ec
@@ -29,8 +29,8 @@ func LocalThreeMasterNodesNetwork() *network.Network {
 			},
 			&node.BaseNode{
 				ID:            "node2",
-				P2PListenPort: 8082,
-				APIAddr:       "127.0.0.1:8182",
+				P2PListenPort: 8032,
+				APIAddr:       "127.0.0.1:8132",
 				APICORS:       "*",
 				Type:          node.MasterNode,
 				Key:           "7072249b800ddac1d29a3cd06468cc1a917cbcd110dde358a905d03dad51748d", // 0x327931085B4cCbCE0baABb5a5E1C678707C51d90
@@ -38,8 +38,8 @@ func LocalThreeMasterNodesNetwork() *network.Network {
 			},
 			&node.BaseNode{
 				ID:            "node3",
-				P2PListenPort: 8083,
-				APIAddr:       "127.0.0.1:8183",
+				P2PListenPort: 8033,
+				APIAddr:       "127.0.0.1:8133",
 				APICORS:       "*",
 				Type:          node.MasterNode,
 				Key:           "c55455943bf026dc44fcf189e8765eb0587c94e66029d580bae795386c0b737a", // 0x084E48c8AE79656D7e27368AE5317b5c2D6a7497

@@ -31,8 +31,8 @@ func LocalSixNodesNetwork() *network.Network {
 		Nodes: []node.Node{
 			&node.BaseNode{
 				ID:            "node1",
-				P2PListenPort: 8081,
-				APIAddr:       "127.0.0.1:8181",
+				P2PListenPort: 8061,
+				APIAddr:       "127.0.0.1:8161",
 				APICORS:       "*",
 				Type:          node.MasterNode,
 				Verbosity:     4,
@@ -41,8 +41,8 @@ func LocalSixNodesNetwork() *network.Network {
 			},
 			&node.BaseNode{
 				ID:            "node2",
-				P2PListenPort: 8082,
-				APIAddr:       "127.0.0.1:8182",
+				P2PListenPort: 8062,
+				APIAddr:       "127.0.0.1:8162",
 				APICORS:       "*",
 				Type:          node.MasterNode,
 				Verbosity:     4,
@@ -51,8 +51,8 @@ func LocalSixNodesNetwork() *network.Network {
 			},
 			&node.BaseNode{
 				ID:            "node3",
-				P2PListenPort: 8083,
-				APIAddr:       "127.0.0.1:8183",
+				P2PListenPort: 8063,
+				APIAddr:       "127.0.0.1:8163",
 				APICORS:       "*",
 				Type:          node.RegularNode,
 				Key:           "1b310ea04afd6d14a8f142158873fc70bfd4ba12a19138cc5b309fce7c77105e", // 0x1b1c0055065b3ADee4B9a9e8297142Ba2cD34EfE
@@ -60,8 +60,8 @@ func LocalSixNodesNetwork() *network.Network {
 			},
 			&node.BaseNode{
 				ID:            "node4",
-				P2PListenPort: 8084,
-				APIAddr:       "127.0.0.1:8184",
+				P2PListenPort: 8064,
+				APIAddr:       "127.0.0.1:8164",
 				APICORS:       "*",
 				Type:          node.MasterNode,
 				Verbosity:     4,
@@ -70,8 +70,8 @@ func LocalSixNodesNetwork() *network.Network {
 			},
 			&node.BaseNode{
 				ID:            "node5",
-				P2PListenPort: 8085,
-				APIAddr:       "127.0.0.1:8185",
+				P2PListenPort: 8065,
+				APIAddr:       "127.0.0.1:8165",
 				APICORS:       "*",
 				Type:          node.MasterNode,
 				Verbosity:     4,
@@ -80,8 +80,8 @@ func LocalSixNodesNetwork() *network.Network {
 			},
 			&node.BaseNode{
 				ID:            "node6",
-				P2PListenPort: 8086,
-				APIAddr:       "127.0.0.1:8186",
+				P2PListenPort: 8066,
+				APIAddr:       "127.0.0.1:8166",
 				APICORS:       "*",
 				Type:          node.RegularNode,
 				Key:           "92ad65923d6782a43e6a1be01a8e52bce701967d78937e73da746a58f293ba30", // 0x9C2871C411CCe579B987E9b932C484dA8b901075
