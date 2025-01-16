@@ -208,8 +208,37 @@ func TestSixNode(t *testing.T) {
 
 	// ensure the artifact path is set
 	for _, node := range networkCfg.Nodes {
-		node.SetExecArtifact("/Users/pedro/go/src/github.com/vechain/thor/bin/thor")
+		node.SetExecArtifact("/Users/user/go/src/github.com/vechain/thor/bin/thor")
 	}
+
+	localEnv := NewLocalEnv()
+	_, err = localEnv.LoadConfig(networkCfg)
+	require.NoError(t, err)
+
+	err = localEnv.StartNetwork()
+	require.NoError(t, err)
+
+	time.Sleep(30 * time.Second) // todo change this to a polling approach
+	for _, node := range networkCfg.Nodes {
+		c := client.NewClient("http://" + node.GetAPIAddr())
+		peers, err := c.GetPeers()
+		require.NoError(t, err)
+
+		require.GreaterOrEqual(t, len(peers), 0)
+	}
+	err = localEnv.StopNetwork()
+	require.NoError(t, err)
+}
+
+func TestFourNodesGalactica(t *testing.T) {
+	t.Skip()
+	fourNodesGalacticaJson, err := json.Marshal(preset.LocalFourNodesGalacticaNetwork)
+	require.NoError(t, err)
+
+	networkCfg, err := network.NewNetwork(
+		network.WithJSON(string(fourNodesGalacticaJson)),
+	)
+	require.NoError(t, err)
 
 	localEnv := NewLocalEnv()
 	_, err = localEnv.LoadConfig(networkCfg)
