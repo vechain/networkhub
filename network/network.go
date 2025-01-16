@@ -54,6 +54,8 @@ func UnmarshalNode(data []byte) (node.Node, error) {
 		if forkConfig, ok := genesis["forkConfig"].(map[string]interface{}); ok {
 			if _, exists := forkConfig["VIPGASCOEF"]; exists {
 				nodeType = &node.NodePostCoefFork{}
+			} else if _, exists := forkConfig["GALACTICA"]; exists {
+				nodeType = &node.NodeGalacticaFork{}
 			}
 		}
 	}
