@@ -218,7 +218,7 @@ func TestSixNode(t *testing.T) {
 	err = localEnv.StartNetwork()
 	require.NoError(t, err)
 
-	time.Sleep(30 * time.Second) // todo change this to a polling approach
+	time.Sleep(30 * time.Second) // TODO: change this to a polling approach
 	for _, node := range networkCfg.Nodes {
 		c := client.NewClient("http://" + node.GetAPIAddr())
 		peers, err := c.GetPeers()
@@ -246,7 +246,7 @@ func TestFourNodesGalactica(t *testing.T) {
 	err = localEnv.StartNetwork()
 	require.NoError(t, err)
 
-	time.Sleep(30 * time.Second) // todo change this to a polling approach
+	time.Sleep(30 * time.Second) // TODO: change this to a polling approach
 	for _, node := range networkCfg.Nodes {
 		c := client.NewClient("http://" + node.GetAPIAddr())
 		peers, err := c.GetPeers()
