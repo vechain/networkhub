@@ -231,7 +231,6 @@ func TestSixNode(t *testing.T) {
 }
 
 func TestFourNodesGalactica(t *testing.T) {
-	t.Skip()
 	fourNodesGalacticaJson, err := json.Marshal(preset.LocalFourNodesGalacticaNetwork)
 	require.NoError(t, err)
 

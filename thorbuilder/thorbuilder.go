@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 type Builder struct {
@@ -16,7 +17,7 @@ type Builder struct {
 func New(branch string) *Builder {
 	return &Builder{
 		branch:       branch,
-		downloadPath: filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_%d", branch, os.Getpid())),
+		downloadPath: filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_%d", strings.ReplaceAll(branch, "/", "_"), os.Getpid())),
 	}
 }
 
@@ -32,6 +33,7 @@ func (b *Builder) Download() error {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
+		os.RemoveAll(b.downloadPath)
 		return fmt.Errorf("failed to clone repository: %w", err)
 	}
 
