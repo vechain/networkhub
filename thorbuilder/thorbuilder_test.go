@@ -43,10 +43,3 @@ func TestErrorHandling(t *testing.T) {
 		assert.Error(t, err)
 	})
 }
-```
-
-## Project Structure
-- **Entrypoints**: Interface to interact with the framework. Currently implemented as an HTTP API server.
-- **Actions**: Domain-specific language (DSL) that allows users to configure, start, stop, and request information on networks.
-- **Environments**: Interface for running networks in different environments, with the Local environment currently implemented.
-- **Thorbuilder Package**: Provides tools for building and managing the Thor binary from a given branch.

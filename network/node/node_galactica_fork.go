@@ -6,7 +6,7 @@ import (
 
 type NodeGalacticaFork struct {
 	BaseNode
-	Genesis *genesis.GalacticaGenesis `json:"genesis,omitempty"` //TODO would be nice to have validation in this format
+	Genesis *genesis.GalacticaForkGenesis `json:"genesis,omitempty"` //TODO would be nice to have validation in this format
 }
 
 func (n *NodeGalacticaFork) GetGenesis() any {

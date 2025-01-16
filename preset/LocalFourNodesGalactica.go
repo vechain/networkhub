@@ -13,11 +13,11 @@ import (
 	thorgenesis "github.com/vechain/thor/v2/genesis"
 )
 
-var LocalSixNodesNetwork = &network.Network{
-	ID:          "sixNodesNetwork",
+var LocalFourNodesGalacticaNetwork = &network.Network{
+	ID:          "fourNodesGalacticaNetwork",
 	Environment: environments.Local,
 	Nodes: []node.Node{
-		&node.NodePreCoefFork{
+		&node.NodeGalacticaFork{
 			BaseNode: node.BaseNode{
 				ID:            "node1",
 				P2PListenPort: 8081,
@@ -27,9 +27,9 @@ var LocalSixNodesNetwork = &network.Network{
 				Verbosity:     4,
 				Key:           "b2c859e115ef4a3f5e4d32228b41de4c661c527a32f723ac37745bf860fd09cb", // 0x5F90f56c7b87E3d1acf9437f0E43E4d687AcEB7e
 			},
-			Genesis: localSixNodesNetworkGenesis,
+			Genesis: localFourNodesNetworkGenesis,
 		},
-		&node.NodePreCoefFork{
+		&node.NodeGalacticaFork{
 			BaseNode: node.BaseNode{
 				ID:            "node2",
 				P2PListenPort: 8082,
@@ -39,9 +39,9 @@ var LocalSixNodesNetwork = &network.Network{
 				Verbosity:     4,
 				Key:           "4de650ca1c8beae4ed6a4358087f50c01b51f5c0002ae9836c55039ca9818d0c", // 0x5c29518F6a6124a2BeE89253347c8295f604710A
 			},
-			Genesis: localSixNodesNetworkGenesis,
+			Genesis: localFourNodesNetworkGenesis,
 		},
-		&node.NodePreCoefFork{
+		&node.NodeGalacticaFork{
 			BaseNode: node.BaseNode{
 				ID:            "node3",
 				P2PListenPort: 8083,
@@ -50,9 +50,9 @@ var LocalSixNodesNetwork = &network.Network{
 				Type:          node.RegularNode,
 				Key:           "1b310ea04afd6d14a8f142158873fc70bfd4ba12a19138cc5b309fce7c77105e", // 0x1b1c0055065b3ADee4B9a9e8297142Ba2cD34EfE
 			},
-			Genesis: localSixNodesNetworkGenesis,
+			Genesis: localFourNodesNetworkGenesis,
 		},
-		&node.NodePreCoefFork{
+		&node.NodeGalacticaFork{
 			BaseNode: node.BaseNode{
 				ID:            "node4",
 				P2PListenPort: 8084,
@@ -62,38 +62,15 @@ var LocalSixNodesNetwork = &network.Network{
 				Verbosity:     4,
 				Key:           "c70dda88e779df10abbc7c5d37fbb3478c5cf8df2a70d6b0bfc551a5a9a17359", // 0x042306e116Dc301ecd7b83a04F4c8277Fbe41b6c
 			},
-			Genesis: localSixNodesNetworkGenesis,
-		},
-		&node.NodePreCoefFork{
-			BaseNode: node.BaseNode{
-				ID:            "node5",
-				P2PListenPort: 8085,
-				APIAddr:       "127.0.0.1:8185",
-				APICORS:       "*",
-				Type:          node.MasterNode,
-				Verbosity:     4,
-				Key:           "ade54b623a4f4afc38f962a85df07a428204a67cee0c9b43a99ca255fd2fb9a6", // 0x0aeC31606e217895696771961de416Efa185Be66
-			},
-			Genesis: localSixNodesNetworkGenesis,
-		},
-		&node.NodePreCoefFork{
-			BaseNode: node.BaseNode{
-				ID:            "node6",
-				P2PListenPort: 8086,
-				APIAddr:       "127.0.0.1:8186",
-				APICORS:       "*",
-				Type:          node.RegularNode,
-				Key:           "92ad65923d6782a43e6a1be01a8e52bce701967d78937e73da746a58f293ba30", // 0x9C2871C411CCe579B987E9b932C484dA8b901075
-			},
-			Genesis: localSixNodesNetworkGenesis,
+			Genesis: localFourNodesNetworkGenesis,
 		},
 	},
 }
 
-var localSixNodesNetworkGenesis = &genesis.PreCoefForkGenesis{
+var localFourNodesNetworkGenesis = &genesis.GalacticaForkGenesis{
 	LaunchTime: 1703180212,
 	GasLimit:   10000000,
-	ExtraData:  "Local Six Nodes Network",
+	ExtraData:  "Local Four Nodes Network (Galactica)",
 	Accounts: []thorgenesis.Account{
 		{
 			Address: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
@@ -117,16 +94,6 @@ var localSixNodesNetworkGenesis = &genesis.PreCoefForkGenesis{
 		},
 		{
 			Address: *Account4.Address,
-			Balance: convToHexOrDecimal256(consts.LargeBigValue),
-			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
-		},
-		{
-			Address: *Account5.Address,
-			Balance: convToHexOrDecimal256(consts.LargeBigValue),
-			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
-		},
-		{
-			Address: *Account6.Address,
 			Balance: convToHexOrDecimal256(consts.LargeBigValue),
 			Energy:  convToHexOrDecimal256(consts.LargeBigValue),
 		},
@@ -167,11 +134,13 @@ var localSixNodesNetworkGenesis = &genesis.PreCoefForkGenesis{
 			},
 		},
 	},
-	ForkConfig: &genesis.PreCoefForkConfig{
+	ForkConfig: &genesis.GalacticaForkConfig{
 		VIP191:    0,
 		ETH_CONST: 0,
 		BLOCKLIST: 0,
 		ETH_IST:   0,
 		VIP214:    0,
+		FINALITY:  0,
+		GALACTICA: 0,
 	},
 }
