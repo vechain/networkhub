@@ -12,7 +12,6 @@ import (
 	"github.com/vechain/networkhub/preset"
 	"github.com/vechain/networkhub/utils/client"
 	"github.com/vechain/networkhub/utils/datagen"
-	"github.com/vechain/thor/v2/api/node"
 )
 
 var genesis = `{
@@ -245,36 +244,28 @@ func TestFourNodesGalactica(t *testing.T) {
 	require.NoError(t, err)
 
 	err = localEnv.StartNetwork()
-  require.NoError(t, err)
-  defer func() {
-    err = localEnv.StopNetwork()
-    require.NoError(t, err)
-  }()
+	require.NoError(t, err)
+	defer func() {
+		err = localEnv.StopNetwork()
+		require.NoError(t, err)
+	}()
 
-  // Polling approach with timeout
-  timeout := time.After(1 * time.Minute)
-  tick := time.Tick(5 * time.Second)
+	// Polling approach with timeout
+	timeout := time.After(1 * time.Minute)
+	tick := time.Tick(5 * time.Second)
 
-  outer:
-    for {
-        select {
-        case <-timeout:
-            t.Fatal("timed out waiting for nodes to connect")
-        case <-tick:
-            peers := []*node.PeerStats{}
-            allConnected := true
-            for _, node := range networkCfg.Nodes {
-                c := client.NewClient("http://" + node.GetAPIAddr())
-                peers, err = c.GetPeers()
-                if err != nil || len(peers) < 1 {
-                    allConnected = false
-                    break
-                }
-            }
-            if allConnected {
-                require.GreaterOrEqual(t, len(peers), 1)
-                break outer
-            }
-        }
-    }
+outer:
+	for {
+		select {
+		case <-timeout:
+			t.Fatal("timed out waiting for nodes to connect")
+		case <-tick:
+			for _, node := range networkCfg.Nodes {
+				c := client.NewClient("http://" + node.GetAPIAddr())
+				peers, err := c.GetPeers()
+				require.True(t, err == nil && len(peers) == 3)
+			}
+			break outer
+		}
+	}
 }
