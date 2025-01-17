@@ -294,7 +294,7 @@ func deployAndAssertShanghaiContract(t *testing.T, client *client.Client, acc *c
 	tag, err := client.ChainTag()
 	require.NoError(t, err)
 
-	// Combine the bytecode and constructor data
+	// Build the transaction using the bytecode
 	contractData := decodedShanghaiContract(t)
 
 	deployContractTx := new(tx.Builder).
