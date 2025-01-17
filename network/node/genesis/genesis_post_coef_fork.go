@@ -1,6 +1,8 @@
 package genesis
 
-import "github.com/vechain/thor/v2/genesis"
+import (
+	"github.com/vechain/thor/v2/genesis"
+)
 
 // PostCoefForkGenesis is user customized genesis
 type PostCoefForkGenesis struct {

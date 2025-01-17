@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
 	"github.com/vechain/networkhub/network"
+	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/preset"
 	"github.com/vechain/networkhub/utils/client"
 	"github.com/vechain/networkhub/utils/common"
@@ -223,17 +224,12 @@ func TestSixNode(t *testing.T) {
 
 	err = localEnv.StartNetwork()
 	require.NoError(t, err)
-
-	time.Sleep(30 * time.Second) // TODO: change this to a polling approach
-	for _, node := range networkCfg.Nodes {
-		c := client.NewClient("http://" + node.GetAPIAddr())
-		peers, err := c.GetPeers()
+	defer func() {
+		err = localEnv.StopNetwork()
 		require.NoError(t, err)
+	}()
 
-		require.GreaterOrEqual(t, len(peers), 0)
-	}
-	err = localEnv.StopNetwork()
-	require.NoError(t, err)
+	pollingWhileConnectingPeers(t, networkCfg.Nodes, 5)
 }
 
 func TestFourNodesGalactica(t *testing.T) {
@@ -256,6 +252,12 @@ func TestFourNodesGalactica(t *testing.T) {
 		require.NoError(t, err)
 	}()
 
+	clients := pollingWhileConnectingPeers(t, networkCfg.Nodes, 3)
+
+	deployAndAssertShanghaiContract(t, clients[0], preset.Account1)
+}
+
+func pollingWhileConnectingPeers(t *testing.T, nodes []node.Node, expectedPeersLen int) []*client.Client {
 	// Polling approach with timeout
 	timeout := time.After(1 * time.Minute)
 	tick := time.Tick(5 * time.Second)
@@ -267,27 +269,24 @@ outer:
 		case <-timeout:
 			t.Fatal("timed out waiting for nodes to connect")
 		case <-tick:
-			for _, node := range networkCfg.Nodes {
+			for _, node := range nodes {
 				c := client.NewClient("http://" + node.GetAPIAddr())
 				peers, err := c.GetPeers()
-				require.True(t, err == nil && len(peers) == 3)
+				require.True(t, err == nil && len(peers) == expectedPeersLen)
 				clients = append(clients, c)
 			}
 			break outer
 		}
 	}
-
-	deployAndAssertShanghaiContract(t, clients[0], preset.Account1)
+	return clients
 }
 
 // https://github.com/vechain/thor-e2e-tests/blob/main/contracts/shanghai/SimpleCounterShanghai.sol
 const shanghaiContractBytecode = "0x608060405234801561000f575f80fd5b505f805561016e806100205f395ff3fe608060405234801561000f575f80fd5b506004361061003f575f3560e01c80635b34b966146100435780638ada066e1461004d5780638bb5d9c314610061575b5f80fd5b61004b610074565b005b5f5460405190815260200160405180910390f35b61004b61006f3660046100fd565b6100c3565b5f8054908061008283610114565b91905055507f3cf8b50771c17d723f2cb711ca7dadde485b222e13c84ba0730a14093fad6d5c5f546040516100b991815260200190565b60405180910390a1565b5f8190556040518181527f3cf8b50771c17d723f2cb711ca7dadde485b222e13c84ba0730a14093fad6d5c9060200160405180910390a150565b5f6020828403121561010d575f80fd5b5035919050565b5f6001820161013157634e487b7160e01b5f52601160045260245ffd5b506001019056fea2646970667358221220aa73e6082b52bca8243902c639e5386b481c2183e8400f34731c4edb93d87f6764736f6c63430008180033"
 
-func DecodedShanghaiContract() []byte {
+func decodedShanghaiContract(t *testing.T) []byte {
 	contractBytecode, err := hexutil.Decode(shanghaiContractBytecode)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 	return contractBytecode
 }
 
@@ -296,7 +295,7 @@ func deployAndAssertShanghaiContract(t *testing.T, client *client.Client, acc *c
 	require.NoError(t, err)
 
 	// Combine the bytecode and constructor data
-	contractData := DecodedShanghaiContract()
+	contractData := decodedShanghaiContract(t)
 
 	deployContractTx := new(tx.Builder).
 		ChainTag(tag).
@@ -309,6 +308,7 @@ func deployAndAssertShanghaiContract(t *testing.T, client *client.Client, acc *c
 			tx.NewClause(nil).WithData(contractData),
 		).Build()
 
+	// Simulating the contract deployment transaction before deploying it
 	depContractInspectResults, err := client.InspectTxClauses(deployContractTx, acc.Address)
 	require.NoError(t, err)
 	for _, respClause := range depContractInspectResults {
@@ -323,6 +323,8 @@ func deployAndAssertShanghaiContract(t *testing.T, client *client.Client, acc *c
 
 	// Retrieve transaction receipt - GET /transactions/{id}/receipt
 	var contractAddr *thor.Address
+	const retryPeriod = 3 * time.Second
+	const maxRetries = 8
 	err = common.Retry(func() error {
 		receipt, err := client.GetTransactionReceipt(issuedTx.ID)
 		if err != nil {
@@ -335,7 +337,7 @@ func deployAndAssertShanghaiContract(t *testing.T, client *client.Client, acc *c
 
 		contractAddr = receipt.Outputs[0].ContractAddress
 		return nil
-	}, 3*time.Second, 5)
+	}, retryPeriod, maxRetries)
 
 	require.NoError(t, err)
 	require.NotNil(t, contractAddr)
