@@ -23,7 +23,7 @@ type Client struct {
 }
 
 func NewClient(url string) *Client {
-	// todo, depending on the url return a http or a ws client
+	// TODO: depending on the url return a http or a ws client
 	return &Client{
 		conn: http.NewClient(url),
 	}
@@ -102,6 +102,10 @@ func (c *Client) GetTransaction(id *thor.Bytes32) (*transactions.Transaction, er
 
 func (c *Client) GetPeers() ([]*node.PeerStats, error) {
 	return c.conn.GetPeers()
+}
+
+func (c *Client) ChainTag() (byte, error) {
+	return c.conn.ChainTag()
 }
 
 func convertToBatchCallData(tx *tx.Transaction, addr *thor.Address) *accounts.BatchCallData {

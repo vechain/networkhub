@@ -190,3 +190,11 @@ func (c *Client) GetPeers() ([]*node.PeerStats, error) {
 
 	return peers, nil
 }
+
+func (c *Client) ChainTag() (byte, error) {
+	blockSummary, err := c.GetBlock("0")
+	if err != nil {
+		return 0, err
+	}
+	return blockSummary.ID[31], nil
+}
