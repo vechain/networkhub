@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/vechain/networkhub/network/node"
+	"github.com/vechain/networkhub/network/node/genesis"
 )
 
 type Network struct {
@@ -51,21 +52,7 @@ func UnmarshalNode(data []byte) (node.Node, error) {
 	}
 
 	if genesisData, ok := raw["genesis"].(map[string]interface{}); ok {
-		if forkConfig, ok := genesisData["forkConfig"].(map[string]interface{}); ok {
-			// Handle AdditionalFields
-			if additionalFields, ok := forkConfig["additionalFields"].(map[string]interface{}); ok {
-				for key, value := range additionalFields {
-					if num, ok := value.(float64); ok { // JSON numbers are float64 by default
-						forkConfig[key] = uint32(num)
-						delete(additionalFields, key)
-					}
-					if len(additionalFields) == 0 {
-						delete(forkConfig, "additionalFields")
-					}
-				}
-				genesisData["forkConfig"] = forkConfig
-			}
-		}
+		genesis.HandleAdditionalFields(&genesisData)
 	}
 
 	modifiedData, err := json.Marshal(raw)

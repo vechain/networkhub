@@ -19,16 +19,8 @@ type CustomGenesis struct {
 	ForkConfig *CustomGenesisForkConfig `json:"forkConfig"`
 }
 
-func (cg *CustomGenesis) Marshal() ([]byte, error) {
-	data, err := json.Marshal(cg)
-	if err != nil {
-		return nil, err
-	}
-	var raw map[string]interface{}
-	if err = json.Unmarshal(data, &raw); err != nil {
-		return nil, err
-	}
-	if forkConfig, ok := raw["forkConfig"].(map[string]interface{}); ok {
+func HandleAdditionalFields(raw *map[string]interface{}) {
+	if forkConfig, ok := (*raw)["forkConfig"].(map[string]interface{}); ok {
 		// Handle AdditionalFields
 		if additionalFields, ok := forkConfig["additionalFields"].(map[string]interface{}); ok {
 			for key, value := range additionalFields {
@@ -40,9 +32,22 @@ func (cg *CustomGenesis) Marshal() ([]byte, error) {
 					delete(forkConfig, "additionalFields")
 				}
 			}
-			raw["forkConfig"] = forkConfig
+			(*raw)["forkConfig"] = forkConfig
 		}
 	}
+}
+
+func (cg *CustomGenesis) Marshal() ([]byte, error) {
+	data, err := json.Marshal(cg)
+	if err != nil {
+		return nil, err
+	}
+	var raw map[string]interface{}
+	if err = json.Unmarshal(data, &raw); err != nil {
+		return nil, err
+	}
+	
+	HandleAdditionalFields(&raw)
 
 	modifiedData, err := json.Marshal(raw)
 	if err != nil {
