@@ -2,7 +2,6 @@ package network
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/network/node/genesis"
@@ -89,8 +88,6 @@ func (n *Network) UnmarshalJSON(data []byte) error {
 		}
 		n.Nodes = append(n.Nodes, nodeObj)
 	}
-
-	fmt.Printf("Numero de nodos %v\n", n.Nodes[0].GetGenesis().ForkConfig.ForkConfig)
 
 	return nil
 }
