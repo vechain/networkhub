@@ -2,7 +2,6 @@ package docker
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -86,7 +85,7 @@ func (n *Node) Start() error {
 	}
 
 	//serialize genesis
-	genesisBytes, err := json.Marshal(n.cfg.GetGenesis())
+	genesisBytes, err := n.cfg.GetGenesis().Marshal()
 	if err != nil {
 		return fmt.Errorf("unable to marshal genesis - %w", err)
 	}

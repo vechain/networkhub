@@ -273,13 +273,20 @@ outer:
 		case <-timeout:
 			t.Fatal("timed out waiting for nodes to connect")
 		case <-tick:
+			allConnected := true
 			for _, node := range nodes {
 				c := client.NewClient("http://" + node.GetAPIAddr())
 				peers, err := c.GetPeers()
-				require.True(t, err == nil && len(peers) == expectedPeersLen)
+				require.NoError(t, err)
+				if len(peers) != expectedPeersLen {
+					allConnected = false
+					break
+				}
 				clients = append(clients, c)
 			}
-			break outer
+			if allConnected {
+				break outer
+			}
 		}
 	}
 	return clients
