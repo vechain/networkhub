@@ -46,7 +46,7 @@ func (cg *CustomGenesis) Marshal() ([]byte, error) {
 	if err = json.Unmarshal(data, &raw); err != nil {
 		return nil, err
 	}
-	
+
 	HandleAdditionalFields(&raw)
 
 	modifiedData, err := json.Marshal(raw)
