@@ -2,7 +2,9 @@ package docker
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/docker/docker/api/types/container"
@@ -47,9 +49,20 @@ func (n *Node) Start() error {
 	if err != nil {
 		if client.IsErrNotFound(err) {
 			// Pull the Docker image
-			_, err = cli.ImagePull(ctx, n.cfg.GetExecArtifact(), image.PullOptions{})
+			out, err := cli.ImagePull(ctx, n.cfg.GetExecArtifact(), image.PullOptions{})
 			if err != nil {
 				return fmt.Errorf("failed to pull Docker image: %w", err)
+			}
+			defer out.Close()
+
+			decoder := json.NewDecoder(out)
+			for {
+				var event map[string]interface{}
+				if err := decoder.Decode(&event); err == io.EOF {
+					break
+				} else if err != nil {
+					return fmt.Errorf("failed to decode image pull event: %w", err)
+				}
 			}
 		} else {
 			return fmt.Errorf("failed to inspect Docker image: %w", err)
