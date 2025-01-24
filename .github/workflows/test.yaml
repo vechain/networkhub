@@ -19,10 +19,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y make git build-essential    
-
-      - name: Pull Docker Image
-        run: docker pull vechain/thor:latest
+          sudo apt-get install -y make git build-essential
 
       - name: Make Test
         id: unit-test

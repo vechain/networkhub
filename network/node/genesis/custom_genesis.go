@@ -36,6 +36,9 @@ func (cfg *CustomGenesisForkConfig) AddField(key string, value uint32) error {
 	if key == "" {
 		return fmt.Errorf("key cannot be empty")
 	}
+	if cfg.AdditionalFields == nil {
+		cfg.AdditionalFields = make(map[string]uint32)
+	}
 	cfg.AdditionalFields[key] = value
 	return nil
 }

@@ -18,6 +18,7 @@ type Node interface {
 	GetExecArtifact() string
 	GetKey() string
 	GetGenesis() *genesis.CustomGenesis
+	SetGenesis(genesis *genesis.CustomGenesis)
 	GetAPIAddr() string
 	GetAPICORS() string
 	GetP2PListenPort() int
