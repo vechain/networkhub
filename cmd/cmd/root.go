@@ -8,7 +8,7 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "netowrkHub",
+	Use:   "networkhub",
 	Short: "Vechain network launcher",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:

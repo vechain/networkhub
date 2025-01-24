@@ -12,50 +12,45 @@ import (
 )
 
 func TestDockerNetwork(t *testing.T) {
-	t.Skip()
+	genesis := preset.LocalThreeMasterNodesNetworkGenesis()
+	presetNetwork := preset.LocalThreeMasterNodesNetwork()
 	// Create a mock network configuration
 	networkCfg := &network.Network{
 		Environment: "docker",
 		ID:          "test-id",
 		Nodes: []node.Node{
-			&node.NodePreCoefFork{
-				BaseNode: node.BaseNode{
-					ID:            "node1",
-					ExecArtifact:  "vechain/thor:latest",
-					DataDir:       "/home/thor",
-					ConfigDir:     "/home/thor",
-					APIAddr:       "0.0.0.0:8545",
-					APICORS:       "*",
-					P2PListenPort: 30303,
-					Key:           preset.LocalThreeMasterNodesNetwork.Nodes[0].GetKey(),
-				},
-				Genesis: preset.LocalThreeMasterNodesNetworkGenesis,
+			&node.BaseNode{
+				ID:            "node1",
+				ExecArtifact:  "vechain/thor:latest",
+				DataDir:       "/home/thor",
+				ConfigDir:     "/home/thor",
+				APIAddr:       "0.0.0.0:8545",
+				APICORS:       "*",
+				P2PListenPort: 30303,
+				Key:           presetNetwork.Nodes[0].GetKey(),
+				Genesis:       genesis,
 			},
-			&node.NodePreCoefFork{
-				BaseNode: node.BaseNode{
-					ID:            "node2",
-					ExecArtifact:  "vechain/thor:latest",
-					DataDir:       "/home/thor",
-					ConfigDir:     "/home/thor",
-					APIAddr:       "0.0.0.0:8545",
-					APICORS:       "*",
-					P2PListenPort: 30303,
-					Key:           preset.LocalThreeMasterNodesNetwork.Nodes[1].GetKey(),
-				},
-				Genesis: preset.LocalThreeMasterNodesNetworkGenesis,
+			&node.BaseNode{
+				ID:            "node2",
+				ExecArtifact:  "vechain/thor:latest",
+				DataDir:       "/home/thor",
+				ConfigDir:     "/home/thor",
+				APIAddr:       "0.0.0.0:8545",
+				APICORS:       "*",
+				P2PListenPort: 30303,
+				Key:           presetNetwork.Nodes[1].GetKey(),
+				Genesis:       genesis,
 			},
-			&node.NodePreCoefFork{
-				BaseNode: node.BaseNode{
-					ID:            "node3",
-					ExecArtifact:  "vechain/thor:latest",
-					DataDir:       "/home/thor",
-					ConfigDir:     "/home/thor",
-					APIAddr:       "0.0.0.0:8545",
-					APICORS:       "*",
-					P2PListenPort: 30303,
-					Key:           preset.LocalThreeMasterNodesNetwork.Nodes[2].GetKey(),
-				},
-				Genesis: preset.LocalThreeMasterNodesNetworkGenesis,
+			&node.BaseNode{
+				ID:            "node3",
+				ExecArtifact:  "vechain/thor:latest",
+				DataDir:       "/home/thor",
+				ConfigDir:     "/home/thor",
+				APIAddr:       "0.0.0.0:8545",
+				APICORS:       "*",
+				P2PListenPort: 30303,
+				Key:           presetNetwork.Nodes[2].GetKey(),
+				Genesis:       genesis,
 			},
 		},
 	}
@@ -73,7 +68,7 @@ func TestDockerNetwork(t *testing.T) {
 	err = dockerEnv.StartNetwork()
 	assert.NoError(t, err)
 
-	time.Sleep(time.Hour)
+	time.Sleep(time.Minute)
 	// Stop network
 	err = dockerEnv.StopNetwork()
 	assert.NoError(t, err)

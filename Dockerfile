@@ -18,7 +18,6 @@ COPY . .
 # Build the application
 ENV CGO_ENABLED=1
 RUN go build -o networkHub ./cmd/main.go
-RUN ./scripts/build_thor.sh
 
 #### Use a Docker multi-stage build to create a lean production image.
 #### Start with the Debian buster-slim image for a small footprint.

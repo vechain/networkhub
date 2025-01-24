@@ -3,6 +3,7 @@ package local
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"strings"
 	"testing"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/preset"
+	"github.com/vechain/networkhub/thorbuilder"
 	"github.com/vechain/networkhub/utils/client"
 	"github.com/vechain/networkhub/utils/datagen"
 )
@@ -144,7 +146,7 @@ func TestLocal(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	fmt.Println(networkJSON)
+	slog.Info(networkJSON)
 	localEnv := NewLocalEnv()
 	_, err = localEnv.LoadConfig(networkCfg)
 	require.NoError(t, err)
@@ -157,7 +159,7 @@ func TestLocal(t *testing.T) {
 	account, err := c.GetAccount(datagen.RandAccount().Address)
 	require.NoError(t, err)
 
-	fmt.Println(account)
+	slog.Info("Account", "acc", account)
 
 	time.Sleep(time.Minute)
 	err = localEnv.StopNetwork()
@@ -167,11 +169,12 @@ func TestLocal(t *testing.T) {
 func TestThreeNodes(t *testing.T) {
 	var err error
 
-	downloader := NewDownloader("")
-	thorBinPath, err := downloader.CloneAndBuildThor()
+	thorBuilder := thorbuilder.New("master", true)
+	require.NoError(t, thorBuilder.Download())
+	thorBinPath, err := thorBuilder.Build()
 	require.NoError(t, err)
 
-	networkCfg := preset.LocalThreeMasterNodesNetwork
+	networkCfg := preset.LocalThreeMasterNodesNetwork()
 
 	// ensure the artifact path is set
 	for _, node := range networkCfg.Nodes {
@@ -189,7 +192,7 @@ func TestThreeNodes(t *testing.T) {
 	account, err := c.GetAccount(datagen.RandAccount().Address)
 	require.NoError(t, err)
 
-	fmt.Println(account)
+	slog.Info("account:", "acc", account)
 
 	time.Sleep(30 * time.Second)
 	err = localEnv.StopNetwork()
@@ -197,8 +200,7 @@ func TestThreeNodes(t *testing.T) {
 }
 
 func TestSixNode(t *testing.T) {
-	t.Skip()
-	sixNodeJson, err := json.Marshal(preset.LocalSixNodesNetwork)
+	sixNodeJson, err := json.Marshal(preset.LocalSixNodesNetwork())
 	require.NoError(t, err)
 
 	networkCfg, err := network.NewNetwork(
@@ -206,9 +208,14 @@ func TestSixNode(t *testing.T) {
 	)
 	require.NoError(t, err)
 
+	thorBuilder := thorbuilder.New("master", true)
+	require.NoError(t, thorBuilder.Download())
+	thorBinPath, err := thorBuilder.Build()
+	require.NoError(t, err)
+
 	// ensure the artifact path is set
 	for _, node := range networkCfg.Nodes {
-		node.SetExecArtifact("/Users/pedro/go/src/github.com/vechain/thor/bin/thor")
+		node.SetExecArtifact(thorBinPath)
 	}
 
 	localEnv := NewLocalEnv()

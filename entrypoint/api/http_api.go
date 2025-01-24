@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -29,10 +30,10 @@ func (s *Server) Start() error {
 	http.HandleFunc("/start/", s.startHandler)
 	http.HandleFunc("/stop/", s.stopHandler)
 
-	fmt.Println("Server started on :8080")
+	slog.Info("Server started on :8080")
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
-		fmt.Println("Error starting server:", err)
+		slog.Error("Error starting server", "err", err)
 	}
 	return nil
 }

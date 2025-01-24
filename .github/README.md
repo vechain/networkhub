@@ -143,6 +143,7 @@ The `thorbuilder` package is a key component of the networkHub framework. It sim
 ### Example Usage:
 
 #### Building the Thor Binary:
+
 ```go
 package main
 
@@ -150,6 +151,7 @@ import (
 	"fmt"
 	"log"
 	"github.com/vechain/networkhub/thorbuilder"
+	"log/slog"
 )
 
 func main() {
@@ -165,6 +167,6 @@ func main() {
 		log.Fatalf("Failed to build binary: %v", err)
 	}
 
-	fmt.Printf("Thor binary built successfully at: %s\n", thorBinaryPath)
+	slog.Info("Thor binary built successfully at: %s", thorBinaryPath)
 }
 ```

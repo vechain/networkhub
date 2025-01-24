@@ -11,6 +11,7 @@ type Network struct {
 	Nodes       []node.Node `json:"nodes"`
 	ID          string      `json:"id"`
 }
+
 type Builder struct {
 }
 
@@ -48,12 +49,17 @@ func UnmarshalNode(data []byte) (node.Node, error) {
 		return nil, err
 	}
 
-	var nodeType node.Node
-	nodeType = &node.NodePreCoefFork{}
-	if genesis, ok := raw["genesis"].(map[string]interface{}); ok {
-		if forkConfig, ok := genesis["forkConfig"].(map[string]interface{}); ok {
-			if _, exists := forkConfig["VIPGASCOEF"]; exists {
-				nodeType = &node.NodePostCoefFork{}
+	nodeType := &node.BaseNode{}
+	if genesisData, ok := raw["genesis"].(map[string]interface{}); ok {
+		if forkConfig, ok := genesisData["forkConfig"].(map[string]interface{}); ok {
+			// Handle AdditionalFields
+			if additionalFields, ok := forkConfig["additionalFields"].(map[string]interface{}); ok {
+				for key, value := range additionalFields {
+					if num, ok := value.(float64); ok { // JSON numbers are float64 by default
+						forkConfig[key] = uint32(num)
+					}
+				}
+				genesisData["forkConfig"] = forkConfig
 			}
 		}
 	}

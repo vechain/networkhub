@@ -1,5 +1,7 @@
 package node
 
+import "github.com/vechain/networkhub/network/node/genesis"
+
 const (
 	MasterNode  = "masterNode"
 	RegularNode = "regularNode"
@@ -15,7 +17,7 @@ type Node interface {
 	GetID() string
 	GetExecArtifact() string
 	GetKey() string
-	GetGenesis() any
+	GetGenesis() *genesis.CustomGenesis
 	GetAPIAddr() string
 	GetAPICORS() string
 	GetP2PListenPort() int

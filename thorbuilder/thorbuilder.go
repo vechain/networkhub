@@ -1,7 +1,9 @@
 package thorbuilder
 
 import (
+	"bytes"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -10,18 +12,33 @@ import (
 type Builder struct {
 	branch       string
 	downloadPath string
+	reusable     bool
 }
 
 // New creates a new Builder instance for the specified branch.
-func New(branch string) *Builder {
+// If reusable is true, it skips cloning if the directory exists and checks for the binary.
+func New(branch string, reusable bool) *Builder {
+	downloadPath := filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_%d", branch, os.Getpid()))
+	if reusable {
+		downloadPath = filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_reusable", branch))
+	}
 	return &Builder{
 		branch:       branch,
-		downloadPath: filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_%d", branch, os.Getpid())),
+		reusable:     reusable,
+		downloadPath: downloadPath,
 	}
 }
 
 // Download clones the specified branch of the Thor repository into the downloadPath.
 func (b *Builder) Download() error {
+	if b.reusable {
+		// Check if the folder exists and ensure it contains a cloned repository
+		if _, err := os.Stat(filepath.Join(b.downloadPath, ".git")); err == nil {
+			slog.Info("Reusable directory with repository exists: ", "path", b.downloadPath)
+			return nil
+		}
+	}
+
 	if err := os.MkdirAll(b.downloadPath, os.ModePerm); err != nil {
 		return fmt.Errorf("failed to create download directory: %w", err)
 	}
@@ -40,12 +57,33 @@ func (b *Builder) Download() error {
 
 // Build runs the make command in the downloadPath and returns the path to the thor binary.
 func (b *Builder) Build() (string, error) {
+	if _, err := os.Stat(b.downloadPath); os.IsNotExist(err) {
+		return "", fmt.Errorf("download directory does not exist: %s", b.downloadPath)
+	}
+
+	if b.reusable {
+		// Check if the binary exists and if it does return the path
+		thorBinaryPath := filepath.Join(b.downloadPath, "bin", "thor")
+		if _, err := os.Stat(thorBinaryPath); err == nil {
+			slog.Info("Reusable binary exists: ", "path", thorBinaryPath)
+			return thorBinaryPath, nil
+		}
+	}
+
 	makeCmd := exec.Command("make")
 	makeCmd.Dir = b.downloadPath
-	makeCmd.Stdout = os.Stdout
-	makeCmd.Stderr = os.Stderr
+	// Capture output
+	var stdout, stderr bytes.Buffer
+	makeCmd.Stdout = &stdout
+	makeCmd.Stderr = &stderr
 
 	if err := makeCmd.Run(); err != nil {
+		slog.Error("Make command failed",
+			"stdout", stdout.String(),
+			"stderr", stderr.String(),
+			"error", err,
+		)
+		slog.Error("extra deets:", "str", makeCmd.String(), "path", makeCmd.Path, "dir", makeCmd.Dir)
 		return "", fmt.Errorf("failed to build project: %w", err)
 	}
 

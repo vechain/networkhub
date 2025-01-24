@@ -2,7 +2,6 @@ package preset
 
 import (
 	"encoding/json"
-	"fmt"
 	"math/big"
 	"testing"
 
@@ -16,15 +15,13 @@ func TestGenesisUnmarshal(t *testing.T) {
 	}
 
 	ble := genesis.HexOrDecimal256(*big.NewInt(123))
-
-	bwoop := derp{Hex: &ble}
-	fmt.Println(bwoop)
+	t.Log(derp{Hex: &ble})
 
 	marshalJSON, err := ble.MarshalJSON()
 	require.NoError(t, err)
-	fmt.Println(string(marshalJSON))
+	t.Log(string(marshalJSON))
 
 	marshal, err := json.Marshal(ble)
 	require.NoError(t, err)
-	fmt.Println(marshal)
+	t.Log(marshal)
 }
