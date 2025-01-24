@@ -280,6 +280,7 @@ outer:
 				require.NoError(t, err)
 				if len(peers) != expectedPeersLen {
 					allConnected = false
+					clients = clients[:0]
 					break
 				}
 				clients = append(clients, c)
