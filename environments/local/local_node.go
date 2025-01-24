@@ -2,7 +2,6 @@ package local
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
@@ -51,7 +50,7 @@ func (n *Node) Start() error {
 
 	// write genesis to disk
 	genesisPath := filepath.Join(n.nodeCfg.GetConfigDir(), "genesis.json")
-	genesisBytes, err := json.Marshal(n.nodeCfg.GetGenesis())
+	genesisBytes, err := n.nodeCfg.GetGenesis().Marshal()
 	if err != nil {
 		return fmt.Errorf("unable to marshal genesis - %w", err)
 	}

@@ -1,6 +1,7 @@
 package genesis
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/vechain/thor/v2/genesis"
@@ -16,6 +17,39 @@ type CustomGenesis struct {
 	Params     genesis.Params           `json:"params"`
 	Executor   genesis.Executor         `json:"executor"`
 	ForkConfig *CustomGenesisForkConfig `json:"forkConfig"`
+}
+
+func (cg *CustomGenesis) Marshal() ([]byte, error) {
+	data, err := json.Marshal(cg)
+	if err != nil {
+		return nil, err
+	}
+	var raw map[string]interface{}
+	if err = json.Unmarshal(data, &raw); err != nil {
+		return nil, err
+	}
+	if forkConfig, ok := raw["forkConfig"].(map[string]interface{}); ok {
+		// Handle AdditionalFields
+		if additionalFields, ok := forkConfig["additionalFields"].(map[string]interface{}); ok {
+			for key, value := range additionalFields {
+				if num, ok := value.(float64); ok { // JSON numbers are float64 by default
+					forkConfig[key] = uint32(num)
+					delete(additionalFields, key)
+				}
+				if len(additionalFields) == 0 {
+					delete(forkConfig, "additionalFields")
+				}
+			}
+			raw["forkConfig"] = forkConfig
+		}
+	}
+
+	modifiedData, err := json.Marshal(raw)
+	if err != nil {
+		return nil, err
+	}
+
+	return modifiedData, nil
 }
 
 type CustomGenesisForkConfig struct {

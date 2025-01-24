@@ -2,6 +2,7 @@ package network
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/vechain/networkhub/network/node"
 )
@@ -49,7 +50,6 @@ func UnmarshalNode(data []byte) (node.Node, error) {
 		return nil, err
 	}
 
-	nodeType := &node.BaseNode{}
 	if genesisData, ok := raw["genesis"].(map[string]interface{}); ok {
 		if forkConfig, ok := genesisData["forkConfig"].(map[string]interface{}); ok {
 			// Handle AdditionalFields
@@ -57,6 +57,10 @@ func UnmarshalNode(data []byte) (node.Node, error) {
 				for key, value := range additionalFields {
 					if num, ok := value.(float64); ok { // JSON numbers are float64 by default
 						forkConfig[key] = uint32(num)
+						delete(additionalFields, key)
+					}
+					if len(additionalFields) == 0 {
+						delete(forkConfig, "additionalFields")
 					}
 				}
 				genesisData["forkConfig"] = forkConfig
@@ -64,7 +68,13 @@ func UnmarshalNode(data []byte) (node.Node, error) {
 		}
 	}
 
-	if err := json.Unmarshal(data, &nodeType); err != nil {
+	modifiedData, err := json.Marshal(raw)
+	if err != nil {
+		return nil, err
+	}
+
+	nodeType := &node.BaseNode{}
+	if err := json.Unmarshal(modifiedData, &nodeType); err != nil {
 		return nil, err
 	}
 
@@ -92,6 +102,8 @@ func (n *Network) UnmarshalJSON(data []byte) error {
 		}
 		n.Nodes = append(n.Nodes, nodeObj)
 	}
+
+	fmt.Printf("Numero de nodos %v\n", n.Nodes[0].GetGenesis().ForkConfig.ForkConfig)
 
 	return nil
 }

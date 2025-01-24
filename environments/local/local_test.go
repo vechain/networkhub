@@ -241,29 +241,23 @@ func TestSixNodes(t *testing.T) {
 }
 
 func TestSixNodesGalactica(t *testing.T) {
-	sixNodeJson, err := json.Marshal(preset.LocalSixNodesNetwork())
-	require.NoError(t, err)
-
-	networkCfg, err := network.NewNetwork(
-		network.WithJSON(string(sixNodeJson)),
-	)
-	require.NoError(t, err)
-
 	thorBuilder := thorbuilder.New("release/galactica", true)
 	require.NoError(t, thorBuilder.Download())
 	thorBinPath, err := thorBuilder.Build()
 	require.NoError(t, err)
 
-	genesis := preset.LocalSixNodesNetworkGenesis()
-	genesis.ForkConfig.AddField("GALACTICA", 0)
+	sixNodesNetwork := preset.LocalSixNodesNetwork()
+
+	sixNodesGalacticaGenesis := preset.LocalSixNodesNetworkGenesis()
+	sixNodesGalacticaGenesis.ForkConfig.AddField("GALACTICA", 0)
 	// ensure the artifact path is set
-	for _, node := range networkCfg.Nodes {
-		node.SetGenesis(genesis)
+	for _, node := range sixNodesNetwork.Nodes {
+		node.SetGenesis(sixNodesGalacticaGenesis)
 		node.SetExecArtifact(thorBinPath)
 	}
 
 	localEnv := NewLocalEnv()
-	_, err = localEnv.LoadConfig(networkCfg)
+	_, err = localEnv.LoadConfig(sixNodesNetwork)
 	require.NoError(t, err)
 
 	err = localEnv.StartNetwork()
@@ -274,7 +268,7 @@ func TestSixNodesGalactica(t *testing.T) {
 		require.NoError(t, err)
 	}()
 
-	clients := pollingWhileConnectingPeers(t, networkCfg.Nodes, 5)
+	clients := pollingWhileConnectingPeers(t, sixNodesNetwork.Nodes, 5)
 
 	deployAndAssertShanghaiContract(t, clients[0], preset.SixNNAccount1)
 }
