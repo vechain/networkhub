@@ -267,7 +267,6 @@ func pollingWhileConnectingPeers(t *testing.T, nodes []node.Node, expectedPeersL
 	tick := time.Tick(5 * time.Second)
 
 	clients := make([]*client.Client, 0)
-outer:
 	for {
 		select {
 		case <-timeout:
@@ -286,11 +285,10 @@ outer:
 				clients = append(clients, c)
 			}
 			if allConnected {
-				break outer
+				return clients
 			}
 		}
 	}
-	return clients
 }
 
 // https://github.com/vechain/thor-e2e-tests/blob/main/contracts/shanghai/SimpleCounterShanghai.sol
