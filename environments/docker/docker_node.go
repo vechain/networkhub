@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/docker/docker/api/types/container"
@@ -12,6 +13,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/vechain/networkhub/network/node"
+	nodegenesis "github.com/vechain/networkhub/network/node/genesis"
 )
 
 // NewDockerNode initializes a new DockerNode
@@ -48,9 +50,21 @@ func (n *Node) Start() error {
 	if err != nil {
 		if client.IsErrNotFound(err) {
 			// Pull the Docker image
-			_, err = cli.ImagePull(ctx, n.cfg.GetExecArtifact(), image.PullOptions{})
+			out, err := cli.ImagePull(ctx, n.cfg.GetExecArtifact(), image.PullOptions{})
 			if err != nil {
 				return fmt.Errorf("failed to pull Docker image: %w", err)
+			}
+			defer out.Close()
+
+			// We wait for the image to be pulled
+			decoder := json.NewDecoder(out)
+			for {
+				var event map[string]interface{}
+				if err := decoder.Decode(&event); err == io.EOF {
+					break
+				} else if err != nil {
+					return fmt.Errorf("failed to decode image pull event: %w", err)
+				}
 			}
 		} else {
 			return fmt.Errorf("failed to inspect Docker image: %w", err)
@@ -86,7 +100,7 @@ func (n *Node) Start() error {
 	}
 
 	//serialize genesis
-	genesisBytes, err := json.Marshal(n.cfg.GetGenesis())
+	genesisBytes, err := nodegenesis.Marshal(n.cfg.GetGenesis())
 	if err != nil {
 		return fmt.Errorf("unable to marshal genesis - %w", err)
 	}

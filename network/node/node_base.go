@@ -101,3 +101,7 @@ func (b *BaseNode) Enode(ipAddr string) (string, error) {
 func (b *BaseNode) GetGenesis() *genesis.CustomGenesis {
 	return b.Genesis
 }
+
+func (b *BaseNode) SetGenesis(genesis *genesis.CustomGenesis) {
+	b.Genesis = genesis
+}

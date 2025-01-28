@@ -1,6 +1,7 @@
 package genesis
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/vechain/thor/v2/genesis"
@@ -16,6 +17,44 @@ type CustomGenesis struct {
 	Params     genesis.Params           `json:"params"`
 	Executor   genesis.Executor         `json:"executor"`
 	ForkConfig *CustomGenesisForkConfig `json:"forkConfig"`
+}
+
+func HandleAdditionalFields(raw *map[string]interface{}) {
+	if forkConfig, ok := (*raw)["forkConfig"].(map[string]interface{}); ok {
+		// Handle AdditionalFields
+		if additionalFields, ok := forkConfig["additionalFields"].(map[string]interface{}); ok {
+			for key, value := range additionalFields {
+				if num, ok := value.(float64); ok { // JSON numbers are float64 by default
+					forkConfig[key] = uint32(num)
+					delete(additionalFields, key)
+				}
+				if len(additionalFields) == 0 {
+					delete(forkConfig, "additionalFields")
+				}
+			}
+			(*raw)["forkConfig"] = forkConfig
+		}
+	}
+}
+
+func Marshal(customGenesis *CustomGenesis) ([]byte, error) {
+	data, err := json.Marshal(&customGenesis)
+	if err != nil {
+		return nil, err
+	}
+	var raw map[string]interface{}
+	if err = json.Unmarshal(data, &raw); err != nil {
+		return nil, err
+	}
+
+	HandleAdditionalFields(&raw)
+
+	modifiedData, err := json.Marshal(raw)
+	if err != nil {
+		return nil, err
+	}
+
+	return modifiedData, nil
 }
 
 type CustomGenesisForkConfig struct {
@@ -35,6 +74,9 @@ func NewCustomGenesisForkConfig(baseConfig thor.ForkConfig) *CustomGenesisForkCo
 func (cfg *CustomGenesisForkConfig) AddField(key string, value uint32) error {
 	if key == "" {
 		return fmt.Errorf("key cannot be empty")
+	}
+	if cfg.AdditionalFields == nil {
+		cfg.AdditionalFields = make(map[string]uint32)
 	}
 	cfg.AdditionalFields[key] = value
 	return nil

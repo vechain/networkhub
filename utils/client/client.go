@@ -104,6 +104,10 @@ func (c *Client) GetPeers() ([]*node.PeerStats, error) {
 	return c.conn.GetPeers()
 }
 
+func (c *Client) ChainTag() (byte, error) {
+	return c.conn.ChainTag()
+}
+
 func convertToBatchCallData(tx *tx.Transaction, addr *thor.Address) *accounts.BatchCallData {
 	cls := make(accounts.Clauses, len(tx.Clauses()))
 	for i, c := range tx.Clauses() {
