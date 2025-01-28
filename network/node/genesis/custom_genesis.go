@@ -37,8 +37,8 @@ func HandleAdditionalFields(raw *map[string]interface{}) {
 	}
 }
 
-func (cg *CustomGenesis) Marshal() ([]byte, error) {
-	data, err := json.Marshal(cg)
+func Marshal(customGenesis *CustomGenesis) ([]byte, error) {
+	data, err := json.Marshal(&customGenesis)
 	if err != nil {
 		return nil, err
 	}

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/vechain/networkhub/network/node"
+	nodegenesis "github.com/vechain/networkhub/network/node/genesis"
 )
 
 type Node struct {
@@ -50,7 +51,7 @@ func (n *Node) Start() error {
 
 	// write genesis to disk
 	genesisPath := filepath.Join(n.nodeCfg.GetConfigDir(), "genesis.json")
-	genesisBytes, err := n.nodeCfg.GetGenesis().Marshal()
+	genesisBytes, err := nodegenesis.Marshal(n.nodeCfg.GetGenesis())
 	if err != nil {
 		return fmt.Errorf("unable to marshal genesis - %w", err)
 	}

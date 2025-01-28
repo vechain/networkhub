@@ -13,6 +13,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/vechain/networkhub/network/node"
+	nodegenesis "github.com/vechain/networkhub/network/node/genesis"
 )
 
 // NewDockerNode initializes a new DockerNode
@@ -55,6 +56,7 @@ func (n *Node) Start() error {
 			}
 			defer out.Close()
 
+			// We wait for the image to be pulled
 			decoder := json.NewDecoder(out)
 			for {
 				var event map[string]interface{}
@@ -98,7 +100,7 @@ func (n *Node) Start() error {
 	}
 
 	//serialize genesis
-	genesisBytes, err := n.cfg.GetGenesis().Marshal()
+	genesisBytes, err := nodegenesis.Marshal(n.cfg.GetGenesis())
 	if err != nil {
 		return fmt.Errorf("unable to marshal genesis - %w", err)
 	}
