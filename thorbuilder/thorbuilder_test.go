@@ -10,32 +10,31 @@ import (
 )
 
 func TestBuilder(t *testing.T) {
-	// TODO fix: gh runners are not playing well with this particular test even when the same reusable feature is used on other tests
-	// t.Run("Test Build Reusable", func(t *testing.T) {
-	//	branch := "master"
-	//	builder := New(branch, true)
-	//
-	//	// First download
-	//	err := builder.Download()
-	//	require.NoError(t, err)
-	//
-	//	// First build
-	//	thorBinaryPath, err := builder.Build()
-	//	require.NoError(t, err)
-	//
-	//	_, err = os.Stat(thorBinaryPath)
-	//	require.NoError(t, err)
-	//	assert.Equal(t, filepath.Join(builder.downloadPath, "bin", "thor"), thorBinaryPath)
-	//
-	//	// Second download should skip cloning
-	//	err = builder.Download()
-	//	require.NoError(t, err)
-	//
-	//	// Second build should skip building if the binary exists
-	//	thorBinaryPath, err = builder.Build()
-	//	require.NoError(t, err)
-	//	assert.Equal(t, filepath.Join(builder.downloadPath, "bin", "thor"), thorBinaryPath)
-	//})
+	t.Run("Test Build Reusable", func(t *testing.T) {
+		branch := "master"
+		builder := New(branch, true)
+
+		// First download
+		err := builder.Download()
+		require.NoError(t, err)
+
+		// First build
+		thorBinaryPath, err := builder.Build()
+		require.NoError(t, err)
+
+		_, err = os.Stat(thorBinaryPath)
+		require.NoError(t, err)
+		assert.Equal(t, filepath.Join(builder.downloadPath, "bin", "thor"), thorBinaryPath)
+
+		// Second download should skip cloning
+		err = builder.Download()
+		require.NoError(t, err)
+
+		// Second build should skip building if the binary exists
+		thorBinaryPath, err = builder.Build()
+		require.NoError(t, err)
+		assert.Equal(t, filepath.Join(builder.downloadPath, "bin", "thor"), thorBinaryPath)
+	})
 
 	t.Run("Test Build Non-Reusable", func(t *testing.T) {
 		branch := "master"
