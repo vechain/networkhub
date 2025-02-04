@@ -23,8 +23,6 @@ func New(branch string, reusable bool) *Builder {
 	suffix := generateRandomSuffix(4)
 
 	downloadPath := filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_%d_%s", branch, os.Getpid(), suffix))
-
-	//downloadPath := filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_%d", branch, os.Getpid()))
 	if reusable {
 		downloadPath = filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_reusable", branch))
 	}
