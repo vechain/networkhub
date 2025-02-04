@@ -33,8 +33,14 @@ func (b *BaseNode) GetP2PListenPort() int {
 	return b.P2PListenPort
 }
 
+func (b *BaseNode) SetP2PListenPort(port int) {
+	b.P2PListenPort = port
+}
 func (b *BaseNode) GetAPIAddr() string {
 	return b.APIAddr
+}
+func (b *BaseNode) SetAPIAddr(addr string) {
+	b.APIAddr = addr
 }
 
 func (b *BaseNode) GetAPICORS() string {

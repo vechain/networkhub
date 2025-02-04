@@ -20,8 +20,10 @@ type Node interface {
 	GetGenesis() *genesis.CustomGenesis
 	SetGenesis(genesis *genesis.CustomGenesis)
 	GetAPIAddr() string
+	SetAPIAddr(addr string)
 	GetAPICORS() string
 	GetP2PListenPort() int
+	SetP2PListenPort(port int)
 	GetVerbosity() int
 	GetHTTPAddr() string
 	GetFakeExecution() bool

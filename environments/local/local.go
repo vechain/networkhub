@@ -24,21 +24,20 @@ func NewLocalEnv() environments.Actions {
 func (l *Local) LoadConfig(cfg *network.Network) (string, error) {
 	l.networkCfg = cfg
 	l.id = l.networkCfg.Environment + l.networkCfg.ID
-	baseTmpDir := filepath.Join(os.TempDir(), l.id)
 
-	// ensure paths exist, use temp dirs if not defined
+	// ensure paths exist, use ExecArtifact base dirs if not defined
 	for _, n := range l.networkCfg.Nodes {
-		if n.GetConfigDir() == "" {
-			n.SetConfigDir(filepath.Join(baseTmpDir, n.GetID(), "config"))
-		}
-
-		if n.GetDataDir() == "" {
-			n.SetDataDir(filepath.Join(baseTmpDir, n.GetID(), "data"))
-		}
-
 		// check if the exec artifact path exists
 		if !fileExists(n.GetExecArtifact()) {
 			return "", fmt.Errorf("exec does not exist at path: %s", n.GetExecArtifact())
+		}
+
+		if n.GetConfigDir() == "" {
+			n.SetConfigDir(filepath.Join(filepath.Dir(n.GetExecArtifact()), n.GetID(), "config"))
+		}
+
+		if n.GetDataDir() == "" {
+			n.SetDataDir(filepath.Join(filepath.Dir(n.GetExecArtifact()), n.GetID(), "data"))
 		}
 	}
 

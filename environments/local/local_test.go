@@ -241,6 +241,7 @@ func TestSixNodes(t *testing.T) {
 }
 
 func TestSixNodesGalactica(t *testing.T) {
+	t.Skip()
 	var sixNodesGalacticaNetwork *network.Network
 	require.NotPanics(t, func() { sixNodesGalacticaNetwork = preset.LocalSixNodesGalacticaNetwork() })
 

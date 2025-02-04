@@ -2,6 +2,8 @@ package thorbuilder
 
 import (
 	"bytes"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"log/slog"
 	"os"
@@ -18,7 +20,9 @@ type Builder struct {
 // New creates a new Builder instance for the specified branch.
 // If reusable is true, it skips cloning if the directory exists and checks for the binary.
 func New(branch string, reusable bool) *Builder {
-	downloadPath := filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_%d", branch, os.Getpid()))
+	suffix := generateRandomSuffix(4)
+
+	downloadPath := filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_%d_%s", branch, os.Getpid(), suffix))
 	if reusable {
 		downloadPath = filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_reusable", branch))
 	}
@@ -96,4 +100,11 @@ func (b *Builder) Build() (string, error) {
 	}
 
 	return thorBinaryPath, nil
+}
+
+// generateRandomSuffix returns a random hexadecimal string.
+func generateRandomSuffix(n int) string {
+	bytes := make([]byte, n)
+	_, _ = rand.Read(bytes)
+	return hex.EncodeToString(bytes)
 }
