@@ -39,7 +39,6 @@ func (l *Local) LoadConfig(cfg *network.Network) (string, error) {
 		if n.GetDataDir() == "" {
 			n.SetDataDir(filepath.Join(filepath.Dir(n.GetExecArtifact()), n.GetID(), "data"))
 		}
-
 	}
 
 	return l.id, nil

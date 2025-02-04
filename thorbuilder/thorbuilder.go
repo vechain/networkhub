@@ -20,10 +20,8 @@ type Builder struct {
 // New creates a new Builder instance for the specified branch.
 // If reusable is true, it skips cloning if the directory exists and checks for the binary.
 func New(branch string, reusable bool) *Builder {
-	suffix, err := generateRandomSuffix(4)
-	if err != nil {
-		// handle error appropriately
-	}
+	suffix := generateRandomSuffix(4)
+
 	downloadPath := filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_%d_%s", branch, os.Getpid(), suffix))
 
 	//downloadPath := filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_%d", branch, os.Getpid()))
@@ -107,10 +105,8 @@ func (b *Builder) Build() (string, error) {
 }
 
 // generateRandomSuffix returns a random hexadecimal string.
-func generateRandomSuffix(n int) (string, error) {
+func generateRandomSuffix(n int) string {
 	bytes := make([]byte, n)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(bytes), nil
+	_, _ = rand.Read(bytes)
+	return hex.EncodeToString(bytes)
 }
