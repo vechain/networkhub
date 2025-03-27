@@ -48,6 +48,14 @@ func (b *Builder) Download() error {
 	}
 
 	repoURL := "https://github.com/vechain/thor"
+	forkRepoUrl := os.Getenv("FORK_REPO_URL")
+	if forkRepoUrl != "" {
+		repoURL = forkRepoUrl
+		slog.Info("Using forked repository URL: ", "url", repoURL)
+	} else {
+		slog.Info("Using default repository URL: ", "url", repoURL)
+	}
+
 	cmd := exec.Command("git", "clone", "--branch", b.branch, "--depth", "1", repoURL, b.downloadPath)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
