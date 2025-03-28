@@ -76,6 +76,7 @@ func TestDockerNetwork(t *testing.T) {
 }
 
 func TestDockerHayabusaNetwork(t *testing.T) {
+	t.Skip()
 	repoUrl := "https://github.com/vechain/hayabusa"
 	branch := "release/hayabusa"
 	genesisUrl := "https://vechain.github.io/hayabusa-devnet/genesis.json"

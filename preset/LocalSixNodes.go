@@ -25,8 +25,7 @@ var (
 )
 
 func LocalSixNodesNetwork() *network.Network {
-	customGenesis := LocalSixNodesNetworkGenesis()
-	return LocalSixNodesNetworkWithGenesis(customGenesis)
+	return LocalSixNodesNetworkWithGenesis(LocalSixNodesNetworkGenesis())
 }
 
 func LocalSixNodesNetworkGenesis() *genesis.CustomGenesis {
