@@ -5,7 +5,9 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -15,11 +17,18 @@ type Builder struct {
 	branch       string
 	downloadPath string
 	reusable     bool
+	repoUrl      string
 }
 
 // New creates a new Builder instance for the specified branch.
 // If reusable is true, it skips cloning if the directory exists and checks for the binary.
 func New(branch string, reusable bool) *Builder {
+	return NewWithRepo("https://github.com/vechain/thor", branch, reusable)
+}
+
+// New creates a new Builder instance for the specified branch and repo.
+// If reusable is true, it skips cloning if the directory exists and checks for the binary.
+func NewWithRepo(repoUrl string, branch string, reusable bool) *Builder {
 	suffix := generateRandomSuffix(4)
 
 	downloadPath := filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_%d_%s", branch, os.Getpid(), suffix))
@@ -30,6 +39,7 @@ func New(branch string, reusable bool) *Builder {
 		branch:       branch,
 		reusable:     reusable,
 		downloadPath: downloadPath,
+		repoUrl:      repoUrl,
 	}
 }
 
@@ -47,8 +57,7 @@ func (b *Builder) Download() error {
 		return fmt.Errorf("failed to create download directory: %w", err)
 	}
 
-	repoURL := "https://github.com/vechain/thor"
-	cmd := exec.Command("git", "clone", "--branch", b.branch, "--depth", "1", repoURL, b.downloadPath)
+	cmd := exec.Command("git", "clone", "--branch", b.branch, "--depth", "1", b.repoUrl, b.downloadPath)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -100,6 +109,46 @@ func (b *Builder) Build() (string, error) {
 	}
 
 	return thorBinaryPath, nil
+}
+
+func (b *Builder) BuildDockerImage() (string, error) {
+	if err := b.Download(); err != nil {
+		return "", fmt.Errorf("failed to download repository: %w", err)
+	}
+
+	tag := fmt.Sprintf("test_%s_%s", b.branch, generateRandomSuffix(4))
+
+	// Build the Docker image
+	cmd := exec.Command("docker", "build", "-t", tag, b.downloadPath)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("failed to build Docker image: %w", err)
+	}
+
+	slog.Info("Successfully built Docker image", "tag", tag)
+	return tag, nil
+}
+
+func FetchCustomGenesisFile(genesisUrl string) (*string, error) {
+	resp, err := http.Get(genesisUrl)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch genesis file: %s", resp.Status)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	genesis := string(body)
+	return &genesis, err
 }
 
 // generateRandomSuffix returns a random hexadecimal string.

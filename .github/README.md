@@ -139,6 +139,7 @@ The `thorbuilder` package is a key component of the networkHub framework. It sim
 ### Features:
 - **Download Thor Source**: Fetches the Thor source code from the specified branch.
 - **Build Thor Binary**: Compiles the source code into a working binary.
+- **Fork Repo Support**: Allows for building from a forked repository, enabling developers to work on custom features or fixes.
 
 ### Example Usage:
 
@@ -157,6 +158,33 @@ import (
 func main() {
 	branch := "master"
 	builder := thorbuilder.New(branch)
+
+	if err := builder.Download(); err != nil {
+		log.Fatalf("Failed to download source: %v", err)
+	}
+
+	thorBinaryPath, err := builder.Build()
+	if err != nil {
+		log.Fatalf("Failed to build binary: %v", err)
+	}
+
+	slog.Info("Thor binary built successfully at: %s", thorBinaryPath)
+}
+```
+#### Building the Thor Binary from fork repo:
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+	"github.com/vechain/networkhub/thorbuilder"
+	"log/slog"
+)
+
+func main() {
+	branch := "release/hayabusa"
+	builder := thorbuilder.NewWithRepo(branch)
 
 	if err := builder.Download(); err != nil {
 		log.Fatalf("Failed to download source: %v", err)

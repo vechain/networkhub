@@ -11,6 +11,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
@@ -260,6 +261,33 @@ func TestSixNodesGalactica(t *testing.T) {
 	clients := pollingWhileConnectingPeers(t, sixNodesGalacticaNetwork.Nodes, 5)
 
 	deployAndAssertShanghaiContract(t, clients[0], preset.SixNNAccount1)
+}
+
+func TestSixNodesHayabusa(t *testing.T) {
+	t.Skip()
+	var sixNodesHayabusaNetwork *network.Network
+
+	genesisUrl := "https://vechain.github.io/hayabusa-devnet/genesis.json"
+	customGenesis, err := thorbuilder.FetchCustomGenesisFile(genesisUrl)
+	assert.NoError(t, err)
+
+	require.NotPanics(t, func() {
+		sixNodesHayabusaNetwork = preset.LocalSixNodesHayabusaNetwork(*customGenesis, "https://github.com/vechain/hayabusa")
+	})
+
+	localEnv := NewLocalEnv()
+	_, err = localEnv.LoadConfig(sixNodesHayabusaNetwork)
+	require.NoError(t, err)
+
+	err = localEnv.StartNetwork()
+	require.NoError(t, err)
+
+	defer func() {
+		err = localEnv.StopNetwork()
+		require.NoError(t, err)
+	}()
+
+	pollingWhileConnectingPeers(t, sixNodesHayabusaNetwork.Nodes, 5)
 }
 
 func pollingWhileConnectingPeers(t *testing.T, nodes []node.Node, expectedPeersLen int) []*client.Client {
