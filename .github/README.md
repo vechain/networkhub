@@ -172,10 +172,6 @@ func main() {
 }
 ```
 #### Building the Thor Binary from fork repo:
-```bash
-export FORK_REPO_URL=https://github.com/vechain/hayabusa
-```
-
 ```go
 package main
 
@@ -188,7 +184,7 @@ import (
 
 func main() {
 	branch := "release/hayabusa"
-	builder := thorbuilder.New(branch)
+	builder := thorbuilder.NewWithRepo(branch)
 
 	if err := builder.Download(); err != nil {
 		log.Fatalf("Failed to download source: %v", err)
