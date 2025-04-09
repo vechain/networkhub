@@ -3,6 +3,7 @@ package local
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/vechain/networkhub/environments"
@@ -53,6 +54,28 @@ func (l *Local) StartNetwork() error {
 			return err
 		}
 		enodes = append(enodes, enode)
+	}
+
+	// check if we need to run `make thor` before starting the nodes
+	// list the files in the exec artifact directory
+	execArtifactDir := l.networkCfg.Nodes[0].GetExecArtifact()
+	makeFile := filepath.Join(execArtifactDir, "Makefile")
+
+	// check if a Makefile exists
+	// if so, we need to run `make thor`
+	if fileExists(makeFile) {
+		// run `make thor` in the exec artifact directory
+		cmd := exec.Command("make", "thor")
+		cmd.Dir = execArtifactDir
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("failed to run make thor: %w", err)
+		}
+
+		for _, node := range l.networkCfg.Nodes {
+			node.SetExecArtifact(filepath.Join(execArtifactDir, "bin", "thor"))
+		}
 	}
 
 	for _, nodeCfg := range l.networkCfg.Nodes {
