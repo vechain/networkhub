@@ -38,7 +38,7 @@ func TestBuilder(t *testing.T) {
 	//})
 
 	t.Run("Test Build Non-Reusable", func(t *testing.T) {
-		branch := "master"
+		branch := "release/galactica"
 		builder := New(branch, false)
 
 		err := builder.Download()
