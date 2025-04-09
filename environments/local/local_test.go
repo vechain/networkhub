@@ -192,7 +192,7 @@ func Test_MakeThor(t *testing.T) {
 	cmd.Dir = tempDir
 	cmd.Path = gitPath
 	cmd.Args = []string{
-		"git", "clone", "https://github.com/vechain/thor",
+		"git", "clone", "-b", "release/galactica", "https://github.com/vechain/thor",
 	}
 	if err := cmd.Run(); err != nil {
 		t.Fatalf("failed to clone thor repo: %v", err)
@@ -227,7 +227,7 @@ func Test_MakeThor(t *testing.T) {
 func TestThreeNodes(t *testing.T) {
 	var err error
 
-	thorBuilder := thorbuilder.New("master", true)
+	thorBuilder := thorbuilder.New("release/galactica", true)
 	require.NoError(t, thorBuilder.Download())
 	thorBinPath, err := thorBuilder.Build()
 	require.NoError(t, err)
@@ -266,7 +266,7 @@ func TestSixNodes(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	thorBuilder := thorbuilder.New("master", true)
+	thorBuilder := thorbuilder.New("release/galactica", true)
 	require.NoError(t, thorBuilder.Download())
 	thorBinPath, err := thorBuilder.Build()
 	require.NoError(t, err)

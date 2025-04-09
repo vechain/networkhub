@@ -53,6 +53,7 @@ require (
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/qianbin/directcache v0.9.7 // indirect
+	github.com/qianbin/drlp v0.0.0-20240102101024-e0e02518b5f9 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a // indirect
