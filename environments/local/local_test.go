@@ -192,7 +192,7 @@ func Test_MakeThor(t *testing.T) {
 	cmd.Dir = tempDir
 	cmd.Path = gitPath
 	cmd.Args = []string{
-		"git", "clone", "https://github.com/vechain/thor",
+		"git", "clone", "-b", "release/galactica", "https://github.com/vechain/thor",
 	}
 	if err := cmd.Run(); err != nil {
 		t.Fatalf("failed to clone thor repo: %v", err)
