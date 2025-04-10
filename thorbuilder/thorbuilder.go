@@ -43,6 +43,16 @@ func NewWithRepo(repoUrl string, branch string, reusable bool) *Builder {
 	}
 }
 
+// NewWithRepoPath allows for local testing and quicker builds
+func NewWithRepoPath(repoUrl string, branch string, downloadPath string) *Builder {
+	return &Builder{
+		branch:       branch,
+		reusable:     true,
+		downloadPath: downloadPath,
+		repoUrl:      repoUrl,
+	}
+}
+
 // Download clones the specified branch of the Thor repository into the downloadPath.
 func (b *Builder) Download() error {
 	if b.reusable {
