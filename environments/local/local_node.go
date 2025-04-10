@@ -3,6 +3,7 @@ package local
 import (
 	"context"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -86,8 +87,14 @@ func (n *Node) Start() error {
 			"--p2p-port", fmt.Sprintf("%d", n.nodeCfg.GetP2PListenPort()),
 			"--bootnode", enodeString,
 		},
-		Stdout: os.Stdout, // Directing stdout to the same stdout of the Go program
-		Stderr: os.Stderr, // Directing stderr to the same stderr of the Go program
+		Stdout: &nodeWriter{
+			id: n.nodeCfg.GetID(),
+			w:  os.Stdout,
+		},
+		Stderr: &nodeWriter{
+			id: n.nodeCfg.GetID(),
+			w:  os.Stderr,
+		},
 	}
 
 	if n.nodeCfg.GetVerbosity() != 0 {
@@ -139,4 +146,23 @@ func (n *Node) Stop() error {
 		slog.Info("Process stopped gracefully")
 	}
 	return nil
+}
+
+type nodeWriter struct {
+	id string
+	w  io.Writer
+}
+
+func (nw *nodeWriter) Write(p []byte) (int, error) {
+	lines := strings.Split(string(p), "\n")
+	for _, line := range lines {
+		if line == "" {
+			continue
+		}
+		line = fmt.Sprintf("[%s] %s\n", nw.id, line)
+		if _, err := nw.w.Write([]byte(line)); err != nil {
+			return 0, err
+		}
+	}
+	return len(p), nil
 }

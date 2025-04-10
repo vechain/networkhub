@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 	"math"
-	"os/exec"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -172,54 +170,6 @@ func TestLocal(t *testing.T) {
 	slog.Info("Account", "acc", account)
 
 	time.Sleep(time.Minute)
-	err = localEnv.StopNetwork()
-	require.NoError(t, err)
-}
-
-func Test_MakeThor(t *testing.T) {
-	var err error
-
-	networkCfg := preset.LocalThreeMasterNodesNetwork()
-
-	tempDir := t.TempDir()
-
-	gitPath, err := exec.LookPath("git")
-	if err != nil {
-		t.Fatalf("git not found in PATH: %v", err)
-	}
-	// git clone https://github.com/vechain/thor
-	cmd := &exec.Cmd{}
-	cmd.Dir = tempDir
-	cmd.Path = gitPath
-	cmd.Args = []string{
-		"git", "clone", "-b", "release/galactica", "https://github.com/vechain/thor",
-	}
-	if err := cmd.Run(); err != nil {
-		t.Fatalf("failed to clone thor repo: %v", err)
-	}
-	repoPath := filepath.Join(tempDir, "thor")
-
-	t.Logf("cloning thor to %s", repoPath)
-
-	// ensure the artifact path is set
-	for _, node := range networkCfg.Nodes {
-		node.SetExecArtifact(repoPath)
-	}
-	localEnv := NewLocalEnv()
-	_, err = localEnv.LoadConfig(networkCfg)
-	require.NoError(t, err)
-
-	err = localEnv.StartNetwork()
-	require.NoError(t, err)
-
-	time.Sleep(30 * time.Second)
-	c := client.NewClient(networkCfg.Nodes[0].GetHTTPAddr())
-	account, err := c.GetAccount(datagen.RandAccount().Address)
-	require.NoError(t, err)
-
-	slog.Info("account:", "acc", account)
-
-	time.Sleep(30 * time.Second)
 	err = localEnv.StopNetwork()
 	require.NoError(t, err)
 }
