@@ -94,15 +94,6 @@ func (b *Builder) Build() (string, error) {
 		return "", fmt.Errorf("download directory does not exist: %s", b.downloadPath)
 	}
 
-	if b.reusable {
-		// Check if the binary exists and if it does return the path
-		thorBinaryPath := filepath.Join(b.downloadPath, "bin", "thor")
-		if _, err := os.Stat(thorBinaryPath); err == nil {
-			slog.Info("Reusable binary exists: ", "path", thorBinaryPath)
-			return thorBinaryPath, nil
-		}
-	}
-
 	makeCmd := exec.Command("make")
 	makeCmd.Dir = b.downloadPath
 	// Capture output
