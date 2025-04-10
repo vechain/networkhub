@@ -44,9 +44,8 @@ func NewWithRepo(repoUrl string, branch string, reusable bool) *Builder {
 }
 
 // NewWithRepoPath allows for local testing and quicker builds
-func NewWithRepoPath(repoUrl string, branch string, downloadPath string) *Builder {
+func NewWithRepoPath(repoUrl string, downloadPath string) *Builder {
 	return &Builder{
-		branch:       branch,
 		reusable:     true,
 		downloadPath: downloadPath,
 		repoUrl:      repoUrl,
@@ -59,6 +58,10 @@ func (b *Builder) Download() error {
 		// Check if the folder exists and ensure it contains a cloned repository
 		if _, err := os.Stat(filepath.Join(b.downloadPath, ".git")); err == nil {
 			slog.Info("Reusable directory with repository exists: ", "path", b.downloadPath)
+			cmd := exec.Command("git", "pull")
+			if err := cmd.Run(); err != nil {
+				return fmt.Errorf("failed to pull latest version of repository: %w", err)
+			}
 			return nil
 		}
 	}
@@ -67,7 +70,14 @@ func (b *Builder) Download() error {
 		return fmt.Errorf("failed to create download directory: %w", err)
 	}
 
-	cmd := exec.Command("git", "clone", "--branch", b.branch, "--depth", "1", b.repoUrl, b.downloadPath)
+	args := make([]string, 0)
+	args = append(args, "clone")
+	if b.branch != "" {
+		args = append(args, "--branch", b.branch)
+	}
+	args = append(args, "--depth", "1", b.repoUrl, b.downloadPath)
+
+	cmd := exec.Command("git", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
