@@ -54,7 +54,7 @@ func (l *Local) StartNetwork() error {
 		}
 		enodes = append(enodes, enode)
 	}
-	
+
 	for _, nodeCfg := range l.networkCfg.Nodes {
 		localNode := NewLocalNode(nodeCfg, enodes)
 		if err := localNode.Start(); err != nil {
