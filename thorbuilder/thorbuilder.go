@@ -60,7 +60,7 @@ func (b *Builder) Download() error {
 			slog.Info("Reusable directory with repository exists: ", "path", b.downloadPath)
 			cmd := exec.Command("git", "pull")
 			if err := cmd.Run(); err != nil {
-				return fmt.Errorf("failed to pull latest version of repository: %w", err)
+				slog.Warn("Failed to pull latest changes from repository", "error", err)
 			}
 			return nil
 		}
