@@ -177,7 +177,7 @@ func TestLocal(t *testing.T) {
 func TestThreeNodes(t *testing.T) {
 	var err error
 
-	thorBuilder := thorbuilder.New("release/galactica", true)
+	thorBuilder := thorbuilder.New("master", true)
 	require.NoError(t, thorBuilder.Download())
 	thorBinPath, err := thorBuilder.Build()
 	require.NoError(t, err)
@@ -216,7 +216,7 @@ func TestSixNodes(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	thorBuilder := thorbuilder.New("release/galactica", true)
+	thorBuilder := thorbuilder.New("master", true)
 	require.NoError(t, thorBuilder.Download())
 	thorBinPath, err := thorBuilder.Build()
 	require.NoError(t, err)

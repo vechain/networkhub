@@ -39,7 +39,7 @@ func TestBuilder(t *testing.T) {
 	//})
 
 	t.Run("Test Build Non-Reusable", func(t *testing.T) {
-		branch := "release/galactica"
+		branch := "master"
 		builder := New(branch, false)
 
 		err := builder.Download()
@@ -54,7 +54,7 @@ func TestBuilder(t *testing.T) {
 	})
 
 	t.Run("Test Build With Specified Download Path", func(t *testing.T) {
-		branch := "release/galactica"
+		branch := "master"
 		builder := New(branch, true)
 		assert.NoError(t, builder.Download())
 		path, err := builder.Build()

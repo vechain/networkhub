@@ -116,7 +116,6 @@ func LocalThreeMasterNodesNetworkGenesis() *genesis.CustomGenesis {
 				BLOCKLIST: 0,
 				ETH_IST:   0,
 				VIP214:    0,
-				GALACTICA: 1,
 			},
 		},
 	}

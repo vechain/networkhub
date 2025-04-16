@@ -162,8 +162,8 @@ github.com/vechain/go-ethereum v1.8.15-0.20250203151135-b4d97bda6bc9 h1:dkF3gD0L
 github.com/vechain/go-ethereum v1.8.15-0.20250203151135-b4d97bda6bc9/go.mod h1:yPUCNmntAh1PritrMfSi7noK+9vVPStZX3wgh3ieaY0=
 github.com/vechain/goleveldb v1.0.1-0.20220809091043-51eb019c8655 h1:CbHcWpCi7wOYfpoErRABh3Slyq9vO0Ay/EHN5GuJSXQ=
 github.com/vechain/goleveldb v1.0.1-0.20220809091043-51eb019c8655/go.mod h1:RRCYJbIwD5jmqPI9XoAFR0OcDxqUctll6zUj/+B4S48=
-github.com/vechain/thor/v2 v2.2.2-0.20250408135930-b635d1213027 h1:iNl+Pq9AZ27omaGSkOHwz006eImj8WuHCbc4du+Gork=
-github.com/vechain/thor/v2 v2.2.2-0.20250408135930-b635d1213027/go.mod h1:0a/ADXhpiBXsoyRv8EWCjzMGL9CkwWvfzoAP7qwDYjQ=
+github.com/vechain/thor/v2 v2.2.1 h1:yvN4VjZHIeO1w+neUy1bzqXwtg9rw3JgxuP3D5Qz+Ss=
+github.com/vechain/thor/v2 v2.2.1/go.mod h1:os07YBz+nTWAbFfwkR8G4yKSLcc8q+ZBVLuwyqYBGek=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.52.0 h1:9l89oX4ba9kHbBol3Xin3leYJ+252h0zszDtBwyKe2A=
