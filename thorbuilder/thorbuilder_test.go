@@ -3,6 +3,7 @@ package thorbuilder
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -50,6 +51,20 @@ func TestBuilder(t *testing.T) {
 		_, err = os.Stat(thorBinaryPath)
 		require.NoError(t, err)
 		assert.Equal(t, filepath.Join(builder.downloadPath, "bin", "thor"), thorBinaryPath)
+	})
+
+	t.Run("Test Build With Specified Download Path", func(t *testing.T) {
+		branch := "master"
+		builder := New(branch, true)
+		assert.NoError(t, builder.Download())
+		path, err := builder.Build()
+		assert.NoError(t, err)
+		path, _ = strings.CutSuffix(path, "/bin/thor")
+
+		custom := NewWithRepoPath("https://github.com/vechain/thor", path)
+		assert.NoError(t, custom.Download())
+		_, err = custom.Build()
+		assert.NoError(t, err)
 	})
 
 	t.Run("Invalid Branch", func(t *testing.T) {

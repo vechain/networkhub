@@ -22,7 +22,6 @@ linters:
     - staticcheck
     - bidichk
     - durationcheck
-    - exportloopref
     - whitespace
 
     # - structcheck # lots of false positives
