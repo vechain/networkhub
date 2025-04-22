@@ -2,6 +2,7 @@ package network
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/network/node/genesis"
@@ -65,6 +66,15 @@ func UnmarshalNode(data []byte) (node.Node, error) {
 	}
 
 	return nodeType, nil
+}
+
+func (n *Network) HealthCheck(waitForBlock uint32, timeout time.Duration) error {
+	for _, n := range n.Nodes {
+		if err := n.HealthCheck(waitForBlock, timeout); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // UnmarshalJSON implements custom unmarshalling for Network

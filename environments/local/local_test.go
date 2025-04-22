@@ -290,6 +290,29 @@ func TestSixNodesHayabusa(t *testing.T) {
 	pollingWhileConnectingPeers(t, sixNodesHayabusaNetwork.Nodes, 5)
 }
 
+func TestThreeNodes_Healthcheck(t *testing.T) {
+	networkCfg := preset.LocalThreeMasterNodesNetwork()
+
+	thorBuilder := thorbuilder.New("master", true)
+	require.NoError(t, thorBuilder.Download())
+	thorBinPath, err := thorBuilder.Build()
+	require.NoError(t, err)
+
+	// ensure the artifact path is set
+	for _, node := range networkCfg.Nodes {
+		node.SetExecArtifact(thorBinPath)
+	}
+
+	localEnv := NewLocalEnv()
+	_, err = localEnv.LoadConfig(networkCfg)
+	require.NoError(t, err)
+
+	err = localEnv.StartNetwork()
+	require.NoError(t, err)
+
+	assert.NoError(t, networkCfg.HealthCheck(0, time.Second*20))
+}
+
 func pollingWhileConnectingPeers(t *testing.T, nodes []node.Node, expectedPeersLen int) []*client.Client {
 	// Polling approach with timeout
 	timeout := time.After(1 * time.Minute)
