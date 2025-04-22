@@ -1,4 +1,4 @@
-package consts
+package preset
 
 import (
 	"math/big"

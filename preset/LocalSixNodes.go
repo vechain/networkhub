@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"github.com/vechain/networkhub/consts"
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
@@ -36,38 +35,38 @@ func LocalSixNodesNetworkGenesis() *genesis.CustomGenesis {
 		Accounts: []thorgenesis.Account{
 			{
 				Address: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"), // dce1443bd2ef0c2631adc1c67e5c93f13dc23a41c18b536effbbdcbcdb96fb65
-				Balance: convToHexOrDecimal256(consts.LargeBigValue),
-				Energy:  convToHexOrDecimal256(consts.LargeBigValue),
+				Balance: convToHexOrDecimal256(LargeBigValue),
+				Energy:  convToHexOrDecimal256(LargeBigValue),
 			},
 			{
 				Address: *SixNNAccount1.Address,
-				Balance: convToHexOrDecimal256(consts.LargeBigValue),
-				Energy:  convToHexOrDecimal256(consts.LargeBigValue),
+				Balance: convToHexOrDecimal256(LargeBigValue),
+				Energy:  convToHexOrDecimal256(LargeBigValue),
 			},
 			{
 				Address: *SixNNAccount2.Address,
-				Balance: convToHexOrDecimal256(consts.LargeBigValue),
-				Energy:  convToHexOrDecimal256(consts.LargeBigValue),
+				Balance: convToHexOrDecimal256(LargeBigValue),
+				Energy:  convToHexOrDecimal256(LargeBigValue),
 			},
 			{
 				Address: *SixNNAccount3.Address,
-				Balance: convToHexOrDecimal256(consts.LargeBigValue),
-				Energy:  convToHexOrDecimal256(consts.LargeBigValue),
+				Balance: convToHexOrDecimal256(LargeBigValue),
+				Energy:  convToHexOrDecimal256(LargeBigValue),
 			},
 			{
 				Address: *SixNNAccount4.Address,
-				Balance: convToHexOrDecimal256(consts.LargeBigValue),
-				Energy:  convToHexOrDecimal256(consts.LargeBigValue),
+				Balance: convToHexOrDecimal256(LargeBigValue),
+				Energy:  convToHexOrDecimal256(LargeBigValue),
 			},
 			{
 				Address: *SixNNAccount5.Address,
-				Balance: convToHexOrDecimal256(consts.LargeBigValue),
-				Energy:  convToHexOrDecimal256(consts.LargeBigValue),
+				Balance: convToHexOrDecimal256(LargeBigValue),
+				Energy:  convToHexOrDecimal256(LargeBigValue),
 			},
 			{
 				Address: *SixNNAccount6.Address,
-				Balance: convToHexOrDecimal256(consts.LargeBigValue),
-				Energy:  convToHexOrDecimal256(consts.LargeBigValue),
+				Balance: convToHexOrDecimal256(LargeBigValue),
+				Energy:  convToHexOrDecimal256(LargeBigValue),
 			},
 		},
 		Authority: []thorgenesis.Authority{
@@ -95,7 +94,7 @@ func LocalSixNodesNetworkGenesis() *genesis.CustomGenesis {
 		Params: thorgenesis.Params{
 			RewardRatio:         convToHexOrDecimal256(big.NewInt(300000000000000000)),
 			BaseGasPrice:        convToHexOrDecimal256(big.NewInt(1000000000000000)),
-			ProposerEndorsement: convToHexOrDecimal256(consts.LargeBigValue),
+			ProposerEndorsement: convToHexOrDecimal256(LargeBigValue),
 			ExecutorAddress:     &localThreeMasterEndorser,
 		},
 		Executor: thorgenesis.Executor{

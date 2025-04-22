@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"github.com/vechain/networkhub/environments/docker"
 
 	"github.com/vechain/networkhub/environments/local"
 	"github.com/vechain/networkhub/hub"
@@ -18,11 +19,11 @@ type Client struct {
 func New() *Client {
 	envManager := hub.NewNetworkHub()
 	envManager.RegisterEnvironment("local", local.NewLocalEnv)
-	//envManager.RegisterEnvironment("docker", docker.NewDockerEnv)
+	envManager.RegisterEnvironment("docker", docker.NewDockerEnv)
 
 	presets := preset.NewPresetNetworks()
-	//presets.Register("threeMasterNodesNetwork", preset.LocalThreeMasterNodesNetwork)
-	//presets.Register("sixNodesNetwork", preset.LocalSixNodesNetwork)
+	//presets.Register("threeMasterNodesNetwork", preset.LocalThreeMasterNodesNetwork())
+	//presets.Register("sixNodesNetwork", preset.LocalSixNodesNetwork())
 
 	return &Client{
 		networkHub: envManager,
