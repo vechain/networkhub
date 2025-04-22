@@ -68,9 +68,9 @@ func UnmarshalNode(data []byte) (node.Node, error) {
 	return nodeType, nil
 }
 
-func (n *Network) HealthCheck(waitForBlock uint32, timeout time.Duration) error {
+func (n *Network) HealthCheck(block uint32, timeout time.Duration) error {
 	for _, n := range n.Nodes {
-		if err := n.HealthCheck(waitForBlock, timeout); err != nil {
+		if err := n.HealthCheck(block, timeout); err != nil {
 			return err
 		}
 	}
