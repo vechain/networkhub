@@ -1,6 +1,10 @@
 package node
 
-import "github.com/vechain/networkhub/network/node/genesis"
+import (
+	"time"
+
+	"github.com/vechain/networkhub/network/node/genesis"
+)
 
 const (
 	MasterNode  = "masterNode"
@@ -27,4 +31,5 @@ type Node interface {
 	GetVerbosity() int
 	GetHTTPAddr() string
 	GetFakeExecution() bool
+	HealthCheck(block uint32, timeout time.Duration) error
 }
