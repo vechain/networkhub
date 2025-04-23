@@ -1,6 +1,6 @@
 module github.com/vechain/networkhub
 
-go 1.24
+go 1.24.2
 
 replace github.com/syndtr/goleveldb => github.com/vechain/goleveldb v1.0.1-0.20220809091043-51eb019c8655
 

@@ -40,6 +40,20 @@ func (b *BaseNode) GetP2PListenPort() int {
 func (b *BaseNode) SetP2PListenPort(port int) {
 	b.P2PListenPort = port
 }
+func (b *BaseNode) GetAPIHost() string {
+	split := strings.Split(b.GetAPIAddr(), ":")
+	if len(split) != 2 {
+		panic(fmt.Errorf("unable to parse API Addr"))
+	}
+	return split[0]
+}
+func (b *BaseNode) SetAPIHost(host string) {
+	split := strings.Split(b.GetAPIAddr(), ":")
+	if len(split) != 2 {
+		panic(fmt.Errorf("unable to parse API Addr"))
+	}
+	b.APIAddr = fmt.Sprintf("%s:%s", host, split[1])
+}
 func (b *BaseNode) GetAPIAddr() string {
 	return b.APIAddr
 }
@@ -73,6 +87,10 @@ func (b *BaseNode) GetDataDir() string {
 
 func (b *BaseNode) SetDataDir(s string) {
 	b.DataDir = s
+}
+
+func (b *BaseNode) SetID(id string) {
+	b.ID = id
 }
 
 func (b *BaseNode) GetID() string {

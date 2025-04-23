@@ -17,10 +17,10 @@ import (
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/preset"
 	"github.com/vechain/networkhub/thorbuilder"
-	"github.com/vechain/networkhub/utils/client"
 	"github.com/vechain/networkhub/utils/common"
 	"github.com/vechain/networkhub/utils/datagen"
 	"github.com/vechain/thor/v2/thor"
+	"github.com/vechain/thor/v2/thorclient"
 	"github.com/vechain/thor/v2/tx"
 )
 
@@ -163,8 +163,8 @@ func TestLocal(t *testing.T) {
 	require.NoError(t, err)
 
 	time.Sleep(30 * time.Second)
-	c := client.NewClient("http://" + networkCfg.Nodes[0].GetAPIAddr())
-	account, err := c.GetAccount(datagen.RandAccount().Address)
+	c := thorclient.New(networkCfg.Nodes[0].GetHTTPAddr())
+	account, err := c.Account(datagen.RandAccount().Address)
 	require.NoError(t, err)
 
 	slog.Info("Account", "acc", account)
@@ -196,8 +196,8 @@ func TestThreeNodes(t *testing.T) {
 	require.NoError(t, err)
 
 	time.Sleep(30 * time.Second)
-	c := client.NewClient(networkCfg.Nodes[0].GetHTTPAddr())
-	account, err := c.GetAccount(datagen.RandAccount().Address)
+	c := thorclient.New(networkCfg.Nodes[0].GetHTTPAddr())
+	account, err := c.Account(datagen.RandAccount().Address)
 	require.NoError(t, err)
 
 	slog.Info("account:", "acc", account)
@@ -313,12 +313,12 @@ func TestThreeNodes_Healthcheck(t *testing.T) {
 	assert.NoError(t, networkCfg.HealthCheck(0, time.Second*20))
 }
 
-func pollingWhileConnectingPeers(t *testing.T, nodes []node.Node, expectedPeersLen int) []*client.Client {
+func pollingWhileConnectingPeers(t *testing.T, nodes []node.Node, expectedPeersLen int) []*thorclient.Client {
 	// Polling approach with timeout
 	timeout := time.After(1 * time.Minute)
 	tick := time.Tick(5 * time.Second)
 
-	clients := make([]*client.Client, 0)
+	clients := make([]*thorclient.Client, 0)
 	for {
 		select {
 		case <-timeout:
@@ -326,8 +326,8 @@ func pollingWhileConnectingPeers(t *testing.T, nodes []node.Node, expectedPeersL
 		case <-tick:
 			allConnected := true
 			for _, node := range nodes {
-				c := client.NewClient("http://" + node.GetAPIAddr())
-				peers, err := c.GetPeers()
+				c := thorclient.New(node.GetHTTPAddr())
+				peers, err := c.Peers()
 				require.NoError(t, err)
 				if len(peers) != expectedPeersLen {
 					allConnected = false
@@ -352,7 +352,7 @@ func decodedShanghaiContract(t *testing.T) []byte {
 	return contractBytecode
 }
 
-func deployAndAssertShanghaiContract(t *testing.T, client *client.Client, acc *common.Account) {
+func deployAndAssertShanghaiContract(t *testing.T, client *thorclient.Client, acc *common.Account) {
 	tag, err := client.ChainTag()
 	require.NoError(t, err)
 
@@ -388,7 +388,7 @@ func deployAndAssertShanghaiContract(t *testing.T, client *client.Client, acc *c
 	const retryPeriod = 3 * time.Second
 	const maxRetries = 8
 	err = common.Retry(func() error {
-		receipt, err := client.GetTransactionReceipt(issuedTx.ID)
+		receipt, err := client.TransactionReceipt(issuedTx.ID)
 		if err != nil {
 			return fmt.Errorf("unable to retrieve tx receipt - %w", err)
 		}

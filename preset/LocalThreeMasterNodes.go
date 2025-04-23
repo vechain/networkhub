@@ -3,7 +3,6 @@ package preset
 import (
 	"math/big"
 
-	"github.com/vechain/networkhub/consts"
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
@@ -59,23 +58,23 @@ func LocalThreeMasterNodesNetworkGenesis() *genesis.CustomGenesis {
 		Accounts: []thorgenesis.Account{
 			{
 				Address: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
-				Balance: convToHexOrDecimal256(consts.LargeBigValue),
-				Energy:  convToHexOrDecimal256(consts.LargeBigValue),
+				Balance: convToHexOrDecimal256(LargeBigValue),
+				Energy:  convToHexOrDecimal256(LargeBigValue),
 			},
 			{
 				Address: thor.MustParseAddress("0x61fF580B63D3845934610222245C116E013717ec"),
-				Balance: convToHexOrDecimal256(consts.LargeBigValue),
-				Energy:  convToHexOrDecimal256(consts.LargeBigValue),
+				Balance: convToHexOrDecimal256(LargeBigValue),
+				Energy:  convToHexOrDecimal256(LargeBigValue),
 			},
 			{
 				Address: thor.MustParseAddress("0x327931085B4cCbCE0baABb5a5E1C678707C51d90"),
-				Balance: convToHexOrDecimal256(consts.LargeBigValue),
-				Energy:  convToHexOrDecimal256(consts.LargeBigValue),
+				Balance: convToHexOrDecimal256(LargeBigValue),
+				Energy:  convToHexOrDecimal256(LargeBigValue),
 			},
 			{
 				Address: thor.MustParseAddress("0x084E48c8AE79656D7e27368AE5317b5c2D6a7497"),
-				Balance: convToHexOrDecimal256(consts.LargeBigValue),
-				Energy:  convToHexOrDecimal256(consts.LargeBigValue),
+				Balance: convToHexOrDecimal256(LargeBigValue),
+				Energy:  convToHexOrDecimal256(LargeBigValue),
 			},
 		},
 		Authority: []thorgenesis.Authority{
@@ -98,7 +97,7 @@ func LocalThreeMasterNodesNetworkGenesis() *genesis.CustomGenesis {
 		Params: thorgenesis.Params{
 			RewardRatio:         convToHexOrDecimal256(big.NewInt(300000000000000000)),
 			BaseGasPrice:        convToHexOrDecimal256(big.NewInt(1000000000000000)),
-			ProposerEndorsement: convToHexOrDecimal256(consts.LargeBigValue),
+			ProposerEndorsement: convToHexOrDecimal256(LargeBigValue),
 			ExecutorAddress:     &localThreeMasterEndorser,
 		},
 		Executor: thorgenesis.Executor{

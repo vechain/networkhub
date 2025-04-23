@@ -26,7 +26,7 @@ func New(branch string, reusable bool) *Builder {
 	return NewWithRepo("https://github.com/vechain/thor", branch, reusable)
 }
 
-// New creates a new Builder instance for the specified branch and repo.
+// NewWithRepo creates a new Builder instance for the specified branch and repo.
 // If reusable is true, it skips cloning if the directory exists and checks for the binary.
 func NewWithRepo(repoUrl string, branch string, reusable bool) *Builder {
 	suffix := generateRandomSuffix(4)
