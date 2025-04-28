@@ -59,6 +59,9 @@ func (b *Builder) Download() error {
 		if _, err := os.Stat(filepath.Join(b.downloadPath, ".git")); err == nil {
 			slog.Info("Reusable directory with repository exists: ", "path", b.downloadPath)
 			cmd := exec.Command("git", "pull")
+			cmd.Dir = b.downloadPath
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
 			if err := cmd.Run(); err != nil {
 				slog.Warn("Failed to pull latest changes from repository", "error", err)
 			}
