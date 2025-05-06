@@ -73,6 +73,10 @@ func (n *Node) Start() error {
 	}
 	enodeString := strings.Join(cleanEnode, ",")
 
+	if err := os.RemoveAll(n.nodeCfg.GetDataDir()); err != nil {
+		return fmt.Errorf("failed to remove data dir - %w", err)
+	}
+
 	args := []string{
 		"thor",
 		"--network", genesisPath,
@@ -80,7 +84,7 @@ func (n *Node) Start() error {
 		"--config-dir", n.nodeCfg.GetConfigDir(),
 		"--api-addr", n.nodeCfg.GetAPIAddr(),
 		"--api-cors", n.nodeCfg.GetAPICORS(),
-		"--verbosity", "4",
+		"--verbosity", strconv.Itoa(n.nodeCfg.GetVerbosity()),
 		"--nat", "none",
 		"--p2p-port", fmt.Sprintf("%d", n.nodeCfg.GetP2PListenPort()),
 		"--bootnode", enodeString,
