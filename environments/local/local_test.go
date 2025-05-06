@@ -3,6 +3,7 @@ package local
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/vechain/thor/v2/thorclient"
 	"log/slog"
 	"math"
 	"strings"
@@ -311,6 +312,48 @@ func TestThreeNodes_Healthcheck(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.NoError(t, networkCfg.HealthCheck(0, time.Second*20))
+}
+
+func TestThreeNodes_AdditionalArgs(t *testing.T) {
+	networkCfg := preset.LocalThreeMasterNodesNetwork()
+
+	thorBuilder := thorbuilder.New("master", true)
+	require.NoError(t, thorBuilder.Download())
+	thorBinPath, err := thorBuilder.Build()
+	require.NoError(t, err)
+
+	// ensure the artifact path is set
+	for _, node := range networkCfg.Nodes {
+		node.SetExecArtifact(thorBinPath)
+		node.SetAdditionalArgs(map[string]string{
+			"api-allowed-tracers": "all",
+		})
+	}
+
+	localEnv := NewLocalEnv()
+	_, err = localEnv.LoadConfig(networkCfg)
+	require.NoError(t, err)
+
+	err = localEnv.StartNetwork()
+	require.NoError(t, err)
+
+	assert.NoError(t, networkCfg.HealthCheck(0, time.Second*20))
+
+	client := thorclient.New(networkCfg.Nodes[0].GetHTTPAddr())
+	_, statusCode, err := client.RawHTTPClient().RawHTTPPost("/debug/tracers/call", []byte(`{
+  "value": "0x0",
+  "to": "0x0000000000000000000000000000456E65726779",
+  "data": "0xa9059cbb0000000000000000000000000f872421dc479f3c11edd89512731814d0598db50000000000",
+  "gas": 50000,
+  "gasPrice": "1000000000000000",
+  "caller": "0x7567d83b7b8d80addcb281a71d54fc7b3364ffed",
+  "provedWork": "1000",
+  "gasPayer": "0xd3ae78222beadb038203be21ed5ce7c9b1bff602",
+  "expiration": 1000,
+  "blockRef": "0x00000000851caf3c",
+  "name": "call"
+}`))
+	require.Equal(t, 200, statusCode)
 }
 
 func pollingWhileConnectingPeers(t *testing.T, nodes []node.Node, expectedPeersLen int) []*thorclient.Client {

@@ -31,6 +31,8 @@ type Node interface {
 	GetAPICORS() string
 	GetP2PListenPort() int
 	SetP2PListenPort(port int)
+	GetAdditionalArgs() map[string]string
+	SetAdditionalArgs(args map[string]string)
 	GetVerbosity() int
 	GetHTTPAddr() string
 	GetFakeExecution() bool

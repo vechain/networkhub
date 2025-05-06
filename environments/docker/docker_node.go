@@ -83,21 +83,24 @@ func (n *Node) Start() error {
 	}
 	enodeString := strings.Join(cleanEnode, ",")
 
-	cmd := []string{
-		"sh", "-c",
-		"cd /home/thor; " +
-			"echo $GENESIS > genesis.json;" +
-			"echo $PRIVATEKEY > master.key;" +
-			"echo $PRIVATEKEY > p2p.key;" +
-			"thor " +
-			"--network genesis.json " +
-			"--nat none " +
-			fmt.Sprintf("--config-dir='%s' ", n.cfg.GetConfigDir()) +
-			fmt.Sprintf("--api-addr='%s' ", n.cfg.GetAPIAddr()) +
-			fmt.Sprintf("--api-cors='%s' ", n.cfg.GetAPICORS()) +
-			fmt.Sprintf("--p2p-port=%d ", n.cfg.GetP2PListenPort()) +
-			fmt.Sprintf("--bootnode=%s", enodeString),
+	args := "cd /home/thor; " +
+		"echo $GENESIS > genesis.json;" +
+		"echo $PRIVATEKEY > master.key;" +
+		"echo $PRIVATEKEY > p2p.key;" +
+		"thor " +
+		"--network genesis.json " +
+		"--nat none " +
+		fmt.Sprintf("--config-dir='%s' ", n.cfg.GetConfigDir()) +
+		fmt.Sprintf("--api-addr='%s' ", n.cfg.GetAPIAddr()) +
+		fmt.Sprintf("--api-cors='%s' ", n.cfg.GetAPICORS()) +
+		fmt.Sprintf("--p2p-port=%d ", n.cfg.GetP2PListenPort()) +
+		fmt.Sprintf("--bootnode=%s", enodeString)
+
+	for key, value := range n.cfg.GetAdditionalArgs() {
+		args += fmt.Sprintf(" --%s=%s", key, value)
 	}
+
+	cmd := []string{"sh", "-c", args}
 
 	//serialize genesis
 	genesisBytes, err := nodegenesis.Marshal(n.cfg.GetGenesis())
