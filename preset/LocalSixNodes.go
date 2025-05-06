@@ -128,7 +128,7 @@ func LocalSixNodesNetworkWithGenesis(genesis *genesis.CustomGenesis) *network.Ne
 				APIAddr:       "127.0.0.1:8161",
 				APICORS:       "*",
 				Type:          node.MasterNode,
-				Verbosity:     4,
+				Verbosity:     3,
 				Key:           "b2c859e115ef4a3f5e4d32228b41de4c661c527a32f723ac37745bf860fd09cb", // 0x5F90f56c7b87E3d1acf9437f0E43E4d687AcEB7e
 				Genesis:       genesis,
 			},
@@ -138,7 +138,7 @@ func LocalSixNodesNetworkWithGenesis(genesis *genesis.CustomGenesis) *network.Ne
 				APIAddr:       "127.0.0.1:8162",
 				APICORS:       "*",
 				Type:          node.MasterNode,
-				Verbosity:     4,
+				Verbosity:     3,
 				Key:           "4de650ca1c8beae4ed6a4358087f50c01b51f5c0002ae9836c55039ca9818d0c", // 0x5c29518F6a6124a2BeE89253347c8295f604710A
 				Genesis:       genesis,
 			},
@@ -157,7 +157,7 @@ func LocalSixNodesNetworkWithGenesis(genesis *genesis.CustomGenesis) *network.Ne
 				APIAddr:       "127.0.0.1:8164",
 				APICORS:       "*",
 				Type:          node.MasterNode,
-				Verbosity:     4,
+				Verbosity:     3,
 				Key:           "c70dda88e779df10abbc7c5d37fbb3478c5cf8df2a70d6b0bfc551a5a9a17359", // 0x042306e116Dc301ecd7b83a04F4c8277Fbe41b6c
 				Genesis:       genesis,
 			},
@@ -167,7 +167,7 @@ func LocalSixNodesNetworkWithGenesis(genesis *genesis.CustomGenesis) *network.Ne
 				APIAddr:       "127.0.0.1:8165",
 				APICORS:       "*",
 				Type:          node.MasterNode,
-				Verbosity:     4,
+				Verbosity:     3,
 				Key:           "ade54b623a4f4afc38f962a85df07a428204a67cee0c9b43a99ca255fd2fb9a6", // 0x0aeC31606e217895696771961de416Efa185Be66
 				Genesis:       genesis,
 			},

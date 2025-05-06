@@ -73,20 +73,31 @@ func (n *Node) Start() error {
 	}
 	enodeString := strings.Join(cleanEnode, ",")
 
+	if err := os.RemoveAll(n.nodeCfg.GetDataDir()); err != nil {
+		return fmt.Errorf("failed to remove data dir - %w", err)
+	}
+
+	args := []string{
+		"thor",
+		"--network", genesisPath,
+		"--data-dir", n.nodeCfg.GetDataDir(),
+		"--config-dir", n.nodeCfg.GetConfigDir(),
+		"--api-addr", n.nodeCfg.GetAPIAddr(),
+		"--api-cors", n.nodeCfg.GetAPICORS(),
+		"--verbosity", strconv.Itoa(n.nodeCfg.GetVerbosity()),
+		"--nat", "none",
+		"--p2p-port", fmt.Sprintf("%d", n.nodeCfg.GetP2PListenPort()),
+		"--bootnode", enodeString,
+	}
+
+	for key, value := range n.nodeCfg.GetAdditionalArgs() {
+		args = append(args, fmt.Sprintf("--%s", key))
+		args = append(args, value)
+	}
+
 	cmd := &exec.Cmd{
 		Path: n.nodeCfg.GetExecArtifact(),
-		Args: []string{
-			"thor",
-			"--network", genesisPath,
-			"--data-dir", n.nodeCfg.GetDataDir(),
-			"--config-dir", n.nodeCfg.GetConfigDir(),
-			"--api-addr", n.nodeCfg.GetAPIAddr(),
-			"--api-cors", n.nodeCfg.GetAPICORS(),
-			"--verbosity", "4",
-			"--nat", "none",
-			"--p2p-port", fmt.Sprintf("%d", n.nodeCfg.GetP2PListenPort()),
-			"--bootnode", enodeString,
-		},
+		Args: args,
 		Stdout: &nodeWriter{
 			id: n.nodeCfg.GetID(),
 			w:  os.Stdout,

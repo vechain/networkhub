@@ -14,19 +14,20 @@ import (
 )
 
 type BaseNode struct {
-	ID            string                 `json:"id"` //TODO this is a mandatory field
-	Key           string                 `json:"key"`
-	APIAddr       string                 `json:"apiAddr"`
-	APICORS       string                 `json:"apiCORS"`
-	ConfigDir     string                 `json:"configDir,omitempty"`
-	DataDir       string                 `json:"dataDir,omitempty"`
-	ExecArtifact  string                 `json:"execArtifact"` // used to determine the executing version of the node ( path, dockerImage, etc)
-	P2PListenPort int                    `json:"p2pListenPort"`
-	Verbosity     int                    `json:"verbosity"`
-	EnodeData     string                 `json:"enode"` // todo: this should be a generated method
-	Type          string                 `json:"type"`
-	FakeExecution bool                   `json:"fakeExecution"`
-	Genesis       *genesis.CustomGenesis `json:"genesis"`
+	ID             string                 `json:"id"` //TODO this is a mandatory field
+	Key            string                 `json:"key"`
+	APIAddr        string                 `json:"apiAddr"`
+	APICORS        string                 `json:"apiCORS"`
+	ConfigDir      string                 `json:"configDir,omitempty"`
+	DataDir        string                 `json:"dataDir,omitempty"`
+	ExecArtifact   string                 `json:"execArtifact"` // used to determine the executing version of the node ( path, dockerImage, etc)
+	P2PListenPort  int                    `json:"p2pListenPort"`
+	Verbosity      int                    `json:"verbosity"`
+	EnodeData      string                 `json:"enode"` // todo: this should be a generated method
+	Type           string                 `json:"type"`
+	FakeExecution  bool                   `json:"fakeExecution"`
+	Genesis        *genesis.CustomGenesis `json:"genesis"`
+	AdditionalArgs map[string]string      `json:"additionalArgs"`
 }
 
 func (b *BaseNode) GetVerbosity() int {
@@ -103,6 +104,14 @@ func (b *BaseNode) GetExecArtifact() string {
 
 func (b *BaseNode) SetExecArtifact(artifact string) {
 	b.ExecArtifact = artifact
+}
+
+func (b *BaseNode) GetAdditionalArgs() map[string]string {
+	return b.AdditionalArgs
+}
+
+func (b *BaseNode) SetAdditionalArgs(args map[string]string) {
+	b.AdditionalArgs = args
 }
 
 func (b *BaseNode) GetHTTPAddr() string {
