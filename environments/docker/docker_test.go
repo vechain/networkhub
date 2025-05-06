@@ -1,9 +1,10 @@
 package docker_test
 
 import (
-	"github.com/vechain/thor/v2/thorclient"
 	"testing"
 	"time"
+
+	"github.com/vechain/thor/v2/thorclient"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vechain/networkhub/environments/docker"

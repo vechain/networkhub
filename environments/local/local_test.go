@@ -3,7 +3,6 @@ package local
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/vechain/thor/v2/thorclient"
 	"log/slog"
 	"math"
 	"strings"
@@ -353,6 +352,7 @@ func TestThreeNodes_AdditionalArgs(t *testing.T) {
   "blockRef": "0x00000000851caf3c",
   "name": "call"
 }`))
+	require.NoError(t, err)
 	require.Equal(t, 200, statusCode)
 }
 

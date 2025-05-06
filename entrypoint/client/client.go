@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+
 	"github.com/vechain/networkhub/environments/docker"
 
 	"github.com/vechain/networkhub/environments/local"
