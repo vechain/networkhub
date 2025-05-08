@@ -1,7 +1,6 @@
 package thorbuilder
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
@@ -100,16 +99,11 @@ func (b *Builder) Build() (string, error) {
 	makeCmd := exec.Command("make")
 	makeCmd.Dir = b.downloadPath
 	// Capture output
-	var stdout, stderr bytes.Buffer
-	makeCmd.Stdout = &stdout
-	makeCmd.Stderr = &stderr
+	makeCmd.Stdout = os.Stdout
+	makeCmd.Stderr = os.Stderr
 
 	if err := makeCmd.Run(); err != nil {
-		slog.Error("Make command failed",
-			"stdout", stdout.String(),
-			"stderr", stderr.String(),
-			"error", err,
-		)
+		slog.Error("Make command failed", "error", err)
 		slog.Error("extra deets:", "str", makeCmd.String(), "path", makeCmd.Path, "dir", makeCmd.Dir)
 		return "", fmt.Errorf("failed to build project: %w", err)
 	}
