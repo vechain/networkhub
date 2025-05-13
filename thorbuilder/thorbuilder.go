@@ -18,6 +18,7 @@ type Builder struct {
 	downloadPath string
 	reusable     bool
 	repoUrl      string
+	debug        bool
 }
 
 // New creates a new Builder instance for the specified branch.
@@ -44,11 +45,12 @@ func NewWithRepo(repoUrl string, branch string, reusable bool) *Builder {
 }
 
 // NewWithRepoPath allows for local testing and quicker builds
-func NewWithRepoPath(repoUrl string, downloadPath string) *Builder {
+func NewWithRepoPath(repoUrl string, downloadPath string, debug bool) *Builder {
 	return &Builder{
 		reusable:     true,
 		downloadPath: downloadPath,
 		repoUrl:      repoUrl,
+		debug:        debug,
 	}
 }
 
@@ -97,20 +99,31 @@ func (b *Builder) Build() (string, error) {
 		return "", fmt.Errorf("download directory does not exist: %s", b.downloadPath)
 	}
 
-	makeCmd := exec.Command("make")
-	makeCmd.Dir = b.downloadPath
-	// Capture output
+	var cmd *exec.Cmd
+	if b.debug {
+		cmd = exec.Command(
+			"go", "build",
+			"-gcflags=all=-N -l", // Disable optimizations. Useful for debugging.
+			"-v",
+			"-o", "./bin/thor",
+			"-ldflags", "-X main.version=0.0.0 -X main.gitCommit=sha -X main.gitTag=v0.0.0 -X main.copyrightYear=2025",
+			"./cmd/thor",
+		)
+	} else {
+		cmd = exec.Command("make")
+	}
+	cmd.Dir = b.downloadPath
 	var stdout, stderr bytes.Buffer
-	makeCmd.Stdout = &stdout
-	makeCmd.Stderr = &stderr
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
 
-	if err := makeCmd.Run(); err != nil {
+	if err := cmd.Run(); err != nil {
 		slog.Error("Make command failed",
 			"stdout", stdout.String(),
 			"stderr", stderr.String(),
 			"error", err,
 		)
-		slog.Error("extra deets:", "str", makeCmd.String(), "path", makeCmd.Path, "dir", makeCmd.Dir)
+		slog.Error("extra deets:", "str", cmd.String(), "path", cmd.Path, "dir", cmd.Dir)
 		return "", fmt.Errorf("failed to build project: %w", err)
 	}
 
