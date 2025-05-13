@@ -29,7 +29,37 @@ func NewLocalNode(nodeCfg node.Node, enodes []string) *Node {
 	}
 }
 
+// cleanup deletes any previous process that may be running
+func (n *Node) cleanup() error {
+	cmd := exec.Command("ps", "aux")
+	output, err := cmd.Output()
+	if err != nil {
+		return fmt.Errorf("failed to execute ps command: %w", err)
+	}
+	lines := strings.Split(string(output), "\n")
+	for _, line := range lines {
+		if strings.Contains(line, n.nodeCfg.GetDataDir()) && strings.Contains(line, "thor --network") {
+			// kill the process
+			parts := strings.Fields(line)
+			if len(parts) > 1 {
+				pid := parts[1]
+				slog.Info("killing previous process", "pid", pid, "id", n.nodeCfg.GetID())
+				cmd := exec.Command("kill", pid)
+				if err := cmd.Run(); err != nil {
+					return fmt.Errorf("failed to kill process %s: %w", pid, err)
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
 func (n *Node) Start() error {
+	// cleanup any previous process
+	if err := n.cleanup(); err != nil {
+		return fmt.Errorf("failed to cleanup previous process - %w", err)
+	}
 	// ensure directories exist
 	if err := os.MkdirAll(n.nodeCfg.GetConfigDir(), 0777); err != nil {
 		return fmt.Errorf("unable to create configDir - %w", err)
@@ -124,7 +154,7 @@ func (n *Node) Start() error {
 
 	n.cmdExec = cmd
 
-	slog.Info("Thor command executed successfully")
+	slog.Info("started node", "id", n.nodeCfg.GetID(), "pid", n.cmdExec.Process.Pid)
 	return nil
 }
 
@@ -147,14 +177,15 @@ func (n *Node) Stop() error {
 	select {
 	case <-ctx.Done():
 		if err := n.cmdExec.Process.Kill(); err != nil {
-			return fmt.Errorf("failed to kill process - %w", err)
+			slog.Warn("failed to kill node", "id", n.nodeCfg.GetID(), "pid", n.cmdExec.Process.Pid)
+		} else {
+			slog.Warn("process killed as timeout reached", "id", n.nodeCfg.GetID(), "pid", n.cmdExec.Process.Pid)
 		}
-		slog.Error("Process killed as timeout reached")
 	case err := <-done:
 		if err != nil {
 			return fmt.Errorf("process exited with error - %w", err)
 		}
-		slog.Info("Process stopped gracefully")
+		slog.Info("node stopped gracefully", "id", n.nodeCfg.GetID(), "pid", n.cmdExec.Process.Pid)
 	}
 	return nil
 }
