@@ -61,7 +61,7 @@ func TestBuilder(t *testing.T) {
 		assert.NoError(t, err)
 		path, _ = strings.CutSuffix(path, "/bin/thor")
 
-		custom := NewWithRepoPath("https://github.com/vechain/thor", path)
+		custom := NewWithRepoPath("https://github.com/vechain/thor", path, false)
 		assert.NoError(t, custom.Download())
 		_, err = custom.Build()
 		assert.NoError(t, err)
