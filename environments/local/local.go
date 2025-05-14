@@ -2,12 +2,12 @@ package local
 
 import (
 	"fmt"
-	"github.com/vechain/networkhub/network/node"
 	"os"
 	"path/filepath"
 
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
+	"github.com/vechain/networkhub/network/node"
 )
 
 type Local struct {
