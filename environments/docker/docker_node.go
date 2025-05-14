@@ -17,7 +17,7 @@ import (
 )
 
 // NewDockerNode initializes a new DockerNode
-func NewDockerNode(cfg node.Node, enodes []string, networkID string, exposedPorts *exposedPort, ipAddr string) *Node {
+func NewDockerNode(cfg node.Config, enodes []string, networkID string, exposedPorts *exposedPort, ipAddr string) *Node {
 	return &Node{
 		cfg:          cfg,
 		enodes:       enodes,
@@ -29,7 +29,7 @@ func NewDockerNode(cfg node.Node, enodes []string, networkID string, exposedPort
 
 // Node represents a Docker container node
 type Node struct {
-	cfg          node.Node
+	cfg          node.Config
 	enodes       []string
 	id           string
 	networkID    string

@@ -7,12 +7,12 @@ import (
 	"strconv"
 	"strings"
 
+	dockertypes "github.com/docker/docker/api/types"
+	dockernetwork "github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
-
-	dockertypes "github.com/docker/docker/api/types"
-	dockernetwork "github.com/docker/docker/api/types/network"
+	"github.com/vechain/networkhub/network/node"
 )
 
 type Docker struct {
@@ -101,6 +101,14 @@ func (d *Docker) StartNetwork() error {
 	}
 
 	return nil
+}
+
+func (d *Docker) Nodes() map[string]node.RunningNode {
+	nodes := make(map[string]node.RunningNode, len(d.dockerNodes))
+	for k, v := range d.dockerNodes {
+		nodes[k] = v
+	}
+	return nodes
 }
 
 func (d *Docker) StopNetwork() error {

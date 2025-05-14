@@ -2,6 +2,7 @@ package local
 
 import (
 	"fmt"
+	"github.com/vechain/networkhub/network/node"
 	"os"
 	"path/filepath"
 
@@ -75,6 +76,14 @@ func (l *Local) StopNetwork() error {
 		}
 	}
 	return nil
+}
+
+func (l *Local) Nodes() map[string]node.RunningNode {
+	nodes := make(map[string]node.RunningNode, len(l.localNodes))
+	for k, v := range l.localNodes {
+		nodes[k] = v
+	}
+	return nodes
 }
 
 func (l *Local) Info() error {

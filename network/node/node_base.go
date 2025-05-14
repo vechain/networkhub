@@ -70,7 +70,7 @@ func (b *BaseNode) GetKey() string {
 	return b.Key
 }
 
-func New() Node {
+func New() Config {
 	return &BaseNode{}
 }
 
