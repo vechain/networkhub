@@ -11,7 +11,7 @@ const (
 	RegularNode = "regularNode"
 )
 
-type Node interface {
+type Config interface {
 	Enode(ipAddr string) (string, error)
 	SetExecArtifact(artifact string)
 	GetConfigDir() string
@@ -37,4 +37,9 @@ type Node interface {
 	GetHTTPAddr() string
 	GetFakeExecution() bool
 	HealthCheck(block uint32, timeout time.Duration) error
+}
+
+type Lifecycle interface {
+	Stop() error
+	Start() error
 }

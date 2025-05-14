@@ -7,6 +7,7 @@ import (
 
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
+	"github.com/vechain/networkhub/network/node"
 )
 
 type Local struct {
@@ -75,6 +76,14 @@ func (l *Local) StopNetwork() error {
 		}
 	}
 	return nil
+}
+
+func (l *Local) Nodes() map[string]node.Lifecycle {
+	nodes := make(map[string]node.Lifecycle, len(l.localNodes))
+	for k, v := range l.localNodes {
+		nodes[k] = v
+	}
+	return nodes
 }
 
 func (l *Local) Info() error {

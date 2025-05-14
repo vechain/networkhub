@@ -348,7 +348,7 @@ func TestThreeNodes_AdditionalArgs(t *testing.T) {
 	println("Response body: %s", body)
 }
 
-func pollingWhileConnectingPeers(t *testing.T, nodes []node.Node, expectedPeersLen int) []*thorclient.Client {
+func pollingWhileConnectingPeers(t *testing.T, nodes []node.Config, expectedPeersLen int) []*thorclient.Client {
 	// Polling approach with timeout
 	timeout := time.After(1 * time.Minute)
 	tick := time.Tick(5 * time.Second)

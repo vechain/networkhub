@@ -3,6 +3,7 @@ package noop
 import (
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
+	"github.com/vechain/networkhub/network/node"
 )
 
 type Noop struct{}
@@ -21,6 +22,10 @@ func (n Noop) StartNetwork() error {
 
 func (n Noop) StopNetwork() error {
 	return nil
+}
+
+func (n Noop) Nodes() map[string]node.Lifecycle {
+	return map[string]node.Lifecycle{}
 }
 
 func (n Noop) Info() error {

@@ -121,7 +121,7 @@ func LocalSixNodesNetworkWithGenesis(genesis *genesis.CustomGenesis) *network.Ne
 	return &network.Network{
 		ID:          "sixNodesNetwork",
 		Environment: environments.Local,
-		Nodes: []node.Node{
+		Nodes: []node.Config{
 			&node.BaseNode{
 				ID:            "node1",
 				P2PListenPort: 8061,

@@ -9,9 +9,9 @@ import (
 )
 
 type Network struct {
-	Environment string      `json:"environment"`
-	Nodes       []node.Node `json:"nodes"`
-	ID          string      `json:"id"`
+	Environment string        `json:"environment"`
+	Nodes       []node.Config `json:"nodes"`
+	ID          string        `json:"id"`
 }
 
 type Builder struct {
@@ -45,7 +45,7 @@ func NewNetwork(opts ...BuilderOptionsFunc) (*Network, error) {
 }
 
 // UnmarshalNode function unmarshals JSON data into the appropriate type based on the presence of VIP212
-func UnmarshalNode(data []byte) (node.Node, error) {
+func UnmarshalNode(data []byte) (node.Config, error) {
 	var raw map[string]interface{}
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return nil, err

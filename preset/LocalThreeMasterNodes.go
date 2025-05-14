@@ -16,7 +16,7 @@ func LocalThreeMasterNodesNetwork() *network.Network {
 	return &network.Network{
 		ID:          "threeMaster",
 		Environment: environments.Local,
-		Nodes: []node.Node{
+		Nodes: []node.Config{
 			&node.BaseNode{
 				ID:            "node1",
 				P2PListenPort: 8031,

@@ -21,7 +21,7 @@ func TestDockerNetwork(t *testing.T) {
 	networkCfg := &network.Network{
 		Environment: "docker",
 		ID:          "test-id",
-		Nodes: []node.Node{
+		Nodes: []node.Config{
 			&node.BaseNode{
 				ID:             "node1",
 				ExecArtifact:   "vechain/thor:latest",
@@ -121,7 +121,7 @@ func TestDockerHayabusaNetwork(t *testing.T) {
 	networkCfg := &network.Network{
 		Environment: "docker",
 		ID:          "test-id",
-		Nodes: []node.Node{
+		Nodes: []node.Config{
 			&node.BaseNode{
 				ID:            "node1",
 				ExecArtifact:  dockerImage,
