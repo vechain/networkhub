@@ -24,8 +24,8 @@ func (n Noop) StopNetwork() error {
 	return nil
 }
 
-func (n Noop) Nodes() map[string]node.RunningNode {
-	return map[string]node.RunningNode{}
+func (n Noop) Nodes() map[string]node.Lifecycle {
+	return map[string]node.Lifecycle{}
 }
 
 func (n Noop) Info() error {

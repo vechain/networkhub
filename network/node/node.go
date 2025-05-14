@@ -39,7 +39,7 @@ type Config interface {
 	HealthCheck(block uint32, timeout time.Duration) error
 }
 
-type RunningNode interface {
+type Lifecycle interface {
 	Stop() error
 	Start() error
 }

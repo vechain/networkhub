@@ -103,8 +103,8 @@ func (d *Docker) StartNetwork() error {
 	return nil
 }
 
-func (d *Docker) Nodes() map[string]node.RunningNode {
-	nodes := make(map[string]node.RunningNode, len(d.dockerNodes))
+func (d *Docker) Nodes() map[string]node.Lifecycle {
+	nodes := make(map[string]node.Lifecycle, len(d.dockerNodes))
 	for k, v := range d.dockerNodes {
 		nodes[k] = v
 	}

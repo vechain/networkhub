@@ -78,8 +78,8 @@ func (l *Local) StopNetwork() error {
 	return nil
 }
 
-func (l *Local) Nodes() map[string]node.RunningNode {
-	nodes := make(map[string]node.RunningNode, len(l.localNodes))
+func (l *Local) Nodes() map[string]node.Lifecycle {
+	nodes := make(map[string]node.Lifecycle, len(l.localNodes))
 	for k, v := range l.localNodes {
 		nodes[k] = v
 	}
