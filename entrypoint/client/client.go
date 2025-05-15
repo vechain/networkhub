@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/vechain/networkhub/environments/docker"
-
 	"github.com/vechain/networkhub/environments/local"
 	"github.com/vechain/networkhub/hub"
 	"github.com/vechain/networkhub/network"
+	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/preset"
 )
 
@@ -59,6 +59,10 @@ func (c *Client) LoadExistingNetworks() error {
 	}
 
 	return nil
+}
+
+func (c *Client) Nodes(id string) map[string]node.Lifecycle {
+	return c.networkHub.Nodes(id)
 }
 
 func (c *Client) Preset(presetNetwork string, environment, artifactPath string) (string, error) {
