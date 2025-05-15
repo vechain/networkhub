@@ -2,6 +2,7 @@ package docker
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strconv"
@@ -112,13 +113,14 @@ func (d *Docker) Nodes() map[string]node.Lifecycle {
 }
 
 func (d *Docker) StopNetwork() error {
-	for s, dockerNode := range d.dockerNodes {
-		err := dockerNode.Stop()
+	var err error
+	for s, localNode := range d.dockerNodes {
+		err := localNode.Stop()
 		if err != nil {
-			return fmt.Errorf("unable to stop node %s - %w", s, err)
+			err = errors.Join(err, fmt.Errorf("failed to stop node %s - %w", s, err))
 		}
 	}
-	return nil
+	return err
 }
 
 func (d *Docker) Info() error {

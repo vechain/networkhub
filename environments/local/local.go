@@ -1,6 +1,7 @@
 package local
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -69,13 +70,14 @@ func (l *Local) StartNetwork() error {
 }
 
 func (l *Local) StopNetwork() error {
+	var err error
 	for s, localNode := range l.localNodes {
 		err := localNode.Stop()
 		if err != nil {
-			return fmt.Errorf("unable to stop node %s - %w", s, err)
+			err = errors.Join(err, fmt.Errorf("failed to stop node %s - %w", s, err))
 		}
 	}
-	return nil
+	return err
 }
 
 func (l *Local) Nodes() map[string]node.Lifecycle {
