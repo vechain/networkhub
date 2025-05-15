@@ -5,6 +5,7 @@ import (
 
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
+	"github.com/vechain/networkhub/network/node"
 )
 
 type NetworkHub struct {
@@ -55,12 +56,12 @@ func (e *NetworkHub) StopNetwork(networkID string) error {
 	return netwk.StopNetwork()
 }
 
-func (e *NetworkHub) InfoNetwork(networkID string) error {
+func (e *NetworkHub) Nodes(networkID string) map[string]node.Lifecycle {
 	netwk, ok := e.configuredNetworks[networkID]
 	if !ok {
-		return fmt.Errorf("network %s is not configured", networkID)
+		return nil
 	}
-	return netwk.StopNetwork()
+	return netwk.Nodes()
 }
 
 func (e *NetworkHub) RegisterEnvironment(id string, env func() environments.Actions) {
