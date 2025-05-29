@@ -2,11 +2,11 @@ package network
 
 import (
 	"encoding/json"
-	"github.com/vechain/networkhub/thorbuilder"
 	"time"
 
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/network/node/genesis"
+	"github.com/vechain/networkhub/thorbuilder"
 )
 
 type Network struct {

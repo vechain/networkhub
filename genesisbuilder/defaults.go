@@ -1,10 +1,11 @@
 package genesisbuilder
 
 import (
+	"math/big"
+
 	"github.com/vechain/networkhub/utils/datagen"
 	"github.com/vechain/thor/v2/genesis"
 	"github.com/vechain/thor/v2/thor"
-	"math/big"
 )
 
 func DefaultAccounts() []genesis.Account {
@@ -30,9 +31,6 @@ func DefaultAccounts() []genesis.Account {
 func DefaultAuthority(amount int) []genesis.Authority {
 	devAccounts := genesis.DevAccounts()
 	accounts := make([]genesis.Authority, amount)
-
-	tenBillion := big.NewInt(10e9)
-	tenBillion = tenBillion.Mul(tenBillion, big.NewInt(1e18))
 
 	for i := range amount {
 		accounts[i] = genesis.Authority{

@@ -2,8 +2,8 @@ package client
 
 import (
 	"fmt"
-	"github.com/vechain/networkhub/environments"
 
+	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/environments/docker"
 	"github.com/vechain/networkhub/environments/local"
 	"github.com/vechain/networkhub/hub"
@@ -81,9 +81,7 @@ func (c *Client) Preset(presetNetwork string, environment, artifactPath string) 
 
 func (c *Client) Config(netCfg *network.Network) (*network.Network, error) {
 	if netCfg.ThorBuilder != nil {
-		var builder *thorbuilder.Builder
-
-		builder = thorbuilder.NewWithRepo(netCfg.ThorBuilder.RepoUrl, netCfg.ThorBuilder.Branch, netCfg.ThorBuilder.Reusable)
+		builder := thorbuilder.NewWithRepo(netCfg.ThorBuilder.RepoUrl, netCfg.ThorBuilder.Branch, netCfg.ThorBuilder.Reusable)
 		if err := builder.Download(); err != nil {
 			return nil, err
 		}
@@ -92,7 +90,7 @@ func (c *Client) Config(netCfg *network.Network) (*network.Network, error) {
 		if err != nil {
 			return nil, err
 		}
-		
+
 		for _, node := range netCfg.Nodes {
 			node.SetExecArtifact(path)
 		}

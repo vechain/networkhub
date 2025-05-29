@@ -55,10 +55,10 @@ func (b *Builder) Overrider(overrider Overrider) *Builder {
 }
 
 func (b *Builder) Build() *genesis.CustomGenesis {
-	if b.accounts == nil || len(b.accounts) == 0 {
+	if len(b.accounts) == 0 {
 		b.accounts = DefaultAccounts()
 	}
-	if b.authority == nil || len(b.authority) == 0 {
+	if len(b.authority) == 0 {
 		b.authority = DefaultAuthority(b.maxBlockProposers)
 	}
 	if b.params == nil {
