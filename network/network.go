@@ -2,6 +2,7 @@ package network
 
 import (
 	"encoding/json"
+	"github.com/vechain/networkhub/thorbuilder"
 	"time"
 
 	"github.com/vechain/networkhub/network/node"
@@ -9,9 +10,10 @@ import (
 )
 
 type Network struct {
-	Environment string        `json:"environment"`
-	Nodes       []node.Config `json:"nodes"`
-	ID          string        `json:"id"`
+	Environment string                     `json:"environment"`
+	Nodes       []node.Config              `json:"nodes"`
+	BaseID      string                     `json:"baseid"`
+	ThorBuilder *thorbuilder.BuilderConfig `json:"thorBuilder,omitempty"`
 }
 
 type Builder struct {
@@ -28,7 +30,7 @@ func WithJSON(s string) BuilderOptionsFunc {
 		}
 
 		n.Nodes = network.Nodes
-		n.ID = network.ID
+		n.BaseID = network.BaseID
 		n.Environment = network.Environment
 		return nil
 	}
@@ -100,4 +102,8 @@ func (n *Network) UnmarshalJSON(data []byte) error {
 	}
 
 	return nil
+}
+
+func (n *Network) ID() string {
+	return n.Environment + n.BaseID
 }

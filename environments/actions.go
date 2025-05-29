@@ -11,6 +11,7 @@ type Actions interface {
 	StopNetwork() error
 	Nodes() map[string]node.Lifecycle
 	Info() error
+	Config() *network.Network
 }
 
 const (

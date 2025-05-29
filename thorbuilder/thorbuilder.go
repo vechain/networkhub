@@ -13,6 +13,12 @@ import (
 	"path/filepath"
 )
 
+type BuilderConfig struct {
+	RepoUrl  string
+	Branch   string
+	Reusable bool
+}
+
 type Builder struct {
 	branch       string
 	downloadPath string

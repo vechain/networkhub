@@ -119,7 +119,7 @@ func LocalSixNodesNetworkGenesis() *genesis.CustomGenesis {
 
 func LocalSixNodesNetworkWithGenesis(genesis *genesis.CustomGenesis) *network.Network {
 	return &network.Network{
-		ID:          "sixNodesNetwork",
+		BaseID:      "sixNodesNetwork",
 		Environment: environments.Local,
 		Nodes: []node.Config{
 			&node.BaseNode{

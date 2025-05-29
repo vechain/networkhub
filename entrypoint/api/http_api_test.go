@@ -60,7 +60,7 @@ func TestStartStopHandler(t *testing.T) {
 			payload:    "{}",
 			method:     http.MethodGet,
 			wantStatus: http.StatusInternalServerError,
-			wantBody:   "Unable to stop network - network no-exist is not configured\n",
+			wantBody:   "Unable to stop network - network not found\n",
 		},
 		{
 			name:       "Load existing preset network",
@@ -92,7 +92,7 @@ func TestStartStopHandler(t *testing.T) {
 	envManager.RegisterEnvironment("noop", noop.NewNoopEnv)
 
 	presets := preset.NewPresetNetworks()
-	presets.Register("noop-network", &network.Network{Environment: "noop", ID: "noop"})
+	presets.Register("noop-network", &network.Network{Environment: "noop", BaseID: "noop"})
 
 	api := New(envManager, presets)
 

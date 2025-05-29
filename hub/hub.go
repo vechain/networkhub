@@ -49,10 +49,11 @@ func (e *NetworkHub) StartNetwork(networkID string) error {
 }
 
 func (e *NetworkHub) StopNetwork(networkID string) error {
-	netwk, ok := e.configuredNetworks[networkID]
-	if !ok {
-		return fmt.Errorf("network %s is not configured", networkID)
+	netwk, err := e.GetNetwork(networkID)
+	if err != nil {
+		return err
 	}
+
 	return netwk.StopNetwork()
 }
 
@@ -68,8 +69,16 @@ func (e *NetworkHub) RegisterEnvironment(id string, env func() environments.Acti
 	e.envFuncs[id] = env
 }
 
-func (e *NetworkHub) GetNetwork(id string) (*network.Network, error) {
+func (e *NetworkHub) GetNetworkConfig(id string) (*network.Network, error) {
 	loadedNetwork, ok := e.networks[id]
+	if !ok {
+		return nil, fmt.Errorf("network not found")
+	}
+	return loadedNetwork, nil
+}
+
+func (e *NetworkHub) GetNetwork(id string) (environments.Actions, error) {
+	loadedNetwork, ok := e.configuredNetworks[id]
 	if !ok {
 		return nil, fmt.Errorf("network not found")
 	}

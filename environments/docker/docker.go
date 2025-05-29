@@ -34,7 +34,7 @@ func NewDockerEnv() environments.Actions {
 
 func (d *Docker) LoadConfig(cfg *network.Network) (string, error) {
 	d.networkCfg = cfg
-	d.id = d.networkCfg.Environment + d.networkCfg.ID
+	d.id = d.networkCfg.ID()
 	d.networkID = d.id + "-network"
 
 	for i, node := range cfg.Nodes {
@@ -124,6 +124,10 @@ func (d *Docker) StopNetwork() error {
 func (d *Docker) Info() error {
 	//TODO implement me
 	panic("implement me")
+}
+
+func (d *Docker) Config() *network.Network {
+	return d.networkCfg
 }
 
 func (d *Docker) checkOrCreateNetwork(networkName, subnet string) error {

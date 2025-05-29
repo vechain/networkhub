@@ -31,3 +31,5 @@ func (n Noop) Nodes() map[string]node.Lifecycle {
 func (n Noop) Info() error {
 	return nil
 }
+
+func (n Noop) Config() *network.Network { return nil }

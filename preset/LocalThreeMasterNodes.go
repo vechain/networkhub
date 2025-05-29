@@ -14,7 +14,7 @@ import (
 func LocalThreeMasterNodesNetwork() *network.Network {
 	genesis := LocalThreeMasterNodesNetworkGenesis()
 	return &network.Network{
-		ID:          "threeMaster",
+		BaseID:      "threeMaster",
 		Environment: environments.Local,
 		Nodes: []node.Config{
 			&node.BaseNode{
