@@ -81,7 +81,7 @@ func (c *Client) Preset(presetNetwork string, environment, artifactPath string) 
 
 func (c *Client) Config(netCfg *network.Network) (*network.Network, error) {
 	if netCfg.ThorBuilder != nil {
-		builder := thorbuilder.NewWithRepo(netCfg.ThorBuilder.RepoUrl, netCfg.ThorBuilder.Branch, netCfg.ThorBuilder.Reusable)
+		builder := thorbuilder.New(netCfg.ThorBuilder)
 		if err := builder.Download(); err != nil {
 			return nil, err
 		}

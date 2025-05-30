@@ -5,64 +5,73 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"io"
 	"log/slog"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 )
 
-type BuilderConfig struct {
-	RepoUrl  string
-	Branch   string
-	Reusable bool
+type Config struct {
+	DownloadConfig *DownloadConfig
+	BuildConfig    *BuildConfig
+}
+type DownloadConfig struct {
+	RepoUrl    string
+	Branch     string
+	IsReusable bool
+}
+
+type BuildConfig struct {
+	ExistingPath string
+	DebugBuild   bool
 }
 
 type Builder struct {
-	branch       string
+	config       *Config
 	downloadPath string
-	reusable     bool
-	repoUrl      string
-	debug        bool
+}
+
+func DefaultConfig() *Config {
+	return &Config{
+		DownloadConfig: &DownloadConfig{
+			RepoUrl:    "https://github.com/vechain/thor",
+			Branch:     "master",
+			IsReusable: true,
+		},
+		BuildConfig: nil,
+	}
 }
 
 // New creates a new Builder instance for the specified branch.
 // If reusable is true, it skips cloning if the directory exists and checks for the binary.
-func New(branch string, reusable bool) *Builder {
-	return NewWithRepo("https://github.com/vechain/thor", branch, reusable)
-}
+func New(cfg *Config) *Builder {
+	downloadPath := ""
+	if cfg.DownloadConfig != nil {
+		suffix := generateRandomSuffix(4)
 
-// NewWithRepo creates a new Builder instance for the specified branch and repo.
-// If reusable is true, it skips cloning if the directory exists and checks for the binary.
-func NewWithRepo(repoUrl string, branch string, reusable bool) *Builder {
-	suffix := generateRandomSuffix(4)
-
-	downloadPath := filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_%d_%s", branch, os.Getpid(), suffix))
-	if reusable {
-		downloadPath = filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_reusable", branch))
+		downloadPath = filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_%d_%s", cfg.DownloadConfig.Branch, os.Getpid(), suffix))
+		if cfg.DownloadConfig.IsReusable {
+			downloadPath = filepath.Join(os.TempDir(), fmt.Sprintf("thor_%s_reusable", cfg.DownloadConfig.Branch))
+		}
 	}
-	return &Builder{
-		branch:       branch,
-		reusable:     reusable,
-		downloadPath: downloadPath,
-		repoUrl:      repoUrl,
-	}
-}
 
-// NewWithRepoPath allows for local testing and quicker builds
-func NewWithRepoPath(repoUrl string, downloadPath string, debug bool) *Builder {
+	if cfg.BuildConfig != nil {
+		downloadPath = cfg.BuildConfig.ExistingPath
+	}
+
 	return &Builder{
-		reusable:     true,
+		config:       cfg,
 		downloadPath: downloadPath,
-		repoUrl:      repoUrl,
-		debug:        debug,
 	}
 }
 
 // Download clones the specified branch of the Thor repository into the downloadPath.
 func (b *Builder) Download() error {
-	if b.reusable {
+	if b.config.DownloadConfig == nil {
+		slog.Info("Skipping Download... No download config was provided")
+		return nil
+	}
+	if b.config.DownloadConfig.IsReusable {
 		// Check if the folder exists and ensure it contains a cloned repository
 		if _, err := os.Stat(filepath.Join(b.downloadPath, ".git")); err == nil {
 			slog.Info("Reusable directory with repository exists: ", "path", b.downloadPath)
@@ -83,10 +92,10 @@ func (b *Builder) Download() error {
 
 	args := make([]string, 0)
 	args = append(args, "clone")
-	if b.branch != "" {
-		args = append(args, "--branch", b.branch)
+	if b.config.DownloadConfig.Branch != "" {
+		args = append(args, "--branch", b.config.DownloadConfig.Branch)
 	}
-	args = append(args, "--depth", "1", b.repoUrl, b.downloadPath)
+	args = append(args, "--depth", "1", b.config.DownloadConfig.RepoUrl, b.downloadPath)
 
 	cmd := exec.Command("git", args...)
 	cmd.Stdout = os.Stdout
@@ -106,7 +115,8 @@ func (b *Builder) Build() (string, error) {
 	}
 
 	var cmd *exec.Cmd
-	if b.debug {
+
+	if b.config.BuildConfig != nil && b.config.BuildConfig.DebugBuild {
 		cmd = exec.Command(
 			"go", "build",
 			"-gcflags=all=-N -l", // Disable optimizations. Useful for debugging.
@@ -149,7 +159,7 @@ func (b *Builder) BuildDockerImage() (string, error) {
 		return "", fmt.Errorf("failed to download repository: %w", err)
 	}
 
-	tag := fmt.Sprintf("test_%s_%s", b.branch, generateRandomSuffix(4))
+	tag := fmt.Sprintf("test_%s_%s", b.config.DownloadConfig.Branch, generateRandomSuffix(4))
 
 	// Build the Docker image
 	cmd := exec.Command("docker", "build", "-t", tag, b.downloadPath)
@@ -162,26 +172,6 @@ func (b *Builder) BuildDockerImage() (string, error) {
 
 	slog.Info("Successfully built Docker image", "tag", tag)
 	return tag, nil
-}
-
-func FetchCustomGenesisFile(genesisUrl string) (*string, error) {
-	resp, err := http.Get(genesisUrl)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to fetch genesis file: %s", resp.Status)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	genesis := string(body)
-	return &genesis, err
 }
 
 // generateRandomSuffix returns a random hexadecimal string.
