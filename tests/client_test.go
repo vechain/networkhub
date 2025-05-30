@@ -25,12 +25,9 @@ func TestLocalClient(t *testing.T) {
 	basePort := 9100 // avoid port collision with other tests
 
 	// configure local artifacts
-	thbuilderCfg := &thorbuilder.BuilderConfig{
-		RepoUrl:  "git@github.com:vechain/thor.git",
-		Branch:   "master",
-		Reusable: true,
-	}
-	networkCfg.ThorBuilder = thbuilderCfg
+	cfg := thorbuilder.DefaultConfig()
+	cfg.DownloadConfig.IsReusable = false
+	networkCfg.ThorBuilder = cfg
 
 	// modify genesis
 	prefundedAcc := datagen.RandAccount().Address

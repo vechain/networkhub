@@ -10,10 +10,10 @@ import (
 )
 
 type Network struct {
-	Environment string                     `json:"environment"`
-	Nodes       []node.Config              `json:"nodes"`
-	BaseID      string                     `json:"baseid"`
-	ThorBuilder *thorbuilder.BuilderConfig `json:"thorBuilder,omitempty"`
+	Environment string              `json:"environment"`
+	Nodes       []node.Config       `json:"nodes"`
+	BaseID      string              `json:"baseid"`
+	ThorBuilder *thorbuilder.Config `json:"thorBuilder,omitempty"`
 }
 
 type Builder struct {

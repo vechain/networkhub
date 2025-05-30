@@ -134,67 +134,121 @@ Below are some example `curl` requests to interact with the networkHub via its H
   ```
 
 ## Thorbuilder Package
-The `thorbuilder` package is a key component of the networkHub framework. It simplifies building the Thor binary from a specified branch, ensuring that developers can easily work with customized or updated versions of the Thor client.
+The `thorbuilder` package is a key component of the networkHub framework that provides flexible configuration options for building Thor binaries from source. It supports both local builds and Docker image creation, with options for reusable builds and debug configurations.
 
 ### Features:
-- **Download Thor Source**: Fetches the Thor source code from the specified branch.
-- **Build Thor Binary**: Compiles the source code into a working binary.
-- **Fork Repo Support**: Allows for building from a forked repository, enabling developers to work on custom features or fixes.
+- **Configurable Build Process**: Customize download and build parameters through a structured Config system
+- **Reusable Builds**: Option to reuse existing cloned repositories for faster subsequent builds
+- **Debug Build Support**: Build with debug flags for development and testing
+- **Docker Image Building**: Create Docker images from Thor source
+- **Custom Genesis Support**: Fetch custom genesis files from URLs
+- **Flexible Repository Sources**: Support for different branches and repository URLs
+
+### Configuration Options:
+```go
+type Config struct {
+    DownloadConfig *DownloadConfig
+    BuildConfig    *BuildConfig
+}
+
+type DownloadConfig struct {
+    RepoUrl    string  // Repository URL (default: https://github.com/vechain/thor)
+    Branch     string  // Branch to clone (default: master)
+    IsReusable bool    // Whether to reuse existing clone
+}
+
+type BuildConfig struct {
+    ExistingPath string  // Path to existing Thor binary
+    DebugBuild   bool    // Whether to build with debug flags
+}
+```
 
 ### Example Usage:
 
-#### Building the Thor Binary:
-
+#### Basic Usage with Default Configuration:
 ```go
 package main
 
 import (
-	"fmt"
-	"log"
-	"github.com/vechain/networkhub/thorbuilder"
-	"log/slog"
+    "log"
+    "github.com/vechain/networkhub/thorbuilder"
+    "log/slog"
 )
 
 func main() {
-	branch := "master"
-	builder := thorbuilder.New(branch)
+    // Use default configuration
+    cfg := thorbuilder.DefaultConfig()
+    builder := thorbuilder.New(cfg)
 
-	if err := builder.Download(); err != nil {
-		log.Fatalf("Failed to download source: %v", err)
-	}
+    if err := builder.Download(); err != nil {
+        log.Fatalf("Failed to download source: %v", err)
+    }
 
-	thorBinaryPath, err := builder.Build()
-	if err != nil {
-		log.Fatalf("Failed to build binary: %v", err)
-	}
+    thorBinaryPath, err := builder.Build()
+    if err != nil {
+        log.Fatalf("Failed to build binary: %v", err)
+    }
 
-	slog.Info("Thor binary built successfully at: %s", thorBinaryPath)
+    slog.Info("Thor binary built successfully", "path", thorBinaryPath)
 }
 ```
-#### Building the Thor Binary from fork repo:
+
+#### Custom Configuration Example:
 ```go
 package main
 
 import (
-	"fmt"
-	"log"
-	"github.com/vechain/networkhub/thorbuilder"
-	"log/slog"
+    "log"
+    "github.com/vechain/networkhub/thorbuilder"
+    "log/slog"
 )
 
 func main() {
-	branch := "release/hayabusa"
-	builder := thorbuilder.NewWithRepo(branch)
+    cfg := &thorbuilder.Config{
+        DownloadConfig: &thorbuilder.DownloadConfig{
+            RepoUrl:    "https://github.com/your-fork/thor",
+            Branch:     "custom-feature",
+            IsReusable: true,
+        },
+        BuildConfig: &thorbuilder.BuildConfig{
+            DebugBuild: true,
+        },
+    }
+    
+    builder := thorbuilder.New(cfg)
 
-	if err := builder.Download(); err != nil {
-		log.Fatalf("Failed to download source: %v", err)
-	}
+    if err := builder.Download(); err != nil {
+        log.Fatalf("Failed to download source: %v", err)
+    }
 
-	thorBinaryPath, err := builder.Build()
-	if err != nil {
-		log.Fatalf("Failed to build binary: %v", err)
-	}
+    thorBinaryPath, err := builder.Build()
+    if err != nil {
+        log.Fatalf("Failed to build binary: %v", err)
+    }
 
-	slog.Info("Thor binary built successfully at: %s", thorBinaryPath)
+    slog.Info("Debug Thor binary built successfully", "path", thorBinaryPath)
+}
+```
+
+#### Building a Docker Image:
+```go
+package main
+
+import (
+    "log"
+    "github.com/vechain/networkhub/thorbuilder"
+    "log/slog"
+)
+
+func main() {
+    cfg := thorbuilder.DefaultConfig()
+    builder := thorbuilder.New(cfg)
+
+    imageTag, err := builder.BuildDockerImage()
+    if err != nil {
+        log.Fatalf("Failed to build Docker image: %v", err)
+    }
+
+    slog.Info("Docker image built successfully", "tag", imageTag)
 }
 ```

@@ -6,7 +6,14 @@ import (
 )
 
 func LocalSixNodesHayabusaNetwork(customGenesisJson string, repoUrl string) *network.Network {
-	thorBuilder := thorbuilder.NewWithRepo(repoUrl, "release/hayabusa", true)
+	thorBuilder := thorbuilder.New(
+		&thorbuilder.Config{
+			DownloadConfig: &thorbuilder.DownloadConfig{
+				RepoUrl:    repoUrl,
+				Branch:     "release/hayabusa",
+				IsReusable: true,
+			},
+		})
 	err := thorBuilder.Download()
 	if err != nil {
 		panic(err)
