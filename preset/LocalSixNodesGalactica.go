@@ -6,7 +6,9 @@ import (
 )
 
 func LocalSixNodesGalacticaNetwork() *network.Network {
-	thorBuilder := thorbuilder.New("release/galactica", true)
+	cfg := thorbuilder.DefaultConfig()
+	cfg.DownloadConfig.Branch = "release/galactica"
+	thorBuilder := thorbuilder.New(cfg)
 	err := thorBuilder.Download()
 	if err != nil {
 		panic(err)

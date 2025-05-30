@@ -3,7 +3,6 @@ package thorbuilder
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -38,9 +37,10 @@ func TestBuilder(t *testing.T) {
 	//	assert.Equal(t, filepath.Join(builder.downloadPath, "bin", "thor"), thorBinaryPath)
 	//})
 
+	downloadedPath := ""
+
 	t.Run("Test Build Non-Reusable", func(t *testing.T) {
-		branch := "master"
-		builder := New(branch, false)
+		builder := New(DefaultConfig())
 
 		err := builder.Download()
 		require.NoError(t, err)
@@ -51,35 +51,30 @@ func TestBuilder(t *testing.T) {
 		_, err = os.Stat(thorBinaryPath)
 		require.NoError(t, err)
 		assert.Equal(t, filepath.Join(builder.downloadPath, "bin", "thor"), thorBinaryPath)
-	})
-
-	t.Run("Test Build With Specified Download Path", func(t *testing.T) {
-		branch := "master"
-		builder := New(branch, true)
-		assert.NoError(t, builder.Download())
-		path, err := builder.Build()
-		assert.NoError(t, err)
-		path, _ = strings.CutSuffix(path, "/bin/thor")
-
-		custom := NewWithRepoPath("https://github.com/vechain/thor", path, false)
-		assert.NoError(t, custom.Download())
-		_, err = custom.Build()
-		assert.NoError(t, err)
+		downloadedPath = builder.downloadPath
 	})
 
 	t.Run("Invalid Branch", func(t *testing.T) {
-		branch := "invalid-branch"
-		builder := New(branch, false)
+		cfg := DefaultConfig()
+		cfg.DownloadConfig.Branch = "invalid-branch"
+		builder := New(cfg)
 
 		err := builder.Download()
 		assert.Error(t, err)
 	})
 
 	t.Run("Build Without Download", func(t *testing.T) {
-		branch := "main"
-		builder := New(branch, false)
+		cfg := DefaultConfig()
+		cfg.BuildConfig = &BuildConfig{
+			ExistingPath: downloadedPath,
+			DebugBuild:   true,
+		}
+		builder := New(cfg)
 
-		_, err := builder.Build()
-		assert.Error(t, err)
+		thorBinaryPath, err := builder.Build()
+		assert.NoError(t, err)
+
+		_, err = os.Stat(thorBinaryPath)
+		assert.NoError(t, err)
 	})
 }

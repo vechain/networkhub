@@ -175,8 +175,9 @@ func TestLocal(t *testing.T) {
 
 func TestThreeNodes(t *testing.T) {
 	var err error
-
-	thorBuilder := thorbuilder.New("master", false)
+	cfg := thorbuilder.DefaultConfig()
+	cfg.DownloadConfig.IsReusable = false
+	thorBuilder := thorbuilder.New(cfg)
 	require.NoError(t, thorBuilder.Download())
 	thorBinPath, err := thorBuilder.Build()
 	require.NoError(t, err)
@@ -215,7 +216,7 @@ func TestSixNodes(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	thorBuilder := thorbuilder.New("master", true)
+	thorBuilder := thorbuilder.New(thorbuilder.DefaultConfig())
 	require.NoError(t, thorBuilder.Download())
 	thorBinPath, err := thorBuilder.Build()
 	require.NoError(t, err)
@@ -257,34 +258,10 @@ func TestSixNodesGalactica(t *testing.T) {
 	deployAndAssertShanghaiContract(t, clients[0], preset.SixNNAccount1)
 }
 
-func TestSixNodesHayabusa(t *testing.T) {
-	t.Skip()
-	var sixNodesHayabusaNetwork *network.Network
-
-	genesisUrl := "https://vechain.github.io/hayabusa-devnet/genesis.json"
-	customGenesis, err := thorbuilder.FetchCustomGenesisFile(genesisUrl)
-	assert.NoError(t, err)
-
-	require.NotPanics(t, func() {
-		sixNodesHayabusaNetwork = preset.LocalSixNodesHayabusaNetwork(*customGenesis, "https://github.com/vechain/hayabusa")
-	})
-
-	localEnv := NewLocalEnv()
-	_, err = localEnv.LoadConfig(sixNodesHayabusaNetwork)
-	require.NoError(t, err)
-
-	t.Cleanup(func() {
-		require.NoError(t, localEnv.StopNetwork())
-	})
-	require.NoError(t, localEnv.StartNetwork())
-
-	pollingWhileConnectingPeers(t, sixNodesHayabusaNetwork.Nodes, 5)
-}
-
 func TestThreeNodes_Healthcheck(t *testing.T) {
 	networkCfg := preset.LocalThreeMasterNodesNetwork()
 
-	thorBuilder := thorbuilder.New("master", true)
+	thorBuilder := thorbuilder.New(thorbuilder.DefaultConfig())
 	require.NoError(t, thorBuilder.Download())
 	thorBinPath, err := thorBuilder.Build()
 	require.NoError(t, err)
@@ -309,7 +286,7 @@ func TestThreeNodes_Healthcheck(t *testing.T) {
 func TestThreeNodes_AdditionalArgs(t *testing.T) {
 	networkCfg := preset.LocalThreeMasterNodesNetwork()
 
-	thorBuilder := thorbuilder.New("master", true)
+	thorBuilder := thorbuilder.New(thorbuilder.DefaultConfig())
 	require.NoError(t, thorBuilder.Download())
 	thorBinPath, err := thorBuilder.Build()
 	require.NoError(t, err)
