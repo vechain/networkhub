@@ -20,7 +20,7 @@ func TestDockerNetwork(t *testing.T) {
 	// Create a mock network configuration
 	networkCfg := &network.Network{
 		Environment: "docker",
-		ID:          "test-id",
+		BaseID:      "test-id",
 		Nodes: []node.Config{
 			&node.BaseNode{
 				ID:             "node1",
@@ -120,7 +120,7 @@ func TestDockerHayabusaNetwork(t *testing.T) {
 	// Create a mock network configuration
 	networkCfg := &network.Network{
 		Environment: "docker",
-		ID:          "test-id",
+		BaseID:      "test-id",
 		Nodes: []node.Config{
 			&node.BaseNode{
 				ID:            "node1",

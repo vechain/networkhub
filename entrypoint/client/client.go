@@ -3,12 +3,14 @@ package client
 import (
 	"fmt"
 
+	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/environments/docker"
 	"github.com/vechain/networkhub/environments/local"
 	"github.com/vechain/networkhub/hub"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/preset"
+	"github.com/vechain/networkhub/thorbuilder"
 )
 
 type Client struct {
@@ -41,6 +43,10 @@ func (c *Client) Start(id string) error {
 	return c.networkHub.StartNetwork(id)
 }
 
+func (c *Client) GetNetwork(id string) (environments.Actions, error) {
+	return c.networkHub.GetNetwork(id)
+}
+
 func (c *Client) LoadExistingNetworks() error {
 	nets, err := c.storage.LoadExistingNetworks()
 	if err != nil {
@@ -65,29 +71,45 @@ func (c *Client) Nodes(id string) map[string]node.Lifecycle {
 	return c.networkHub.Nodes(id)
 }
 
-func (c *Client) Preset(presetNetwork string, environment, artifactPath string) (string, error) {
+func (c *Client) Preset(presetNetwork string, environment, artifactPath string) (*network.Network, error) {
 	netCfg, err := c.presets.Load(presetNetwork, &preset.APIConfigPayload{Environment: environment, ArtifactPath: artifactPath})
 	if err != nil {
-		return "", fmt.Errorf("unable to load network preset: %w", err)
+		return nil, fmt.Errorf("unable to load network preset: %w", err)
 	}
 	return c.Config(netCfg)
 }
 
-func (c *Client) Config(netCfg *network.Network) (string, error) {
+func (c *Client) Config(netCfg *network.Network) (*network.Network, error) {
+	if netCfg.ThorBuilder != nil {
+		builder := thorbuilder.NewWithRepo(netCfg.ThorBuilder.RepoUrl, netCfg.ThorBuilder.Branch, netCfg.ThorBuilder.Reusable)
+		if err := builder.Download(); err != nil {
+			return nil, err
+		}
+
+		path, err := builder.Build()
+		if err != nil {
+			return nil, err
+		}
+
+		for _, node := range netCfg.Nodes {
+			node.SetExecArtifact(path)
+		}
+	}
+
 	networkID, err := c.networkHub.LoadNetworkConfig(netCfg)
 	if err != nil {
-		return "", fmt.Errorf("unable to load config: %w", err)
+		return nil, fmt.Errorf("unable to load config: %w", err)
 	}
 
-	networkInst, err := c.networkHub.GetNetwork(networkID)
+	networkInst, err := c.networkHub.GetNetworkConfig(networkID)
 	if err != nil {
-		return "", fmt.Errorf("unable to retrieve network: %w", err)
+		return nil, fmt.Errorf("unable to retrieve network: %w", err)
 	}
 
-	err = c.storage.Store(networkID, networkInst)
+	err = c.storage.Store(netCfg)
 	if err != nil {
-		return "", fmt.Errorf("unable to store network: %w", err)
+		return nil, fmt.Errorf("unable to store network: %w", err)
 	}
 
-	return networkID, nil
+	return networkInst, nil
 }

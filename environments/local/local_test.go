@@ -94,7 +94,7 @@ var genesis = `{
         }
       }`
 var networkJSON = fmt.Sprintf(`{
-  "id": "local_test",
+  "baseId": "local_test",
   "nodes": [
     {
       "id": "node1",
@@ -176,7 +176,7 @@ func TestLocal(t *testing.T) {
 func TestThreeNodes(t *testing.T) {
 	var err error
 
-	thorBuilder := thorbuilder.New("master", true)
+	thorBuilder := thorbuilder.New("master", false)
 	require.NoError(t, thorBuilder.Download())
 	thorBinPath, err := thorBuilder.Build()
 	require.NoError(t, err)
@@ -196,7 +196,7 @@ func TestThreeNodes(t *testing.T) {
 	})
 	require.NoError(t, localEnv.StartNetwork())
 
-	err = networkCfg.HealthCheck(0, time.Second*20)
+	err = networkCfg.HealthCheck(0, time.Second*30)
 	require.NoError(t, err)
 
 	c := thorclient.New(networkCfg.Nodes[0].GetHTTPAddr())

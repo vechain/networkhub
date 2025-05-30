@@ -51,7 +51,7 @@ var startCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cmdManager := setup()
 		networkID := args[0]
-		slog.Info("Starting network...", "ID", networkID)
+		slog.Info("Starting network...", "BaseID", networkID)
 
 		// Channel to listen for interrupt signals
 		sigChan := make(chan os.Signal, 1)

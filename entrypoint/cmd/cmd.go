@@ -74,7 +74,7 @@ func (c *Cmd) config(netCfg *network.Network) (string, error) {
 		return "", fmt.Errorf("unable to load config: %w", err)
 	}
 
-	networkInst, err := c.networkHub.GetNetwork(networkID)
+	networkInst, err := c.networkHub.GetNetworkConfig(networkID)
 	if err != nil {
 		return "", fmt.Errorf("unable to retrieve network: %w", err)
 	}

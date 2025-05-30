@@ -24,7 +24,7 @@ func NewLocalEnv() environments.Actions {
 
 func (l *Local) LoadConfig(cfg *network.Network) (string, error) {
 	l.networkCfg = cfg
-	l.id = l.networkCfg.Environment + l.networkCfg.ID
+	l.id = l.networkCfg.ID()
 
 	// ensure paths exist, use ExecArtifact base dirs if not defined
 	for _, n := range l.networkCfg.Nodes {
@@ -89,6 +89,10 @@ func (l *Local) Nodes() map[string]node.Lifecycle {
 func (l *Local) Info() error {
 	//TODO implement me
 	panic("implement me")
+}
+
+func (l *Local) Config() *network.Network {
+	return l.networkCfg
 }
 
 func fileExists(path string) bool {

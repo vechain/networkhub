@@ -47,7 +47,7 @@ func (s *Server) presetHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract the part of the path after "/preset/"
 	networkPresetID := strings.TrimPrefix(r.URL.Path, "/preset/")
 	if networkPresetID == "" {
-		http.Error(w, "Network preset ID must be specified", http.StatusBadRequest)
+		http.Error(w, "Network preset BaseID must be specified", http.StatusBadRequest)
 		return
 	}
 
@@ -106,7 +106,7 @@ func (s *Server) startHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract the part of the path after "/start/"
 	networkID := strings.TrimPrefix(r.URL.Path, "/start/")
 	if networkID == "" {
-		http.Error(w, "Network ID must be specified", http.StatusBadRequest)
+		http.Error(w, "Network BaseID must be specified", http.StatusBadRequest)
 		return
 	}
 
@@ -130,7 +130,7 @@ func (s *Server) stopHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract the part of the path after "/start/"
 	networkID := strings.TrimPrefix(r.URL.Path, "/stop/")
 	if networkID == "" {
-		http.Error(w, "Network ID must be specified", http.StatusBadRequest)
+		http.Error(w, "Network BaseID must be specified", http.StatusBadRequest)
 		return
 	}
 

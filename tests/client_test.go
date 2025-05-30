@@ -24,12 +24,13 @@ func TestLocalClient(t *testing.T) {
 	networkCfg := preset.LocalThreeMasterNodesNetwork()
 	basePort := 9100 // avoid port collision with other tests
 
-	// create local artifacts
-	thBuilder := thorbuilder.New("master", false)
-	err := thBuilder.Download()
-	require.NoError(t, err)
-	buildPath, err := thBuilder.Build()
-	require.NoError(t, err)
+	// configure local artifacts
+	thbuilderCfg := &thorbuilder.BuilderConfig{
+		RepoUrl:  "git@github.com:vechain/thor.git",
+		Branch:   "master",
+		Reusable: true,
+	}
+	networkCfg.ThorBuilder = thbuilderCfg
 
 	// modify genesis
 	prefundedAcc := datagen.RandAccount().Address
@@ -42,7 +43,6 @@ func TestLocalClient(t *testing.T) {
 				Balance: (*thorgenesis.HexOrDecimal256)(preset.LargeBigValue),
 			})
 		node.SetGenesis(nodeGenesis)
-		node.SetExecArtifact(buildPath)
 		basePort++
 		node.SetAPIAddr(fmt.Sprintf("0.0.0.0:%d", basePort))
 		basePort++
@@ -50,13 +50,13 @@ func TestLocalClient(t *testing.T) {
 	}
 
 	// Configure and start network
-	networkID, err := c.Config(networkCfg)
+	net, err := c.Config(networkCfg)
 	if err != nil {
 		t.Fatalf("Failed to configure network: %v", err)
 	}
 
 	// Start network
-	if err := c.Start(networkID); err != nil {
+	if err := c.Start(net.ID()); err != nil {
 		t.Fatalf("Failed to start network: %v", err)
 	}
 
@@ -74,7 +74,8 @@ func TestLocalClient(t *testing.T) {
 	require.Equal(t, bal.Cmp(big.NewInt(0)), 1)
 
 	// Stop network
-	if err := c.Stop(networkID); err != nil {
+	time.Sleep(5 * time.Second)
+	if err := c.Stop(net.ID()); err != nil {
 		t.Fatalf("Failed to stop network: %v", err)
 	}
 }
@@ -113,11 +114,11 @@ func TestDockerClient(t *testing.T) {
 	}
 
 	// Configure and start network
-	networkID, err := c.Config(networkCfg)
+	net, err := c.Config(networkCfg)
 	require.NoError(t, err)
 
 	// Start network
-	if err := c.Start(networkID); err != nil {
+	if err := c.Start(net.ID()); err != nil {
 		t.Fatalf("Failed to start network: %v", err)
 	}
 
@@ -135,7 +136,7 @@ func TestDockerClient(t *testing.T) {
 	require.Equal(t, bal.Cmp(big.NewInt(0)), 1)
 
 	// Stop network
-	if err := c.Stop(networkID); err != nil {
+	if err := c.Stop(net.ID()); err != nil {
 		t.Fatalf("Failed to stop network: %v", err)
 	}
 }

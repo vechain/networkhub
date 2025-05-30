@@ -16,9 +16,9 @@ func NewInMemStorage() *Storage {
 	}
 }
 
-func (s *Storage) Store(networkID string, net *network.Network) error {
+func (s *Storage) Store(net *network.Network) error {
 	// Add/Update the network entry
-	s.storage[networkID] = net
+	s.storage[net.ID()] = net
 
 	slog.Info("Network saved to memory")
 	return nil
