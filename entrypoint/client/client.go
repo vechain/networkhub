@@ -92,7 +92,7 @@ func (c *Client) Config(netCfg *network.Network) (*network.Network, error) {
 		}
 
 		for _, node := range netCfg.Nodes {
-			if node.GetExecArtifact() != "" {
+			if node.GetExecArtifact() == "" {
 				node.SetExecArtifact(path)
 			}
 		}
