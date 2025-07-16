@@ -33,6 +33,7 @@ type Config interface {
 	SetP2PListenPort(port int)
 	GetAdditionalArgs() map[string]string
 	SetAdditionalArgs(args map[string]string)
+	AddAdditionalArg(key, value string)
 	GetVerbosity() int
 	GetHTTPAddr() string
 	GetFakeExecution() bool
