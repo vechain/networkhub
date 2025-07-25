@@ -20,8 +20,8 @@ func TestDockerNetwork(t *testing.T) {
 	networkCfg := &network.Network{
 		Environment: "docker",
 		BaseID:      "test-id",
-		Nodes: []node.Config{
-			&node.BaseNode{
+		Nodes: []*node.Config{
+			{
 				ID:             "node1",
 				ExecArtifact:   "vechain/thor:latest",
 				DataDir:        "/home/thor",
@@ -33,7 +33,7 @@ func TestDockerNetwork(t *testing.T) {
 				Genesis:        genesis,
 				AdditionalArgs: map[string]string{"api-allowed-tracers": "all"},
 			},
-			&node.BaseNode{
+			{
 				ID:             "node2",
 				ExecArtifact:   "vechain/thor:latest",
 				DataDir:        "/home/thor",
@@ -45,7 +45,7 @@ func TestDockerNetwork(t *testing.T) {
 				Genesis:        genesis,
 				AdditionalArgs: map[string]string{"api-allowed-tracers": "all"},
 			},
-			&node.BaseNode{
+			{
 				ID:             "node3",
 				ExecArtifact:   "vechain/thor:latest",
 				DataDir:        "/home/thor",

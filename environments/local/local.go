@@ -22,6 +22,8 @@ func NewLocalEnv() environments.Actions {
 	}
 }
 
+var _ environments.Actions = (*Local)(nil)
+
 func (l *Local) LoadConfig(cfg *network.Network) (string, error) {
 	l.networkCfg = cfg
 	l.id = l.networkCfg.ID()

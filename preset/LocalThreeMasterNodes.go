@@ -16,8 +16,8 @@ func LocalThreeMasterNodesNetwork() *network.Network {
 	return &network.Network{
 		BaseID:      "threeMaster",
 		Environment: environments.Local,
-		Nodes: []node.Config{
-			&node.BaseNode{
+		Nodes: []*node.Config{
+			{
 				ID:            "node1",
 				P2PListenPort: 8031,
 				APIAddr:       "127.0.0.1:8131",
@@ -27,7 +27,7 @@ func LocalThreeMasterNodesNetwork() *network.Network {
 				Genesis:       genesis,
 				Verbosity:     3,
 			},
-			&node.BaseNode{
+			{
 				ID:            "node2",
 				P2PListenPort: 8032,
 				APIAddr:       "127.0.0.1:8132",
@@ -37,7 +37,7 @@ func LocalThreeMasterNodesNetwork() *network.Network {
 				Genesis:       genesis,
 				Verbosity:     3,
 			},
-			&node.BaseNode{
+			{
 				ID:            "node3",
 				P2PListenPort: 8033,
 				APIAddr:       "127.0.0.1:8133",

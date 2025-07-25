@@ -17,12 +17,12 @@ import (
 )
 
 type Node struct {
-	nodeCfg node.Config
+	nodeCfg *node.Config
 	cmdExec *exec.Cmd
 	enodes  []string
 }
 
-func NewLocalNode(nodeCfg node.Config, enodes []string) *Node {
+func NewLocalNode(nodeCfg *node.Config, enodes []string) *Node {
 	return &Node{
 		nodeCfg: nodeCfg,
 		enodes:  enodes,

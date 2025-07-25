@@ -13,7 +13,7 @@ import (
 	"github.com/vechain/thor/v2/thorclient"
 )
 
-type BaseNode struct {
+type Config struct {
 	ID             string                 `json:"id"` //TODO this is a mandatory field
 	Key            string                 `json:"key"`
 	APIAddr        string                 `json:"apiAddr"`
@@ -30,91 +30,91 @@ type BaseNode struct {
 	AdditionalArgs map[string]string      `json:"additionalArgs"`
 }
 
-func (b *BaseNode) GetVerbosity() int {
+func (b *Config) GetVerbosity() int {
 	return b.Verbosity
 }
 
-func (b *BaseNode) GetP2PListenPort() int {
+func (b *Config) GetP2PListenPort() int {
 	return b.P2PListenPort
 }
 
-func (b *BaseNode) SetP2PListenPort(port int) {
+func (b *Config) SetP2PListenPort(port int) {
 	b.P2PListenPort = port
 }
-func (b *BaseNode) GetAPIHost() string {
+func (b *Config) GetAPIHost() string {
 	split := strings.Split(b.GetAPIAddr(), ":")
 	if len(split) != 2 {
 		panic(fmt.Errorf("unable to parse API Addr"))
 	}
 	return split[0]
 }
-func (b *BaseNode) SetAPIHost(host string) {
+func (b *Config) SetAPIHost(host string) {
 	split := strings.Split(b.GetAPIAddr(), ":")
 	if len(split) != 2 {
 		panic(fmt.Errorf("unable to parse API Addr"))
 	}
 	b.APIAddr = fmt.Sprintf("%s:%s", host, split[1])
 }
-func (b *BaseNode) GetAPIAddr() string {
+func (b *Config) GetAPIAddr() string {
 	return b.APIAddr
 }
-func (b *BaseNode) SetAPIAddr(addr string) {
+func (b *Config) SetAPIAddr(addr string) {
 	b.APIAddr = addr
 }
 
-func (b *BaseNode) GetAPICORS() string {
+func (b *Config) GetAPICORS() string {
 	return b.APICORS
 }
 
-func (b *BaseNode) GetKey() string {
+func (b *Config) GetKey() string {
 	return b.Key
 }
 
-func New() Config {
-	return &BaseNode{}
+func New() *Config {
+	return &Config{}
 }
 
-func (b *BaseNode) GetConfigDir() string {
+func (b *Config) GetConfigDir() string {
 	return b.ConfigDir
 }
 
-func (b *BaseNode) SetConfigDir(s string) {
+func (b *Config) SetConfigDir(s string) {
 	b.ConfigDir = s
 }
 
-func (b *BaseNode) GetDataDir() string {
+func (b *Config) GetDataDir() string {
 	return b.DataDir
 }
 
-func (b *BaseNode) SetDataDir(s string) {
+func (b *Config) SetDataDir(s string) {
 	b.DataDir = s
 }
 
-func (b *BaseNode) SetID(id string) {
+func (b *Config) SetID(id string) {
 	b.ID = id
 }
 
-func (b *BaseNode) GetID() string {
+func (b *Config) GetID() string {
 	return b.ID
 }
 
-func (b *BaseNode) GetExecArtifact() string {
+func (b *Config) GetExecArtifact() string {
 	return b.ExecArtifact
 }
 
-func (b *BaseNode) SetExecArtifact(artifact string) {
+func (b *Config) SetExecArtifact(artifact string) {
 	b.ExecArtifact = artifact
 }
 
-func (b *BaseNode) GetAdditionalArgs() map[string]string {
+func (b *Config) GetAdditionalArgs() map[string]string {
 	return b.AdditionalArgs
 }
 
-func (b *BaseNode) SetAdditionalArgs(args map[string]string) {
+func (b *Config) SetAdditionalArgs(args map[string]string) {
 	b.AdditionalArgs = args
 }
 
-func (b *BaseNode) GetHTTPAddr() string {
+func (b *Config) GetHTTPAddr() string {
 	//todo make this smarter
 	if strings.Contains(b.APIAddr, "0.0.0.0") {
 		return "http://" + strings.ReplaceAll(b.APIAddr, "0.0.0.0", "127.0.0.1")
@@ -122,11 +122,11 @@ func (b *BaseNode) GetHTTPAddr() string {
 	return "http://" + b.APIAddr
 }
 
-func (b *BaseNode) GetFakeExecution() bool {
+func (b *Config) GetFakeExecution() bool {
 	return b.FakeExecution
 }
 
-func (b *BaseNode) Enode(ipAddr string) (string, error) {
+func (b *Config) Enode(ipAddr string) (string, error) {
 	privKey, err := crypto.HexToECDSA(b.Key)
 	if err != nil {
 		return "", fmt.Errorf("unable to process key for node %s : %w", b.ID, err)
@@ -135,7 +135,7 @@ func (b *BaseNode) Enode(ipAddr string) (string, error) {
 	return fmt.Sprintf("enode://%x@%s:%v", discover.PubkeyID(&privKey.PublicKey).Bytes(), ipAddr, b.P2PListenPort), nil
 }
 
-func (b *BaseNode) HealthCheck(block uint32, timeout time.Duration) error {
+func (b *Config) HealthCheck(block uint32, timeout time.Duration) error {
 	client := thorclient.New(b.GetHTTPAddr())
 	ticker := time.NewTicker(timeout)
 	defer ticker.Stop()
@@ -155,10 +155,10 @@ func (b *BaseNode) HealthCheck(block uint32, timeout time.Duration) error {
 	}
 }
 
-func (b *BaseNode) GetGenesis() *genesis.CustomGenesis {
+func (b *Config) GetGenesis() *genesis.CustomGenesis {
 	return b.Genesis
 }
 
-func (b *BaseNode) SetGenesis(genesis *genesis.CustomGenesis) {
+func (b *Config) SetGenesis(genesis *genesis.CustomGenesis) {
 	b.Genesis = genesis
 }

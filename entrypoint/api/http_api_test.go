@@ -89,7 +89,7 @@ func TestStartStopHandler(t *testing.T) {
 	}
 
 	envManager := hub.NewNetworkHub()
-	envManager.RegisterEnvironment("noop", noop.NewNoopEnv)
+	envManager.RegisterEnvironment("noop", noop.NewNoopEnv())
 
 	presets := preset.NewPresetNetworks()
 	presets.Register("noop-network", &network.Network{Environment: "noop", BaseID: "noop"})

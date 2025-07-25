@@ -11,7 +11,7 @@ import (
 
 type Network struct {
 	Environment string              `json:"environment"`
-	Nodes       []node.Config       `json:"nodes"`
+	Nodes       []*node.Config      `json:"nodes"`
 	BaseID      string              `json:"baseid"`
 	ThorBuilder *thorbuilder.Config `json:"thorBuilder,omitempty"`
 }
@@ -47,7 +47,7 @@ func NewNetwork(opts ...BuilderOptionsFunc) (*Network, error) {
 }
 
 // UnmarshalNode function unmarshals JSON data into the appropriate type based on the presence of VIP212
-func UnmarshalNode(data []byte) (node.Config, error) {
+func UnmarshalNode(data []byte) (*node.Config, error) {
 	var raw map[string]interface{}
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func UnmarshalNode(data []byte) (node.Config, error) {
 		return nil, err
 	}
 
-	nodeType := &node.BaseNode{}
+	nodeType := &node.Config{}
 	if err := json.Unmarshal(modifiedData, &nodeType); err != nil {
 		return nil, err
 	}
