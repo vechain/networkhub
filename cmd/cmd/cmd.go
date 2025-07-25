@@ -19,8 +19,8 @@ import (
 
 func setup() *cmdentrypoint.Cmd {
 	envManager := hub.NewNetworkHub()
-	envManager.RegisterEnvironment("local", local.NewLocalEnv)
-	envManager.RegisterEnvironment("docker", docker.NewDockerEnv)
+	envManager.RegisterEnvironment("local", local.NewLocalEnv())
+	envManager.RegisterEnvironment("docker", docker.NewDockerEnv())
 
 	presets := preset.NewPresetNetworks()
 	presets.Register("threeMasterNodesNetwork", preset.LocalThreeMasterNodesNetwork())
