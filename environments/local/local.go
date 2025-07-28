@@ -2,11 +2,12 @@ package local
 
 import (
 	"fmt"
-	"github.com/vechain/networkhub/environments"
-	"github.com/vechain/networkhub/thorbuilder"
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/vechain/networkhub/environments"
+	"github.com/vechain/networkhub/thorbuilder"
 
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
