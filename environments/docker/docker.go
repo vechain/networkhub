@@ -24,15 +24,13 @@ type Docker struct {
 	ipManager    *IpManager
 }
 
-func NewDockerEnv() *Docker {
+func NewDockerEnv() environments.Actions {
 	return &Docker{
 		dockerNodes:  map[string]*Node{},
 		exposedPorts: map[string]*exposedPort{},
 		ipManager:    NewIPManagerRandom(),
 	}
 }
-
-var _ environments.Actions = (*Docker)(nil)
 
 func (d *Docker) LoadConfig(cfg *network.Network) (string, error) {
 	d.networkCfg = cfg

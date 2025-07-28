@@ -28,6 +28,10 @@ func (n Noop) Nodes() map[string]node.Lifecycle {
 	return map[string]node.Lifecycle{}
 }
 
+func (n Noop) AttachNode(_ *node.Config) error {
+	return nil
+}
+
 func (n Noop) Info() error {
 	return nil
 }

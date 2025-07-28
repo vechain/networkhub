@@ -10,7 +10,6 @@ type Actions interface {
 	StartNetwork() error
 	StopNetwork() error
 	Nodes() map[string]node.Lifecycle
-	Info() error
 	Config() *network.Network
 }
 

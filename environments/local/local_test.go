@@ -283,6 +283,61 @@ func TestThreeNodes_Healthcheck(t *testing.T) {
 	assert.NoError(t, networkCfg.HealthCheck(0, time.Second*20))
 }
 
+func Test_AttachNode(t *testing.T) {
+	networkCfg := preset.LocalThreeMasterNodesNetwork()
+
+	thorBuilder := thorbuilder.New(thorbuilder.DefaultConfig())
+	require.NoError(t, thorBuilder.Download())
+	thorBinPath, err := thorBuilder.Build()
+	require.NoError(t, err)
+
+	// ensure the artifact path is set
+	for _, node := range networkCfg.Nodes {
+		node.SetExecArtifact(thorBinPath)
+	}
+
+	localEnv := NewLocalEnv()
+	_, err = localEnv.LoadConfig(networkCfg)
+	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		require.NoError(t, localEnv.StopNetwork())
+	})
+	require.NoError(t, localEnv.StartNetwork())
+
+	key, err := crypto.GenerateKey()
+	require.NoError(t, err)
+	hexKey := hexutil.Encode(key.D.Bytes())
+
+	genesis := preset.LocalThreeMasterNodesNetworkGenesis()
+
+	node := &node.Config{
+		ID:            "node100",
+		P2PListenPort: 8038,
+		APIAddr:       "127.0.0.1:8139",
+		APICORS:       "*",
+		Type:          node.RegularNode,
+		Key:           strings.TrimPrefix(hexKey, "0x"),
+		Genesis:       genesis,
+		Verbosity:     3,
+		ExecArtifact:  thorBinPath,
+	}
+
+	if err := localEnv.AttachNode(node); err != nil {
+		t.Fatalf("failed to attach node: %v", err)
+	}
+
+	client := thorclient.New(node.GetHTTPAddr())
+
+	err = common.Retry(func() error {
+		if _, err := client.Block("1"); err != nil {
+			return fmt.Errorf("failed to get block 1: %w", err)
+		}
+		return nil
+	}, time.Second, 15)
+	require.NoError(t, err)
+}
+
 func TestThreeNodes_AdditionalArgs(t *testing.T) {
 	networkCfg := preset.LocalThreeMasterNodesNetwork()
 

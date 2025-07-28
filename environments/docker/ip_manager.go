@@ -32,6 +32,9 @@ func NewIPManager(subnet string) *IpManager {
 }
 
 func (im *IpManager) NextIP(nodeID string) (string, error) {
+	if value, exists := im.assignedIps[nodeID]; exists {
+		return value, nil
+	}
 	if im.currentIP > 253 {
 		return "", errors.New("no more available IP addresses")
 	}
