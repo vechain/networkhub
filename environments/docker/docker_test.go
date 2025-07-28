@@ -61,7 +61,7 @@ func TestDockerNetwork(t *testing.T) {
 	}
 
 	// Initialize Docker environment
-	dockerEnv := docker.NewDockerEnv()
+	dockerEnv := docker.NewEnv()
 	assert.NotNil(t, dockerEnv)
 
 	// Load configuration

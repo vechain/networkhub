@@ -7,10 +7,9 @@ import (
 	"sync"
 
 	"github.com/vechain/networkhub/environments"
-	"github.com/vechain/networkhub/thorbuilder"
-
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
+	"github.com/vechain/networkhub/thorbuilder"
 )
 
 type Local struct {
@@ -30,10 +29,10 @@ func NewFactory() *Factory {
 }
 
 func (f *Factory) New() environments.Actions {
-	return NewLocalEnv()
+	return NewEnv()
 }
 
-func NewLocalEnv() *Local {
+func NewEnv() *Local {
 	return &Local{
 		localNodes: make(map[string]*Node),
 	}
@@ -140,6 +139,22 @@ func (l *Local) AttachNode(n node.Config) error {
 		}
 	}
 
+	return nil
+}
+
+func (l *Local) RemoveNode(nodeID string) error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	if _, exists := l.localNodes[nodeID]; !exists {
+		return fmt.Errorf("node with ID %s does not exist", nodeID)
+	}
+
+	if err := l.localNodes[nodeID].Stop(); err != nil {
+		return fmt.Errorf("unable to stop node %s - %w", nodeID, err)
+	}
+	
+	delete(l.localNodes, nodeID)
 	return nil
 }
 

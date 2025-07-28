@@ -34,10 +34,10 @@ func NewFactory() *Factory {
 }
 
 func (f *Factory) New() environments.Actions {
-	return NewDockerEnv()
+	return NewEnv()
 }
 
-func NewDockerEnv() *Docker {
+func NewEnv() *Docker {
 	return &Docker{
 		dockerNodes:  map[string]*Node{},
 		exposedPorts: map[string]*exposedPort{},
