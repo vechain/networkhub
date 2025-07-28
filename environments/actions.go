@@ -9,7 +9,6 @@ type Actions interface {
 	LoadConfig(cfg *network.Network) (string, error)
 	StartNetwork() error
 	StopNetwork() error
-	AttachNode(n *node.Config) error
 	Nodes() map[string]node.Lifecycle
 	Config() *network.Network
 }

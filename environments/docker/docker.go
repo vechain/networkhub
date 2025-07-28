@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"strconv"
 	"strings"
-	"sync"
 
 	dockertypes "github.com/docker/docker/api/types"
 	dockernetwork "github.com/docker/docker/api/types/network"
@@ -23,11 +22,9 @@ type Docker struct {
 	networkID    string
 	exposedPorts map[string]*exposedPort
 	ipManager    *IpManager
-	started      bool
-	mu           sync.Mutex
 }
 
-func NewDockerEnv() *Docker {
+func NewDockerEnv() environments.Actions {
 	return &Docker{
 		dockerNodes:  map[string]*Node{},
 		exposedPorts: map[string]*exposedPort{},
@@ -35,12 +32,7 @@ func NewDockerEnv() *Docker {
 	}
 }
 
-var _ environments.Actions = (*Docker)(nil)
-
 func (d *Docker) LoadConfig(cfg *network.Network) (string, error) {
-	d.mu.Lock()
-	defer d.mu.Unlock()
-
 	d.networkCfg = cfg
 	d.id = d.networkCfg.ID()
 	d.networkID = d.id + "-network"
@@ -52,11 +44,6 @@ func (d *Docker) LoadConfig(cfg *network.Network) (string, error) {
 		}
 		if node.GetDataDir() == "" {
 			node.SetDataDir("/home/thor")
-		}
-		// initial ip addr config, in case `AttachNode` is called later
-		_, err := d.ipManager.NextIP(node.GetID())
-		if err != nil {
-			return "", fmt.Errorf("unable to get next ip for node %s - %w", node.GetID(), err)
 		}
 
 		// ensure API ports are exposed to the localhost
@@ -80,24 +67,32 @@ func (d *Docker) LoadConfig(cfg *network.Network) (string, error) {
 }
 
 func (d *Docker) StartNetwork() error {
-	d.mu.Lock()
-	defer d.mu.Unlock()
-
 	// create a network for fixed ip addresses (enodes cannot have dns names)
 	if err := d.checkOrCreateNetwork(d.networkID, d.ipManager.Subnet()); err != nil {
 		return fmt.Errorf("unable to create network: %w", err)
 	}
 
 	for _, nodeCfg := range d.networkCfg.Nodes {
-		enodes, err := d.enodes(nodeCfg)
+		// calculate the node ip address
+		nextIpAddr, err := d.ipManager.NextIP(nodeCfg.GetID())
 		if err != nil {
-			return fmt.Errorf("failed to get enodes - %w", err)
+			return err
 		}
-		ipAddr, err := d.ipManager.NextIP(nodeCfg.GetID())
-		if err != nil {
-			return fmt.Errorf("unable to get next ip for node %s - %w", nodeCfg.GetID(), err)
+
+		// speed up p2p bootstrap
+		var enodes []string
+		for _, node := range d.networkCfg.Nodes {
+			if node.GetID() == nodeCfg.GetID() {
+				break
+			}
+			enode, err := node.Enode(d.ipManager.GetNodeIP(node.GetID()))
+			if err != nil {
+				return err
+			}
+			enodes = append(enodes, enode)
 		}
-		dockerNode := NewDockerNode(nodeCfg, enodes, d.networkID, d.exposedPorts[nodeCfg.GetID()], ipAddr)
+
+		dockerNode := NewDockerNode(nodeCfg, enodes, d.networkID, d.exposedPorts[nodeCfg.GetID()], nextIpAddr)
 		if err := dockerNode.Start(); err != nil {
 			return fmt.Errorf("unable to start node - %w", err)
 		}
@@ -105,15 +100,10 @@ func (d *Docker) StartNetwork() error {
 		d.dockerNodes[nodeCfg.GetID()] = dockerNode
 	}
 
-	d.started = true
-
 	return nil
 }
 
 func (d *Docker) Nodes() map[string]node.Lifecycle {
-	d.mu.Lock()
-	defer d.mu.Unlock()
-
 	nodes := make(map[string]node.Lifecycle, len(d.dockerNodes))
 	for k, v := range d.dockerNodes {
 		nodes[k] = v
@@ -122,63 +112,18 @@ func (d *Docker) Nodes() map[string]node.Lifecycle {
 }
 
 func (d *Docker) StopNetwork() error {
-	d.mu.Lock()
-	defer d.mu.Unlock()
-
 	for s, dockerNode := range d.dockerNodes {
 		err := dockerNode.Stop()
 		if err != nil {
 			return fmt.Errorf("unable to stop node %s - %w", s, err)
 		}
 	}
-
-	d.started = false
 	return nil
 }
 
-func (d *Docker) AttachNode(n *node.Config) error {
-	d.mu.Lock()
-	defer d.mu.Unlock()
-
-	if _, exists := d.dockerNodes[n.GetID()]; exists {
-		return fmt.Errorf("node with ID %s already exists", n.GetID())
-	}
-
-	enodes, err := d.enodes(n)
-	if err != nil {
-		return fmt.Errorf("failed to get enodes - %w", err)
-	}
-	ipAddr, err := d.ipManager.NextIP(n.GetID())
-	if err != nil {
-		return fmt.Errorf("unable to get next ip for node %s - %w", n.GetID(), err)
-	}
-	dockerNode := NewDockerNode(n, enodes, d.networkID, d.exposedPorts[n.GetID()], ipAddr)
-
-	split := strings.Split(n.GetAPIAddr(), ":")
-	if len(split) != 2 {
-		return fmt.Errorf("unable to parse API Addr")
-	}
-	exposedAPIPort, err := strconv.Atoi(split[1])
-	if err != nil {
-		return fmt.Errorf("unable to parse API port: %w", err)
-	}
-	d.exposedPorts[n.GetID()] = &exposedPort{
-		hostPort:      fmt.Sprintf("%d", exposedAPIPort+len(d.dockerNodes)),
-		containerPort: split[1],
-	}
-
-	d.dockerNodes[n.GetID()] = dockerNode
-
-	if d.started {
-		// If the network has already started, we need to start the node immediately.
-		if err := dockerNode.Start(); err != nil {
-			return fmt.Errorf("unable to start node %s after attaching - %w", n.GetID(), err)
-		}
-	} else {
-		slog.Info("Network not started yet, node will be started when network starts", "nodeID", n.GetID())
-	}
-
-	return nil
+func (d *Docker) Info() error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (d *Docker) Config() *network.Network {
@@ -231,22 +176,6 @@ func (d *Docker) checkOrCreateNetwork(networkName, subnet string) error {
 
 	slog.Info("Network created", "networkName", networkName)
 	return nil
-}
-
-func (d *Docker) enodes(exclude *node.Config) ([]string, error) {
-	var enodes []string
-	for _, node := range d.networkCfg.Nodes {
-		if node.GetID() == exclude.GetID() {
-			continue // skip the node that is being configured
-		}
-		enode, err := node.Enode(d.ipManager.GetNodeIP(node.GetID()))
-		if err != nil {
-			return nil, err
-		}
-		enodes = append(enodes, enode)
-	}
-
-	return enodes, nil
 }
 
 type exposedPort struct {

@@ -20,7 +20,7 @@ type Local struct {
 	mu sync.Mutex
 }
 
-func NewLocalEnv() environments.Actions {
+func NewLocalEnv() *Local {
 	return &Local{
 		localNodes: map[string]*Node{},
 	}
@@ -92,6 +92,10 @@ func (l *Local) AttachNode(n *node.Config) error {
 
 	if _, exists := l.localNodes[n.GetID()]; exists {
 		return fmt.Errorf("node with ID %s already exists", n.GetID())
+	}
+
+	if err := l.checkNode(n); err != nil {
+		return err
 	}
 
 	endodes, err := l.enodes()
