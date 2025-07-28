@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 	"math"
-	"strings"
 	"testing"
 	"time"
 
@@ -144,7 +143,7 @@ func TestLocalInvalidExecArtifact(t *testing.T) {
 	_, err = localEnv.LoadConfig(networkCfg)
 	require.Error(t, err)
 
-	require.True(t, strings.Contains(err.Error(), "does not exist at path"))
+	require.ErrorContains(t, err, "exec artifact path /some_fake_dir does not exist")
 }
 
 func TestLocal(t *testing.T) {
