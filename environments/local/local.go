@@ -153,7 +153,7 @@ func (l *Local) RemoveNode(nodeID string) error {
 	if err := l.localNodes[nodeID].Stop(); err != nil {
 		return fmt.Errorf("unable to stop node %s - %w", nodeID, err)
 	}
-	
+
 	delete(l.localNodes, nodeID)
 	return nil
 }
