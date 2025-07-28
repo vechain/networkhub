@@ -3,6 +3,7 @@ package docker
 import (
 	"context"
 	"fmt"
+
 	"log/slog"
 	"strconv"
 	"strings"
@@ -13,6 +14,7 @@ import (
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
+	"github.com/vechain/networkhub/thorbuilder"
 )
 
 type Docker struct {
@@ -22,9 +24,20 @@ type Docker struct {
 	networkID    string
 	exposedPorts map[string]*exposedPort
 	ipManager    *IpManager
+	dockerImage  string
 }
 
-func NewDockerEnv() environments.Actions {
+type Factory struct{}
+
+func NewFactory() *Factory {
+	return &Factory{}
+}
+
+func (f *Factory) New() environments.Actions {
+	return NewEnv()
+}
+
+func NewEnv() *Docker {
 	return &Docker{
 		dockerNodes:  map[string]*Node{},
 		exposedPorts: map[string]*exposedPort{},
@@ -37,6 +50,20 @@ func (d *Docker) LoadConfig(cfg *network.Network) (string, error) {
 	d.id = d.networkCfg.ID()
 	d.networkID = d.id + "-network"
 
+	if cfg.ThorBuilder != nil {
+		builder := thorbuilder.New(cfg.ThorBuilder)
+		if err := builder.Download(); err != nil {
+			return "", err
+		}
+
+		dockerImage, err := builder.BuildDockerImage()
+		if err != nil {
+			return "", fmt.Errorf("failed to build thor binary - %w", err)
+		}
+
+		d.dockerImage = dockerImage
+	}
+
 	for i, node := range cfg.Nodes {
 		// use preset dirs if not defined
 		if node.GetConfigDir() == "" {
@@ -44,6 +71,12 @@ func (d *Docker) LoadConfig(cfg *network.Network) (string, error) {
 		}
 		if node.GetDataDir() == "" {
 			node.SetDataDir("/home/thor")
+		}
+		if node.GetExecArtifact() == "" {
+			if d.dockerImage == "" {
+				return "", fmt.Errorf("docker image is not set, please provide a valid docker image")
+			}
+			node.SetExecArtifact(d.dockerImage)
 		}
 
 		// ensure API ports are exposed to the localhost

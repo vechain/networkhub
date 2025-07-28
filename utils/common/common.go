@@ -2,16 +2,10 @@ package common
 
 import (
 	"crypto/ecdsa"
-	"fmt"
 	"time"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/vechain/thor/v2/thor"
-)
-
-var (
-	NotFoundErr     = fmt.Errorf("not found")
-	Not200StatusErr = fmt.Errorf("not 200 status code")
 )
 
 func NewAccount(pkString string) *Account {

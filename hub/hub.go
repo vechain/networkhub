@@ -9,26 +9,26 @@ import (
 )
 
 type NetworkHub struct {
-	envFuncs           map[string]func() environments.Actions
+	factories          map[string]environments.Factory
 	configuredNetworks map[string]environments.Actions
 	networks           map[string]*network.Network
 }
 
 func NewNetworkHub() *NetworkHub {
 	return &NetworkHub{
-		envFuncs:           map[string]func() environments.Actions{},
+		factories:          map[string]environments.Factory{},
 		configuredNetworks: map[string]environments.Actions{},
 		networks:           map[string]*network.Network{},
 	}
 }
 
 func (e *NetworkHub) LoadNetworkConfig(cfg *network.Network) (string, error) {
-	envFunc, ok := e.envFuncs[cfg.Environment]
+	factory, ok := e.factories[cfg.Environment]
 	if !ok {
 		return "", fmt.Errorf("unable to load env %s", cfg.Environment)
 	}
 
-	env := envFunc()
+	env := factory.New()
 	networkID, err := env.LoadConfig(cfg)
 	if err != nil {
 		return "", fmt.Errorf("unable to load config - %w", err)
@@ -65,8 +65,8 @@ func (e *NetworkHub) Nodes(networkID string) map[string]node.Lifecycle {
 	return netwk.Nodes()
 }
 
-func (e *NetworkHub) RegisterEnvironment(id string, env func() environments.Actions) {
-	e.envFuncs[id] = env
+func (e *NetworkHub) RegisterEnvironment(id string, factory environments.Factory) {
+	e.factories[id] = factory
 }
 
 func (e *NetworkHub) GetNetworkConfig(id string) (*network.Network, error) {

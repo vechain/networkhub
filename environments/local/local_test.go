@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 	"math"
-	"strings"
 	"testing"
 	"time"
 
@@ -140,11 +139,11 @@ func TestLocalInvalidExecArtifact(t *testing.T) {
 
 	networkCfg.Nodes[0].SetExecArtifact("/some_fake_dir")
 
-	localEnv := NewLocalEnv()
+	localEnv := NewEnv()
 	_, err = localEnv.LoadConfig(networkCfg)
 	require.Error(t, err)
 
-	require.True(t, strings.Contains(err.Error(), "does not exist at path"))
+	require.ErrorContains(t, err, "exec artifact path /some_fake_dir does not exist")
 }
 
 func TestLocal(t *testing.T) {
@@ -155,7 +154,7 @@ func TestLocal(t *testing.T) {
 	require.NoError(t, err)
 
 	slog.Info(networkJSON)
-	localEnv := NewLocalEnv()
+	localEnv := NewEnv()
 	_, err = localEnv.LoadConfig(networkCfg)
 	require.NoError(t, err)
 
@@ -188,7 +187,7 @@ func TestThreeNodes(t *testing.T) {
 	for _, node := range networkCfg.Nodes {
 		node.SetExecArtifact(thorBinPath)
 	}
-	localEnv := NewLocalEnv()
+	localEnv := NewEnv()
 	_, err = localEnv.LoadConfig(networkCfg)
 	require.NoError(t, err)
 
@@ -226,7 +225,7 @@ func TestSixNodes(t *testing.T) {
 		node.SetExecArtifact(thorBinPath)
 	}
 
-	localEnv := NewLocalEnv()
+	localEnv := NewEnv()
 	_, err = localEnv.LoadConfig(networkCfg)
 	require.NoError(t, err)
 
@@ -244,7 +243,7 @@ func TestSixNodesGalactica(t *testing.T) {
 	var sixNodesGalacticaNetwork *network.Network
 	require.NotPanics(t, func() { sixNodesGalacticaNetwork = preset.LocalSixNodesGalacticaNetwork() })
 
-	localEnv := NewLocalEnv()
+	localEnv := NewEnv()
 	_, err := localEnv.LoadConfig(sixNodesGalacticaNetwork)
 	require.NoError(t, err)
 
@@ -271,7 +270,7 @@ func TestThreeNodes_Healthcheck(t *testing.T) {
 		node.SetExecArtifact(thorBinPath)
 	}
 
-	localEnv := NewLocalEnv()
+	localEnv := NewEnv()
 	_, err = localEnv.LoadConfig(networkCfg)
 	require.NoError(t, err)
 
@@ -299,7 +298,7 @@ func TestThreeNodes_AdditionalArgs(t *testing.T) {
 		})
 	}
 
-	localEnv := NewLocalEnv()
+	localEnv := NewEnv()
 	_, err = localEnv.LoadConfig(networkCfg)
 	require.NoError(t, err)
 

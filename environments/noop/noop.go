@@ -8,6 +8,16 @@ import (
 
 type Noop struct{}
 
+type Factory struct{}
+
+func NewFactory() *Factory {
+	return &Factory{}
+}
+
+func (f *Factory) New() environments.Actions {
+	return NewNoopEnv()
+}
+
 func NewNoopEnv() environments.Actions {
 	return &Noop{}
 }
