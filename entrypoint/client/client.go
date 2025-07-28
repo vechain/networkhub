@@ -10,7 +10,6 @@ import (
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/preset"
-	"github.com/vechain/networkhub/thorbuilder"
 )
 
 type Client struct {
@@ -21,8 +20,8 @@ type Client struct {
 
 func New() *Client {
 	envManager := hub.NewNetworkHub()
-	envManager.RegisterEnvironment("local", local.NewLocalEnv)
-	envManager.RegisterEnvironment("docker", docker.NewDockerEnv)
+	envManager.RegisterEnvironment("local", local.NewFactory())
+	envManager.RegisterEnvironment("docker", docker.NewFactory())
 
 	presets := preset.NewPresetNetworks()
 	//presets.Register("threeMasterNodesNetwork", preset.LocalThreeMasterNodesNetwork())
@@ -80,24 +79,6 @@ func (c *Client) Preset(presetNetwork string, environment, artifactPath string) 
 }
 
 func (c *Client) Config(netCfg *network.Network) (*network.Network, error) {
-	if netCfg.ThorBuilder != nil {
-		builder := thorbuilder.New(netCfg.ThorBuilder)
-		if err := builder.Download(); err != nil {
-			return nil, err
-		}
-
-		path, err := builder.Build()
-		if err != nil {
-			return nil, err
-		}
-
-		for _, node := range netCfg.Nodes {
-			if node.GetExecArtifact() == "" {
-				node.SetExecArtifact(path)
-			}
-		}
-	}
-
 	networkID, err := c.networkHub.LoadNetworkConfig(netCfg)
 	if err != nil {
 		return nil, fmt.Errorf("unable to load config: %w", err)
