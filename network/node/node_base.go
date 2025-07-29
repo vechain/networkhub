@@ -114,6 +114,13 @@ func (b *BaseNode) SetAdditionalArgs(args map[string]string) {
 	b.AdditionalArgs = args
 }
 
+func (b *BaseNode) AddAdditionalArg(key, value string) {
+	if b.AdditionalArgs == nil {
+		b.AdditionalArgs = make(map[string]string)
+	}
+	b.AdditionalArgs[key] = value
+}
+
 func (b *BaseNode) GetHTTPAddr() string {
 	//todo make this smarter
 	if strings.Contains(b.APIAddr, "0.0.0.0") {
