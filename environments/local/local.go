@@ -114,6 +114,10 @@ func (l *Local) AttachNode(n node.Config) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
+	if l.networkCfg == nil {
+		return fmt.Errorf("network configuration is not loaded")
+	}
+
 	if _, exists := l.localNodes[n.GetID()]; exists {
 		return fmt.Errorf("node with ID %s already exists", n.GetID())
 	}
@@ -128,6 +132,7 @@ func (l *Local) AttachNode(n node.Config) error {
 	}
 	localNode := NewLocalNode(n, endodes)
 	l.localNodes[n.GetID()] = localNode
+	l.networkCfg.Nodes = append(l.networkCfg.Nodes, n)
 	if err := localNode.Start(); err != nil {
 		return fmt.Errorf("unable to start node %s - %w", n.GetID(), err)
 	}
@@ -150,10 +155,23 @@ func (l *Local) RemoveNode(nodeID string) error {
 		return fmt.Errorf("node with ID %s does not exist", nodeID)
 	}
 
+	index, found := -1, false
+	for i, n := range l.networkCfg.Nodes {
+		if n.GetID() == nodeID {
+			index = i
+			found = true
+			break
+		}
+	}
+	if !found {
+		return fmt.Errorf("node with ID %s not found in network configuration", nodeID)
+	}
+
 	if err := l.localNodes[nodeID].Stop(); err != nil {
 		return fmt.Errorf("unable to stop node %s - %w", nodeID, err)
 	}
 
+	l.networkCfg.Nodes = append(l.networkCfg.Nodes[:index], l.networkCfg.Nodes[index+1:]...)
 	delete(l.localNodes, nodeID)
 	return nil
 }
