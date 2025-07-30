@@ -138,13 +138,11 @@ func (n *Node) Start() error {
 		},
 	}
 
-	if n.nodeCfg.GetVerbosity() != 0 {
-		cmd.Args = append(cmd.Args, "--verbosity", strconv.Itoa(n.nodeCfg.GetVerbosity()))
-	}
-
 	slog.Info(cmd.String())
 	if n.nodeCfg.GetFakeExecution() {
 		slog.Info("FakeExecution enabled - Not starting node: ", "id", n.nodeCfg.GetID())
+		slog.Info("Waiting 10 seconds for node to start...")
+		time.Sleep(10 * time.Second)
 		return nil
 	}
 	// Start the command and check for errors

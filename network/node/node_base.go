@@ -63,6 +63,9 @@ func (b *BaseNode) SetAPIAddr(addr string) {
 }
 
 func (b *BaseNode) GetAPICORS() string {
+	if b.APICORS == "" {
+		return "*"
+	}
 	return b.APICORS
 }
 
