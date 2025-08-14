@@ -28,7 +28,7 @@ type BuildConfig struct {
 
 type Builder struct {
 	config       *Config
-	downloadPath string
+	DownloadPath string
 }
 
 func DefaultConfig() *Config {
@@ -61,7 +61,7 @@ func New(cfg *Config) *Builder {
 
 	return &Builder{
 		config:       cfg,
-		downloadPath: downloadPath,
+		DownloadPath: downloadPath,
 	}
 }
 
@@ -73,10 +73,10 @@ func (b *Builder) Download() error {
 	}
 	if b.config.DownloadConfig.IsReusable {
 		// Check if the folder exists and ensure it contains a cloned repository
-		if _, err := os.Stat(filepath.Join(b.downloadPath, ".git")); err == nil {
-			slog.Info("Reusable directory with repository exists: ", "path", b.downloadPath)
+		if _, err := os.Stat(filepath.Join(b.DownloadPath, ".git")); err == nil {
+			slog.Info("Reusable directory with repository exists: ", "path", b.DownloadPath)
 			cmd := exec.Command("git", "pull")
-			cmd.Dir = b.downloadPath
+			cmd.Dir = b.DownloadPath
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			if err := cmd.Run(); err != nil {
@@ -86,7 +86,7 @@ func (b *Builder) Download() error {
 		}
 	}
 
-	if err := os.MkdirAll(b.downloadPath, os.ModePerm); err != nil {
+	if err := os.MkdirAll(b.DownloadPath, os.ModePerm); err != nil {
 		return fmt.Errorf("failed to create download directory: %w", err)
 	}
 
@@ -95,7 +95,7 @@ func (b *Builder) Download() error {
 	if b.config.DownloadConfig.Branch != "" {
 		args = append(args, "--branch", b.config.DownloadConfig.Branch)
 	}
-	args = append(args, "--depth", "1", b.config.DownloadConfig.RepoUrl, b.downloadPath)
+	args = append(args, "--depth", "1", b.config.DownloadConfig.RepoUrl, b.DownloadPath)
 
 	cmd := exec.Command("git", args...)
 	cmd.Stdout = os.Stdout
@@ -110,8 +110,8 @@ func (b *Builder) Download() error {
 
 // Build runs the make command in the downloadPath and returns the path to the thor binary.
 func (b *Builder) Build() (string, error) {
-	if _, err := os.Stat(b.downloadPath); os.IsNotExist(err) {
-		return "", fmt.Errorf("download directory does not exist: %s", b.downloadPath)
+	if _, err := os.Stat(b.DownloadPath); os.IsNotExist(err) {
+		return "", fmt.Errorf("download directory does not exist: %s", b.DownloadPath)
 	}
 
 	var cmd *exec.Cmd
@@ -128,7 +128,7 @@ func (b *Builder) Build() (string, error) {
 	} else {
 		cmd = exec.Command("make")
 	}
-	cmd.Dir = b.downloadPath
+	cmd.Dir = b.DownloadPath
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -143,7 +143,7 @@ func (b *Builder) Build() (string, error) {
 		return "", fmt.Errorf("failed to build project: %w", err)
 	}
 
-	thorBinaryPath := filepath.Join(b.downloadPath, "bin", "thor")
+	thorBinaryPath := filepath.Join(b.DownloadPath, "bin", "thor")
 	if _, err := os.Stat(thorBinaryPath); err != nil {
 		if os.IsNotExist(err) {
 			return "", fmt.Errorf("thor binary not found at expected path: %s", thorBinaryPath)
@@ -162,7 +162,7 @@ func (b *Builder) BuildDockerImage() (string, error) {
 	tag := fmt.Sprintf("test_%s_%s", b.config.DownloadConfig.Branch, generateRandomSuffix(4))
 
 	// Build the Docker image
-	cmd := exec.Command("docker", "build", "-t", tag, b.downloadPath)
+	cmd := exec.Command("docker", "build", "-t", tag, b.DownloadPath)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
