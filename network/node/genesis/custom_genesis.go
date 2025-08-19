@@ -17,6 +17,7 @@ type CustomGenesis struct {
 	Params     genesis.Params           `json:"params"`
 	Executor   genesis.Executor         `json:"executor"`
 	ForkConfig *CustomGenesisForkConfig `json:"forkConfig"`
+	Config     *thor.Config             `json:"config"`
 }
 
 func HandleAdditionalFields(raw *map[string]interface{}) {
