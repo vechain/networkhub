@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/vechain/networkhub/entrypoint/client"
+	"github.com/vechain/networkhub/environments/docker"
 	"github.com/vechain/networkhub/preset"
 	"github.com/vechain/networkhub/thorbuilder"
 	"github.com/vechain/networkhub/utils/common"
@@ -86,7 +87,7 @@ func TestDockerClient(t *testing.T) {
 
 	// Modify for docker usage
 	networkCfg.Environment = "docker"
-	dockerImage := "vechain/thor"
+	dockerImage := docker.GetDockerImageTag()
 	basePort := 9000 // avoid port collision with other tests
 
 	prefundedAcc := datagen.RandAccount().Address
