@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/vechain/networkhub/entrypoint/client"
+	"github.com/vechain/networkhub/environments/docker"
 	"github.com/vechain/networkhub/preset"
 	"github.com/vechain/networkhub/thorbuilder"
 	"github.com/vechain/networkhub/utils/common"
@@ -67,7 +68,7 @@ func TestLocalClient(t *testing.T) {
 
 	account, err := thorclient.New(networkCfg.Nodes[0].GetHTTPAddr()).Account(prefundedAcc)
 	require.NoError(t, err)
-	bal := big.Int(account.Balance)
+	bal := (*big.Int)(account.Balance)
 	require.Equal(t, bal.Cmp(big.NewInt(0)), 1)
 
 	// Stop network
@@ -86,7 +87,7 @@ func TestDockerClient(t *testing.T) {
 
 	// Modify for docker usage
 	networkCfg.Environment = "docker"
-	dockerImage := "vechain/thor"
+	dockerImage := docker.GetDockerImageTag()
 	basePort := 9000 // avoid port collision with other tests
 
 	prefundedAcc := datagen.RandAccount().Address
@@ -129,7 +130,7 @@ func TestDockerClient(t *testing.T) {
 
 	account, err := thorclient.New(networkCfg.Nodes[0].GetHTTPAddr()).Account(prefundedAcc)
 	require.NoError(t, err)
-	bal := big.Int(account.Balance)
+	bal := (*big.Int)(account.Balance)
 	require.Equal(t, bal.Cmp(big.NewInt(0)), 1)
 
 	// Stop network
