@@ -133,9 +133,6 @@ func (l *Local) AttachNode(n node.Config) error {
 	localNode := NewLocalNode(n, endodes)
 	l.localNodes[n.GetID()] = localNode
 	l.networkCfg.Nodes = append(l.networkCfg.Nodes, n)
-	if err := localNode.Start(); err != nil {
-		return fmt.Errorf("unable to start node %s - %w", n.GetID(), err)
-	}
 
 	if l.started {
 		// If the network has already started, we need to start the node immediately.
