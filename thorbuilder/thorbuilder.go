@@ -32,10 +32,16 @@ type Builder struct {
 }
 
 func DefaultConfig() *Config {
+	branch := "master"
+	env := os.Getenv("THOR_BRANCH")
+	if env != "" {
+		branch = env
+	}
+
 	return &Config{
 		DownloadConfig: &DownloadConfig{
 			RepoUrl:    "https://github.com/vechain/thor",
-			Branch:     "master",
+			Branch:     branch,
 			IsReusable: true,
 		},
 		BuildConfig: nil,

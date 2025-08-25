@@ -17,6 +17,7 @@ type Builder struct {
 	params            *thorgenesis.Params
 	executor          *thorgenesis.Executor
 	forkConfig        *genesis.CustomGenesisForkConfig
+	config            *thor.Config
 	overrider         Overrider
 }
 
@@ -46,6 +47,11 @@ func (b *Builder) Executor(executor thorgenesis.Executor) *Builder {
 
 func (b *Builder) ForkConfig(forkConfig *genesis.CustomGenesisForkConfig) *Builder {
 	b.forkConfig = forkConfig
+	return b
+}
+
+func (b *Builder) Config(config *thor.Config) *Builder {
+	b.config = config
 	return b
 }
 
@@ -82,6 +88,7 @@ func (b *Builder) Build() *genesis.CustomGenesis {
 		Params:     *b.params,
 		Executor:   *b.executor,
 		ForkConfig: b.forkConfig,
+		Config:     b.config,
 	}
 
 	if b.overrider != nil {
