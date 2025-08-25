@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
+	"os"
 	"strings"
 
 	"github.com/docker/docker/api/types/container"
@@ -17,24 +19,45 @@ import (
 )
 
 // NewDockerNode initializes a new DockerNode
-func NewDockerNode(cfg node.Config, enodes []string, networkID string, exposedPorts *exposedPort, ipAddr string) *Node {
+func NewDockerNode(
+	cfg node.Config,
+	enodes []string,
+	networkID string,
+	hostPort string,
+	containerPort string,
+	ipAddr string,
+) *Node {
 	return &Node{
-		cfg:          cfg,
-		enodes:       enodes,
-		networkID:    networkID,
-		exposedPorts: exposedPorts,
-		ipAddr:       ipAddr,
+		cfg:           cfg,
+		enodes:        enodes,
+		networkID:     networkID,
+		hostPort:      hostPort,
+		containerPort: containerPort,
+		ipAddr:        ipAddr,
 	}
 }
 
 // Node represents a Docker container node
 type Node struct {
-	cfg          node.Config
-	enodes       []string
-	id           string
-	networkID    string
-	exposedPorts *exposedPort
-	ipAddr       string
+	cfg           node.Config
+	enodes        []string
+	id            string
+	networkID     string
+	hostPort      string
+	containerPort string
+	ipAddr        string
+	hostDataDir   string
+	logConfig     container.LogConfig
+}
+
+// SetHostVolume sets the base directory on the host where node data will be stored.
+// The system will automatically create subdirectories: {hostDataDir}/{nodeID}/config and {hostDataDir}/{nodeID}/data
+func (n *Node) SetHostVolume(hostDataDir string) {
+	n.hostDataDir = hostDataDir
+}
+
+func (n *Node) SetLogConfig(logConfig container.LogConfig) {
+	n.logConfig = logConfig
 }
 
 // Start runs the node as a Docker container
@@ -71,7 +94,7 @@ func (n *Node) Start() error {
 		}
 	}
 
-	cleanEnode := []string{} // todo theres a clever way of doing this
+	var cleanEnode []string // todo theres a clever way of doing this
 	for _, enode := range n.enodes {
 		nodeEnode, err := n.cfg.Enode(n.ipAddr)
 		if err != nil {
@@ -83,7 +106,7 @@ func (n *Node) Start() error {
 	}
 	enodeString := strings.Join(cleanEnode, ",")
 
-	args := "cd /home/thor; " +
+	args := fmt.Sprintf("cd %s; ", n.cfg.GetConfigDir()) +
 		"echo $GENESIS > genesis.json;" +
 		"echo $PRIVATEKEY > master.key;" +
 		"echo $PRIVATEKEY > p2p.key;" +
@@ -109,12 +132,12 @@ func (n *Node) Start() error {
 	}
 
 	exposedPorts := nat.PortSet{
-		nat.Port(fmt.Sprintf("%s/tcp", n.exposedPorts.containerPort)): struct{}{},
+		nat.Port(fmt.Sprintf("%s/tcp", n.containerPort)): struct{}{},
 	}
 	portBindings := map[nat.Port][]nat.PortBinding{
-		nat.Port(fmt.Sprintf("%s/tcp", n.exposedPorts.containerPort)): {
+		nat.Port(fmt.Sprintf("%s/tcp", n.containerPort)): {
 			{
-				HostPort: n.exposedPorts.hostPort,
+				HostPort: n.hostPort,
 			},
 		},
 	}
@@ -133,6 +156,47 @@ func (n *Node) Start() error {
 
 	hostConfig := &container.HostConfig{
 		PortBindings: portBindings,
+		LogConfig:    n.logConfig,
+	}
+
+	// Set up automatic volume mounts if hostDataDir is specified
+	if n.hostDataDir != "" {
+		config.Volumes = make(map[string]struct{})
+		var binds []string
+
+		nodeID := n.cfg.GetID()
+
+		// Mount config directory: eg /host/nodes/{nodeID}/config -> container's config dir
+		if configDir := n.cfg.GetConfigDir(); configDir != "" {
+			hostConfigPath := fmt.Sprintf("%s/%s/config", n.hostDataDir, nodeID)
+
+			// Create the host directory if it doesn't exist
+			if err := os.MkdirAll(hostConfigPath, 0755); err != nil {
+				return fmt.Errorf("failed to create config directory %s: %w", hostConfigPath, err)
+			}
+
+			volumeBind := fmt.Sprintf("%s:%s", hostConfigPath, configDir)
+			config.Volumes[configDir] = struct{}{}
+			binds = append(binds, volumeBind)
+		}
+
+		// Mount data directory: eg /host/nodes/{nodeID}/data -> container's data dir
+		if dataDir := n.cfg.GetDataDir(); dataDir != "" {
+			hostDataPath := fmt.Sprintf("%s/%s/data", n.hostDataDir, nodeID)
+
+			// Create the host directory if it doesn't exist
+			if err := os.MkdirAll(hostDataPath, 0755); err != nil {
+				return fmt.Errorf("failed to create data directory %s: %w", hostDataPath, err)
+			}
+
+			volumeBind := fmt.Sprintf("%s:%s", hostDataPath, dataDir)
+			config.Volumes[dataDir] = struct{}{}
+			binds = append(binds, volumeBind)
+		}
+
+		slog.Info("setting up volume binds for node", "nodeID", nodeID, "binds", strings.Join(binds, ", "))
+
+		hostConfig.Binds = binds
 	}
 
 	// Define the network configuration

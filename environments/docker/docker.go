@@ -102,7 +102,7 @@ func (d *Docker) LoadConfig(cfg *network.Network) (string, error) {
 
 func (d *Docker) StartNetwork() error {
 	// create a network for fixed ip addresses (enodes cannot have dns names)
-	if err := d.checkOrCreateNetwork(d.networkID, d.ipManager.Subnet()); err != nil {
+	if err := CheckOrCreateNetwork(d.networkID, d.ipManager.Subnet()); err != nil {
 		return fmt.Errorf("unable to create network: %w", err)
 	}
 
@@ -126,7 +126,8 @@ func (d *Docker) StartNetwork() error {
 			enodes = append(enodes, enode)
 		}
 
-		dockerNode := NewDockerNode(nodeCfg, enodes, d.networkID, d.exposedPorts[nodeCfg.GetID()], nextIpAddr)
+		ports := d.exposedPorts[nodeCfg.GetID()]
+		dockerNode := NewDockerNode(nodeCfg, enodes, d.networkID, ports.hostPort, ports.containerPort, nextIpAddr)
 		if err := dockerNode.Start(); err != nil {
 			return fmt.Errorf("unable to start node - %w", err)
 		}
@@ -164,7 +165,7 @@ func (d *Docker) Config() *network.Network {
 	return d.networkCfg
 }
 
-func (d *Docker) checkOrCreateNetwork(networkName, subnet string) error {
+func CheckOrCreateNetwork(networkName, subnet string) error {
 	// Create a Docker client
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
