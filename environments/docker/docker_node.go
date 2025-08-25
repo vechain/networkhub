@@ -47,12 +47,17 @@ type Node struct {
 	containerPort string
 	ipAddr        string
 	hostDataDir   string
+	logConfig     container.LogConfig
 }
 
 // SetHostVolume sets the base directory on the host where node data will be stored.
 // The system will automatically create subdirectories: {hostDataDir}/{nodeID}/config and {hostDataDir}/{nodeID}/data
 func (n *Node) SetHostVolume(hostDataDir string) {
 	n.hostDataDir = hostDataDir
+}
+
+func (n *Node) SetLogConfig(logConfig container.LogConfig) {
+	n.logConfig = logConfig
 }
 
 // Start runs the node as a Docker container
@@ -151,6 +156,7 @@ func (n *Node) Start() error {
 
 	hostConfig := &container.HostConfig{
 		PortBindings: portBindings,
+		LogConfig:    n.logConfig,
 	}
 
 	// Set up automatic volume mounts if hostDataDir is specified
