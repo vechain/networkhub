@@ -3,6 +3,7 @@ package docker
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"log/slog"
 	"strconv"
@@ -215,4 +216,16 @@ func CheckOrCreateNetwork(networkName, subnet string) error {
 type exposedPort struct {
 	hostPort      string
 	containerPort string
+}
+
+func GetDockerImageTag() string {
+	env := os.Getenv("THOR_BRANCH")
+	if env != "" {
+		if env == "release/hayabusa" {
+			return "ghcr.io/vechain/thor:release-hayabusa-latest"
+		}
+	}
+
+	// Default to the latest tag if no specific branch is set
+	return "vechain/thor:latest"
 }
