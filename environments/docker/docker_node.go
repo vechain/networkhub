@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
+	"os"
 	"strings"
 
 	"github.com/docker/docker/api/types/container"
@@ -44,6 +46,13 @@ type Node struct {
 	hostPort      string
 	containerPort string
 	ipAddr        string
+	hostDataDir   string
+}
+
+// SetHostVolume sets the base directory on the host where node data will be stored.
+// The system will automatically create subdirectories: {hostDataDir}/{nodeID}/config and {hostDataDir}/{nodeID}/data
+func (n *Node) SetHostVolume(hostDataDir string) {
+	n.hostDataDir = hostDataDir
 }
 
 // Start runs the node as a Docker container
@@ -92,7 +101,7 @@ func (n *Node) Start() error {
 	}
 	enodeString := strings.Join(cleanEnode, ",")
 
-	args := "cd /home/thor; " +
+	args := fmt.Sprintf("cd %s; ", n.cfg.GetConfigDir()) +
 		"echo $GENESIS > genesis.json;" +
 		"echo $PRIVATEKEY > master.key;" +
 		"echo $PRIVATEKEY > p2p.key;" +
@@ -142,6 +151,46 @@ func (n *Node) Start() error {
 
 	hostConfig := &container.HostConfig{
 		PortBindings: portBindings,
+	}
+
+	// Set up automatic volume mounts if hostDataDir is specified
+	if n.hostDataDir != "" {
+		config.Volumes = make(map[string]struct{})
+		var binds []string
+
+		nodeID := n.cfg.GetID()
+
+		// Mount config directory: eg /host/nodes/{nodeID}/config -> container's config dir
+		if configDir := n.cfg.GetConfigDir(); configDir != "" {
+			hostConfigPath := fmt.Sprintf("%s/%s/config", n.hostDataDir, nodeID)
+
+			// Create the host directory if it doesn't exist
+			if err := os.MkdirAll(hostConfigPath, 0755); err != nil {
+				return fmt.Errorf("failed to create config directory %s: %w", hostConfigPath, err)
+			}
+
+			volumeBind := fmt.Sprintf("%s:%s", hostConfigPath, configDir)
+			config.Volumes[configDir] = struct{}{}
+			binds = append(binds, volumeBind)
+		}
+
+		// Mount data directory: eg /host/nodes/{nodeID}/data -> container's data dir
+		if dataDir := n.cfg.GetDataDir(); dataDir != "" {
+			hostDataPath := fmt.Sprintf("%s/%s/data", n.hostDataDir, nodeID)
+
+			// Create the host directory if it doesn't exist
+			if err := os.MkdirAll(hostDataPath, 0755); err != nil {
+				return fmt.Errorf("failed to create data directory %s: %w", hostDataPath, err)
+			}
+
+			volumeBind := fmt.Sprintf("%s:%s", hostDataPath, dataDir)
+			config.Volumes[dataDir] = struct{}{}
+			binds = append(binds, volumeBind)
+		}
+
+		slog.Info("setting up volume binds for node", "nodeID", nodeID, "binds", strings.Join(binds, ", "))
+
+		hostConfig.Binds = binds
 	}
 
 	// Define the network configuration
