@@ -32,20 +32,34 @@ type Builder struct {
 }
 
 func DefaultConfig() *Config {
-	branch := "master"
-	env := os.Getenv("THOR_BRANCH")
-	if env != "" {
-		branch = env
+	// Prefer building from an existing local checkout if provided
+	if workingDir := os.Getenv("THOR_WORKING_DIR"); workingDir != "" {
+		return &Config{
+			BuildConfig: &BuildConfig{
+				ExistingPath: workingDir,
+				DebugBuild:   false,
+			},
+		}
 	}
 
+	branch := os.Getenv("THOR_BRANCH")
+	if branch == "" {
+		branch = "master"
+	}
 	return &Config{
 		DownloadConfig: &DownloadConfig{
 			RepoUrl:    "https://github.com/vechain/thor",
 			Branch:     branch,
 			IsReusable: true,
 		},
-		BuildConfig: nil,
 	}
+}
+
+// FromEnv returns a Config based on THOR_WORKING_DIR and THOR_BRANCH.
+// - If THOR_WORKING_DIR is set, returns BuildConfig with ExistingPath.
+// - Else returns DownloadConfig using https repo, THOR_BRANCH or release/hayabusa, and IsReusable.
+func FromEnv() *Config {
+	return DefaultConfig()
 }
 
 // New creates a new Builder instance for the specified branch.
