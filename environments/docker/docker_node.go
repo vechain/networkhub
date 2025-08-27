@@ -128,6 +128,10 @@ func (n *Node) Start() error {
 	if err := os.MkdirAll(configDir, 0777); err != nil {
 		return fmt.Errorf("failed to create config directory %s: %w", configDir, err)
 	}
+	// Explicitly set permissions to ensure they're correct regardless of umask
+	if err := os.Chmod(configDir, 0777); err != nil {
+		return fmt.Errorf("failed to set permissions for config directory %s: %w", configDir, err)
+	}
 
 	// Write all config files with open permissions for development
 	files := map[string][]byte{
@@ -158,6 +162,11 @@ func (n *Node) Start() error {
 		// Create the data directory with full permissions so container can write to it
 		if err := os.MkdirAll(hostDataPath, 0777); err != nil {
 			return fmt.Errorf("failed to create data directory %s: %w", hostDataPath, err)
+		}
+
+		// Explicitly set permissions to ensure they're correct regardless of umask
+		if err := os.Chmod(hostDataPath, 0777); err != nil {
+			return fmt.Errorf("failed to set permissions for data directory %s: %w", hostDataPath, err)
 		}
 
 		volumeBind := fmt.Sprintf("%s:%s", hostDataPath, dataDir)
