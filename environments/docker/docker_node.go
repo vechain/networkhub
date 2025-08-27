@@ -61,6 +61,11 @@ func (n *Node) SetLogConfig(logConfig container.LogConfig) {
 	n.logConfig = logConfig
 }
 
+// Helper function to write files with open permissions for dev use
+func writeConfigFile(path string, data []byte) error {
+	return os.WriteFile(path, data, 0777)
+}
+
 // Start runs the node as a Docker container
 func (n *Node) Start() error {
 	ctx := context.Background()
@@ -113,29 +118,44 @@ func (n *Node) Start() error {
 	}
 	baseHostDir := fmt.Sprintf("%s/%s", n.hostDataDir, n.cfg.GetID())
 
-	// write the genesis to the config directory on the host
+	// write configuration files to the host directory
 	genesisBytes, err := nodegenesis.Marshal(n.cfg.GetGenesis())
 	if err != nil {
-		return fmt.Errorf("unable to marshal genesis - %w", err)
+		return fmt.Errorf("unable to marshal genesis: %w", err)
 	}
+
 	configDir := fmt.Sprintf("%s/config", baseHostDir)
 	if err := os.MkdirAll(configDir, 0777); err != nil {
 		return fmt.Errorf("failed to create config directory %s: %w", configDir, err)
 	}
-	genesisPath := fmt.Sprintf("%s/genesis.json", configDir)
-	if err := os.WriteFile(genesisPath, genesisBytes, 0777); err != nil {
-		return fmt.Errorf("failed to write genesis file to %s: %w", genesisPath, err)
+
+	// Write all config files with open permissions for development
+	files := map[string][]byte{
+		"genesis.json": genesisBytes,
+		"master.key":   []byte(n.cfg.GetKey()),
+		"p2p.key":      []byte(n.cfg.GetKey()),
 	}
 
-	// write the master key to the config directory on the host
-	masterKeyPath := fmt.Sprintf("%s/master.key", configDir)
-	if err := os.WriteFile(masterKeyPath, []byte(n.cfg.GetKey()), 0777); err != nil {
-		return fmt.Errorf("failed to write master key to %s: %w", masterKeyPath, err)
+	for filename, data := range files {
+		filePath := fmt.Sprintf("%s/%s", configDir, filename)
+		if err := writeConfigFile(filePath, data); err != nil {
+			return fmt.Errorf("failed to write %s to %s: %w", filename, filePath, err)
+		}
 	}
-	// write the p2p key to the config directory on the host
-	p2pKeyPath := fmt.Sprintf("%s/p2p.key", configDir)
-	if err := os.WriteFile(p2pKeyPath, []byte(n.cfg.GetKey()), 0777); err != nil {
-		return fmt.Errorf("failed to write p2p key to %s: %w", p2pKeyPath, err)
+
+	var binds []string
+	// Mount config directory: eg /host/nodes/{nodeID}/config -> container's config dir
+	if configDir := n.cfg.GetConfigDir(); configDir != "" {
+		hostConfigPath := fmt.Sprintf("%s/config", baseHostDir)
+		volumeBind := fmt.Sprintf("%s:%s", hostConfigPath, configDir)
+		binds = append(binds, volumeBind)
+	}
+
+	// Mount data directory: eg /host/nodes/{nodeID}/data -> container's data dir
+	if dataDir := n.cfg.GetDataDir(); dataDir != "" {
+		hostDataPath := fmt.Sprintf("%s/data", baseHostDir)
+		volumeBind := fmt.Sprintf("%s:%s", hostDataPath, dataDir)
+		binds = append(binds, volumeBind)
 	}
 
 	containerConfigDir := n.cfg.GetConfigDir()
@@ -147,6 +167,7 @@ func (n *Node) Start() error {
 	cmd = append(cmd, "--network", containerConfigDir+"/genesis.json")
 	cmd = append(cmd, "--nat", "none")
 	cmd = append(cmd, "--config-dir", n.cfg.GetConfigDir())
+	cmd = append(cmd, "--data-dir", n.cfg.GetDataDir())
 	cmd = append(cmd, "--api-addr", n.cfg.GetAPIAddr())
 	cmd = append(cmd, "--api-cors", n.cfg.GetAPICORS())
 	cmd = append(cmd, "--p2p-port", fmt.Sprintf("%d", n.cfg.GetP2PListenPort()))
@@ -183,44 +204,8 @@ func (n *Node) Start() error {
 	hostConfig := &container.HostConfig{
 		PortBindings: portBindings,
 		LogConfig:    n.logConfig,
+		Binds:        binds,
 	}
-
-	config.Volumes = make(map[string]struct{})
-	var binds []string
-
-	nodeID := n.cfg.GetID()
-
-	// Mount config directory: eg /host/nodes/{nodeID}/config -> container's config dir
-	if configDir := n.cfg.GetConfigDir(); configDir != "" {
-		hostConfigPath := fmt.Sprintf("%s/config", baseHostDir)
-
-		// Create the host directory if it doesn't exist
-		if err := os.MkdirAll(hostConfigPath, 0777); err != nil {
-			return fmt.Errorf("failed to create config directory %s: %w", hostConfigPath, err)
-		}
-
-		volumeBind := fmt.Sprintf("%s:%s", hostConfigPath, configDir)
-		config.Volumes[configDir] = struct{}{}
-		binds = append(binds, volumeBind)
-	}
-
-	// Mount data directory: eg /host/nodes/{nodeID}/data -> container's data dir
-	if dataDir := n.cfg.GetDataDir(); dataDir != "" {
-		hostDataPath := fmt.Sprintf("%s/data", baseHostDir)
-
-		// Create the host directory if it doesn't exist
-		if err := os.MkdirAll(hostDataPath, 0777); err != nil {
-			return fmt.Errorf("failed to create data directory %s: %w", hostDataPath, err)
-		}
-
-		volumeBind := fmt.Sprintf("%s:%s", hostDataPath, dataDir)
-		config.Volumes[dataDir] = struct{}{}
-		binds = append(binds, volumeBind)
-	}
-
-	slog.Info("setting up volume binds for node", "nodeID", nodeID, "binds", strings.Join(binds, ", "))
-
-	hostConfig.Binds = binds
 
 	// Define the network configuration
 	networkConfig := &network.NetworkingConfig{
