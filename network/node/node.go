@@ -22,8 +22,6 @@ type Config interface {
 	GetKey() string
 	GetGenesis() *genesis.CustomGenesis
 	SetGenesis(genesis *genesis.CustomGenesis)
-	SetAPIHost(host string)
-	GetAPIHost() string
 	GetAPIAddr() string
 	SetAPIAddr(addr string)
 	GetAPICORS() string

@@ -10,6 +10,7 @@ import (
 	"github.com/vechain/networkhub/environments"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
+	"github.com/vechain/networkhub/network/node/health"
 	"github.com/vechain/networkhub/thorbuilder"
 	"github.com/vechain/networkhub/utils/ports"
 )
@@ -99,8 +100,8 @@ func (l *Local) StartNetwork() error {
 	}
 	l.started = true
 
-	for _, nodeConfig := range l.networkCfg.Nodes {
-		if err := nodeConfig.HealthCheck(0, 30*time.Second); err != nil {
+	for _, n := range l.networkCfg.Nodes {
+		if err := health.HealthCheck(0, 30*time.Second, n.GetHTTPAddr()); err != nil {
 			return err
 		}
 	}
@@ -169,7 +170,7 @@ func (l *Local) AttachNode(
 		}
 	}
 
-	if err := n.HealthCheck(0, 30*time.Second); err != nil {
+	if err := health.HealthCheck(0, 30*time.Second, n.GetHTTPAddr()); err != nil {
 		return fmt.Errorf("failed to health check attached node: %w", err)
 	}
 	return nil
