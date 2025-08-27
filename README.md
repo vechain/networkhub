@@ -44,7 +44,7 @@ func main() {
     net.ThorBuilder = cfg // Local env will build thor and set the exec path
 
     // Create local environment, load, start
-    env := envlocal.NewEnv()
+    env := local.NewEnv()
     if _, err := env.LoadConfig(net); err != nil {
         log.Fatal(err)
     }
@@ -78,7 +78,7 @@ func main() {
     net := preset.LocalSixNodesNetwork()
     net.ThorBuilder = cfg // Docker env will build a docker image and assign it to nodes
 
-    env := envdocker.NewEnv()
+    env := docker.NewEnv()
     if _, err := env.LoadConfig(net); err != nil {
         log.Fatal(err)
     }

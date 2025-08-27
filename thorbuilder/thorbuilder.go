@@ -63,7 +63,7 @@ func FromEnv() *Config {
 }
 
 // New creates a new Builder instance for the specified branch.
-// If reusable is true, it skips cloning if the directory exists and checks for the binary.
+// If IsReusable is true, it skips cloning if the directory exists and checks for the binary.
 func New(cfg *Config) *Builder {
 	downloadPath := ""
 	if cfg.DownloadConfig != nil {

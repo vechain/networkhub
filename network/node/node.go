@@ -1,8 +1,6 @@
 package node
 
 import (
-	"time"
-
 	"github.com/vechain/networkhub/network/node/genesis"
 )
 
@@ -37,7 +35,6 @@ type Config interface {
 	GetVerbosity() int
 	GetHTTPAddr() string
 	GetFakeExecution() bool
-	HealthCheck(block uint32, timeout time.Duration) error
 }
 
 type Lifecycle interface {

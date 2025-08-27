@@ -2,15 +2,11 @@ package node
 
 import (
 	"fmt"
-	"log/slog"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/p2p/discover"
 	"github.com/vechain/networkhub/network/node/genesis"
-	"github.com/vechain/thor/v2/thorclient"
 )
 
 type BaseNode struct {
@@ -143,26 +139,6 @@ func (b *BaseNode) Enode(ipAddr string) (string, error) {
 	}
 
 	return fmt.Sprintf("enode://%x@%s:%v", discover.PubkeyID(&privKey.PublicKey).Bytes(), ipAddr, b.P2PListenPort), nil
-}
-
-func (b *BaseNode) HealthCheck(block uint32, timeout time.Duration) error {
-	client := thorclient.New(b.GetHTTPAddr())
-	ticker := time.NewTicker(timeout)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ticker.C:
-			return fmt.Errorf("timeout waiting for node %s to be healthy", b.ID)
-		default:
-			blk, err := client.Block(strconv.Itoa(int(block)))
-			if err == nil && blk != nil {
-				return nil
-			}
-			slog.Debug("waiting for node to be healthy", "node", b.ID, "block", block, "error", err)
-			time.Sleep(1 * time.Second)
-		}
-	}
 }
 
 func (b *BaseNode) GetGenesis() *genesis.CustomGenesis {

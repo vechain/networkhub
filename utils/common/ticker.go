@@ -48,22 +48,14 @@ func (t *Ticker) Wait(timeout time.Duration) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	ticker := time.NewTicker(timeout)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ticker.C:
-			return nil, errors.New("timeout waiting for block")
-		default:
-			block, err := t.client.ExpandedBlockInfo("best")
-			if err == nil && block != nil && best != nil && block.Number > best.Number {
-				return nil, nil
-			}
-			time.Sleep(100 * time.Millisecond)
+	err = t.WaitForCondition(timeout, func() (bool, error) {
+		b, e := t.client.ExpandedBlockInfo("best")
+		if e != nil || b == nil || best == nil {
+			return false, nil
 		}
-	}
+		return b.Number > best.Number, nil
+	})
+	return nil, err
 }
 
 // WaitForBlock waits until the given block number is available (or an error/timeout occurs).
@@ -86,26 +78,17 @@ func (t *Ticker) WaitForBlock(blockNumber uint32) error {
 		bestNum = best.Number
 	}
 	expectedTime := time.Unix(int64(bestTs), 0).Add(time.Duration(blockNumber-bestNum) * 10 * time.Second)
-	wait := min(max(time.Until(expectedTime), 300*time.Millisecond), 2*time.Second)
+	timeout := min(max(time.Until(expectedTime), 300*time.Millisecond), 2*time.Second)
 
-	deadline := time.NewTimer(wait)
-	defer deadline.Stop()
-	poll := time.NewTicker(100 * time.Millisecond)
-	defer poll.Stop()
+	slog.Info("waiting for block...", "block", blockNumber, "deadline", timeout.String())
 
-	slog.Info("waiting for block...", "block", blockNumber, "deadline", wait.String())
-
-	for {
-		select {
-		case <-deadline.C:
-			return errors.New("timeout waiting for block")
-		case <-poll.C:
-			block, err := t.client.ExpandedBlockInfo(strconv.Itoa(int(blockNumber)))
-			if err == nil && block != nil && block.Number >= blockNumber {
-				return nil
-			}
+	return t.WaitForCondition(timeout, func() (bool, error) {
+		b, e := t.client.ExpandedBlockInfo(strconv.Itoa(int(blockNumber)))
+		if e != nil || b == nil {
+			return false, nil
 		}
-	}
+		return b.Number >= blockNumber, nil
+	})
 }
 
 type ConditionFunc func() (bool, error)
