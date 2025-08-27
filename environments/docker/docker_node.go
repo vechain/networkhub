@@ -154,6 +154,12 @@ func (n *Node) Start() error {
 	// Mount data directory: eg /host/nodes/{nodeID}/data -> container's data dir
 	if dataDir := n.cfg.GetDataDir(); dataDir != "" {
 		hostDataPath := fmt.Sprintf("%s/data", baseHostDir)
+
+		// Create the data directory with full permissions so container can write to it
+		if err := os.MkdirAll(hostDataPath, 0777); err != nil {
+			return fmt.Errorf("failed to create data directory %s: %w", hostDataPath, err)
+		}
+
 		volumeBind := fmt.Sprintf("%s:%s", hostDataPath, dataDir)
 		binds = append(binds, volumeBind)
 	}
