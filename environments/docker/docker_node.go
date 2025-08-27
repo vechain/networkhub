@@ -119,22 +119,22 @@ func (n *Node) Start() error {
 		return fmt.Errorf("unable to marshal genesis - %w", err)
 	}
 	configDir := fmt.Sprintf("%s/config", baseHostDir)
-	if err := os.MkdirAll(configDir, 0755); err != nil {
+	if err := os.MkdirAll(configDir, 0777); err != nil {
 		return fmt.Errorf("failed to create config directory %s: %w", configDir, err)
 	}
 	genesisPath := fmt.Sprintf("%s/genesis.json", configDir)
-	if err := os.WriteFile(genesisPath, genesisBytes, 0644); err != nil {
+	if err := os.WriteFile(genesisPath, genesisBytes, 0777); err != nil {
 		return fmt.Errorf("failed to write genesis file to %s: %w", genesisPath, err)
 	}
 
 	// write the master key to the config directory on the host
 	masterKeyPath := fmt.Sprintf("%s/master.key", configDir)
-	if err := os.WriteFile(masterKeyPath, []byte(n.cfg.GetKey()), 0600); err != nil {
+	if err := os.WriteFile(masterKeyPath, []byte(n.cfg.GetKey()), 0777); err != nil {
 		return fmt.Errorf("failed to write master key to %s: %w", masterKeyPath, err)
 	}
 	// write the p2p key to the config directory on the host
 	p2pKeyPath := fmt.Sprintf("%s/p2p.key", configDir)
-	if err := os.WriteFile(p2pKeyPath, []byte(n.cfg.GetKey()), 0600); err != nil {
+	if err := os.WriteFile(p2pKeyPath, []byte(n.cfg.GetKey()), 0777); err != nil {
 		return fmt.Errorf("failed to write p2p key to %s: %w", p2pKeyPath, err)
 	}
 
@@ -195,7 +195,7 @@ func (n *Node) Start() error {
 		hostConfigPath := fmt.Sprintf("%s/config", baseHostDir)
 
 		// Create the host directory if it doesn't exist
-		if err := os.MkdirAll(hostConfigPath, 0755); err != nil {
+		if err := os.MkdirAll(hostConfigPath, 0777); err != nil {
 			return fmt.Errorf("failed to create config directory %s: %w", hostConfigPath, err)
 		}
 
@@ -209,7 +209,7 @@ func (n *Node) Start() error {
 		hostDataPath := fmt.Sprintf("%s/data", baseHostDir)
 
 		// Create the host directory if it doesn't exist
-		if err := os.MkdirAll(hostDataPath, 0755); err != nil {
+		if err := os.MkdirAll(hostDataPath, 0777); err != nil {
 			return fmt.Errorf("failed to create data directory %s: %w", hostDataPath, err)
 		}
 
