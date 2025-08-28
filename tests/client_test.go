@@ -3,7 +3,6 @@ package tests
 import (
 	"fmt"
 	"math/big"
-	"os"
 	"testing"
 	"time"
 
@@ -19,9 +18,6 @@ import (
 )
 
 func TestLocalClient(t *testing.T) {
-	// TODO: remove this once we have merged the release/hayabusa branch
-	os.Setenv("THOR_BRANCH", "release/hayabusa")
-
 	// Create client
 	c := client.New()
 
@@ -83,9 +79,6 @@ func TestLocalClient(t *testing.T) {
 }
 
 func TestDockerClient(t *testing.T) {
-	// TODO: remove this once we have merged the release/hayabusa branch
-	os.Setenv("THOR_BRANCH", "release/hayabusa")
-
 	// Create client
 	c := client.New()
 

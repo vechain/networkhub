@@ -173,10 +173,7 @@ func (n *Node) Start() error {
 		binds = append(binds, volumeBind)
 	}
 
-	containerConfigDir := n.cfg.GetConfigDir()
-	if strings.HasSuffix(containerConfigDir, "/") {
-		containerConfigDir = strings.TrimSuffix(containerConfigDir, "/")
-	}
+	containerConfigDir := strings.TrimSuffix(n.cfg.GetConfigDir(), "/")
 
 	var cmd strslice.StrSlice
 	cmd = append(cmd, "--network", containerConfigDir+"/genesis.json")

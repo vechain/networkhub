@@ -175,8 +175,6 @@ func TestLocal(t *testing.T) {
 }
 
 func TestThreeNodes(t *testing.T) {
-	// TODO: remove this once we have merged the release/hayabusa branch
-	os.Setenv("THOR_BRANCH", "release/hayabusa")
 	var err error
 	cfg := thorbuilder.DefaultConfig()
 	cfg.DownloadConfig.IsReusable = false
@@ -211,9 +209,6 @@ func TestThreeNodes(t *testing.T) {
 }
 
 func TestSixNodes(t *testing.T) {
-	// TODO: remove this once we have merged the release/hayabusa branch
-	os.Setenv("THOR_BRANCH", "release/hayabusa")
-
 	sixNodeJson, err := json.Marshal(preset.LocalSixNodesNetwork())
 	require.NoError(t, err)
 
@@ -247,8 +242,6 @@ func TestSixNodes(t *testing.T) {
 
 func TestSixNodesGalactica(t *testing.T) {
 	t.Skip()
-	// TODO: remove this once we have merged the release/hayabusa branch
-	os.Setenv("THOR_BRANCH", "release/hayabusa")
 
 	var sixNodesGalacticaNetwork *network.Network
 	require.NotPanics(t, func() { sixNodesGalacticaNetwork = preset.LocalSixNodesGalacticaNetwork() })
@@ -335,9 +328,6 @@ func Test_ensureNodeReady_sets_exec_and_ports(t *testing.T) {
 }
 
 func TestThreeNodes_Healthcheck(t *testing.T) {
-	// TODO: remove this once we have merged the release/hayabusa branch
-	os.Setenv("THOR_BRANCH", "release/hayabusa")
-
 	networkCfg := preset.LocalThreeMasterNodesNetwork()
 
 	thorBuilder := thorbuilder.New(thorbuilder.DefaultConfig())
@@ -363,9 +353,6 @@ func TestThreeNodes_Healthcheck(t *testing.T) {
 }
 
 func TestThreeNodes_AdditionalArgs(t *testing.T) {
-	// TODO: remove this once we have merged the release/hayabusa branch
-	os.Setenv("THOR_BRANCH", "release/hayabusa")
-
 	networkCfg := preset.LocalThreeMasterNodesNetwork()
 
 	thorBuilder := thorbuilder.New(thorbuilder.DefaultConfig())
