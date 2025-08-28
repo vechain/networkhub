@@ -188,7 +188,7 @@ func (n *Node) Start() error {
 	cmd = append(cmd, "--p2p-port", fmt.Sprintf("%d", n.cfg.GetP2PListenPort()))
 
 	if enodeString != "" {
-		cmd = append(cmd, "--bootnodes", enodeString)
+		cmd = append(cmd, "--bootnode", enodeString)
 	}
 
 	for key, value := range n.cfg.GetAdditionalArgs() {
