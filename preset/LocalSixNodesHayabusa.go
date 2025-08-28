@@ -30,6 +30,8 @@ func LocalSixNodesHayabusaNetwork(customGenesisJson string, repoUrl string) *net
 
 	sixNodesHayabusaGenesis.ForkConfig.AddField("FINALITY", 0)
 	sixNodesHayabusaGenesis.ForkConfig.AddField("HAYABUSA", 12)
+	tp := uint32(12)
+	sixNodesHayabusaGenesis.Config.HayabusaTP = &tp
 	sixNodesHayabusaNetwork := LocalSixNodesNetworkWithGenesis(sixNodesHayabusaGenesis)
 
 	for _, node := range sixNodesHayabusaNetwork.Nodes {

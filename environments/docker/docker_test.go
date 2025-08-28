@@ -24,8 +24,8 @@ func TestDockerNetwork(t *testing.T) {
 			&node.BaseNode{
 				ID:             "node1",
 				ExecArtifact:   docker.GetDockerImageTag(),
-				DataDir:        "/home/thor",
-				ConfigDir:      "/home/thor",
+				DataDir:        "/home/thor/data",
+				ConfigDir:      "/home/thor/config",
 				APIAddr:        "0.0.0.0:8545",
 				APICORS:        "*",
 				P2PListenPort:  30303,
@@ -36,8 +36,8 @@ func TestDockerNetwork(t *testing.T) {
 			&node.BaseNode{
 				ID:             "node2",
 				ExecArtifact:   docker.GetDockerImageTag(),
-				DataDir:        "/home/thor",
-				ConfigDir:      "/home/thor",
+				DataDir:        "/home/thor/data",
+				ConfigDir:      "/home/thor/config",
 				APIAddr:        "0.0.0.0:8545",
 				APICORS:        "*",
 				P2PListenPort:  30303,
@@ -48,8 +48,8 @@ func TestDockerNetwork(t *testing.T) {
 			&node.BaseNode{
 				ID:             "node3",
 				ExecArtifact:   docker.GetDockerImageTag(),
-				DataDir:        "/home/thor",
-				ConfigDir:      "/home/thor",
+				DataDir:        "/home/thor/data",
+				ConfigDir:      "/home/thor/config",
 				APIAddr:        "0.0.0.0:8545",
 				APICORS:        "*",
 				P2PListenPort:  30303,
