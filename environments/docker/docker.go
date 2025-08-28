@@ -68,16 +68,19 @@ func (d *Docker) LoadConfig(cfg *network.Network) (string, error) {
 	for i, node := range cfg.Nodes {
 		// use preset dirs if not defined
 		if node.GetConfigDir() == "" {
-			node.SetConfigDir("/home/thor")
+			node.SetConfigDir("/home/thor/config")
 		}
 		if node.GetDataDir() == "" {
-			node.SetDataDir("/home/thor")
+			node.SetDataDir("/home/thor/data")
 		}
 		if node.GetExecArtifact() == "" {
 			if d.dockerImage == "" {
 				return "", fmt.Errorf("docker image is not set, please provide a valid docker image")
 			}
 			node.SetExecArtifact(d.dockerImage)
+		}
+		if node.GetConfigDir() == node.GetDataDir() {
+			return "", fmt.Errorf("config and data dir cannot be the same")
 		}
 
 		// ensure API ports are exposed to the localhost
