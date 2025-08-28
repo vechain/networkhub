@@ -24,7 +24,7 @@ func NewAccount(pkString string) *Account {
 // It waits for retryPeriod between each retry.
 func Retry(fn func() error, retryPeriod time.Duration, maxRetries int) error {
 	var err error
-	for i := 0; i < maxRetries; i++ {
+	for range maxRetries {
 		err = fn()
 		if err == nil {
 			return nil

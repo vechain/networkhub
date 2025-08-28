@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 	"math"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -240,6 +242,7 @@ func TestSixNodes(t *testing.T) {
 
 func TestSixNodesGalactica(t *testing.T) {
 	t.Skip()
+
 	var sixNodesGalacticaNetwork *network.Network
 	require.NotPanics(t, func() { sixNodesGalacticaNetwork = preset.LocalSixNodesGalacticaNetwork() })
 
@@ -255,6 +258,73 @@ func TestSixNodesGalactica(t *testing.T) {
 	clients := pollingWhileConnectingPeers(t, sixNodesGalacticaNetwork.Nodes, 5)
 
 	deployAndAssertShanghaiContract(t, clients[0], preset.SixNNAccount1)
+}
+
+func Test_ensureNodePorts_allocates_when_missing(t *testing.T) {
+	l := NewEnv()
+	l.id = "test-net"
+
+	n := &node.BaseNode{ID: "n1"}
+
+	require.NoError(t, l.ensureNodePorts(n))
+	require.NotEmpty(t, n.GetAPIAddr())
+	require.Contains(t, n.GetAPIAddr(), ":")
+	require.Greater(t, n.GetP2PListenPort(), 0)
+}
+
+func Test_ensureNodePorts_preserves_existing(t *testing.T) {
+	l := NewEnv()
+	l.id = "test-net"
+
+	n := &node.BaseNode{ID: "n1", APIAddr: "127.0.0.1:9999"}
+	n.SetP2PListenPort(5555)
+
+	require.NoError(t, l.ensureNodePorts(n))
+	require.Equal(t, "127.0.0.1:9999", n.GetAPIAddr())
+	require.Equal(t, 5555, n.GetP2PListenPort())
+}
+
+func Test_ensureNodePorts_errors_on_empty_network_id(t *testing.T) {
+	l := NewEnv()
+	l.id = "" // triggers allocation error
+
+	n := &node.BaseNode{ID: "n1"}
+	err := l.ensureNodePorts(n)
+	require.Error(t, err)
+}
+
+func Test_validateAttachable(t *testing.T) {
+	l := NewEnv()
+	n := &node.BaseNode{ID: "n1"}
+
+	// no network loaded
+	require.Error(t, l.validateAttachable(n))
+
+	l.networkCfg = &network.Network{}
+	l.localNodes["n1"] = &Node{}
+	require.Error(t, l.validateAttachable(n))
+
+	delete(l.localNodes, "n1")
+	require.NoError(t, l.validateAttachable(n))
+}
+
+func Test_ensureNodeReady_sets_exec_and_ports(t *testing.T) {
+	l := NewEnv()
+	l.id = "test-net"
+
+	// create a fake exec artifact file
+	tmpDir := t.TempDir()
+	fakeExec := filepath.Join(tmpDir, "thor")
+	require.NoError(t, os.WriteFile(fakeExec, []byte("#!/bin/sh"), 0o755))
+	l.execPath = fakeExec
+
+	n := &node.BaseNode{ID: "n1"}
+	require.NoError(t, l.ensureNodeReady(n))
+	require.Equal(t, fakeExec, n.GetExecArtifact())
+	require.NotEmpty(t, n.GetConfigDir())
+	require.NotEmpty(t, n.GetDataDir())
+	require.NotEmpty(t, n.GetAPIAddr())
+	require.Greater(t, n.GetP2PListenPort(), 0)
 }
 
 func TestThreeNodes_Healthcheck(t *testing.T) {

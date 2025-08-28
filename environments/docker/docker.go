@@ -159,11 +159,6 @@ func (d *Docker) StopNetwork() error {
 	return nil
 }
 
-func (d *Docker) Info() error {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (d *Docker) Config() *network.Network {
 	return d.networkCfg
 }

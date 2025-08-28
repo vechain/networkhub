@@ -78,3 +78,56 @@ func TestBuilder(t *testing.T) {
 		assert.NoError(t, err)
 	})
 }
+
+func TestDefaultConfig_WithWorkingDir_PrefersBuildConfig(t *testing.T) {
+	t.Setenv("THOR_WORKING_DIR", "/tmp/thor-working-dir")
+	t.Setenv("THOR_BRANCH", "release/hayabusa")
+
+	cfg := DefaultConfig()
+
+	assert.NotNil(t, cfg)
+	assert.NotNil(t, cfg.BuildConfig)
+	assert.Equal(t, "/tmp/thor-working-dir", cfg.BuildConfig.ExistingPath)
+	assert.False(t, cfg.BuildConfig.DebugBuild)
+	assert.Nil(t, cfg.DownloadConfig)
+}
+
+func TestDefaultConfig_WithBranch_UsesDownloadConfig(t *testing.T) {
+	t.Setenv("THOR_WORKING_DIR", "")
+	t.Setenv("THOR_BRANCH", "release/hayabusa")
+
+	cfg := DefaultConfig()
+
+	assert.NotNil(t, cfg)
+	assert.NotNil(t, cfg.DownloadConfig)
+	assert.Equal(t, "https://github.com/vechain/thor", cfg.DownloadConfig.RepoUrl)
+	assert.Equal(t, "release/hayabusa", cfg.DownloadConfig.Branch)
+	assert.True(t, cfg.DownloadConfig.IsReusable)
+	assert.Nil(t, cfg.BuildConfig)
+}
+
+func TestDefaultConfig_NoEnv_UsesMasterBranch(t *testing.T) {
+	t.Setenv("THOR_WORKING_DIR", "")
+	t.Setenv("THOR_BRANCH", "")
+
+	cfg := DefaultConfig()
+
+	assert.NotNil(t, cfg)
+	assert.NotNil(t, cfg.DownloadConfig)
+	assert.Equal(t, "https://github.com/vechain/thor", cfg.DownloadConfig.RepoUrl)
+	assert.Equal(t, "master", cfg.DownloadConfig.Branch)
+	assert.True(t, cfg.DownloadConfig.IsReusable)
+	assert.Nil(t, cfg.BuildConfig)
+}
+
+func TestDefaultConfig_WorkingDirOverridesBranch(t *testing.T) {
+	t.Setenv("THOR_WORKING_DIR", "/tmp/thor-working-dir")
+	t.Setenv("THOR_BRANCH", "release/hayabusa")
+
+	cfg := DefaultConfig()
+
+	assert.NotNil(t, cfg)
+	assert.NotNil(t, cfg.BuildConfig)
+	assert.Equal(t, "/tmp/thor-working-dir", cfg.BuildConfig.ExistingPath)
+	assert.Nil(t, cfg.DownloadConfig)
+}
