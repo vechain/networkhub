@@ -39,6 +39,8 @@ func (b *BaseNode) GetAPICORS() string {
 	return b.APICORS
 }
 
+func (b *BaseNode) SetAPICORS(origins string) { b.APICORS = origins }
+
 func (b *BaseNode) GetKey() string { return b.Key }
 
 func New() Config { return &BaseNode{} }

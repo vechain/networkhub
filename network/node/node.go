@@ -25,6 +25,7 @@ type Config interface {
 	GetAPIAddr() string
 	SetAPIAddr(addr string)
 	GetAPICORS() string
+	SetAPICORS(origins string)
 	GetP2PListenPort() int
 	SetP2PListenPort(port int)
 	GetAdditionalArgs() map[string]string

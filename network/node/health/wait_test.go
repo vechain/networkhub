@@ -31,6 +31,7 @@ func (f *fakeNode) GetAPIHost() string                     { return "" }
 func (f *fakeNode) GetAPIAddr() string                     { return f.addr }
 func (f *fakeNode) SetAPIAddr(string)                      {}
 func (f *fakeNode) GetAPICORS() string                     { return "*" }
+func (f *fakeNode) SetAPICORS(string)                      {}
 func (f *fakeNode) GetP2PListenPort() int                  { return 0 }
 func (f *fakeNode) SetP2PListenPort(int)                   {}
 func (f *fakeNode) GetAdditionalArgs() map[string]string   { return nil }
