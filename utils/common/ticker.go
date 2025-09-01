@@ -2,8 +2,8 @@ package common
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
-	"strconv"
 	"time"
 
 	"github.com/vechain/thor/v2/thorclient"
@@ -68,26 +68,34 @@ func (t *Ticker) WaitForBlock(blockNumber uint32) error {
 		return nil
 	}
 
-	if best != nil && best.Number == 0 { // edge case -> spinning up a new network with old genesis timestamps
-		best.Timestamp = uint64(time.Now().Unix())
-	}
-	bestTs := uint64(time.Now().Unix())
-	bestNum := uint32(0)
+	blocksToWait := uint32(1)
 	if best != nil {
-		bestTs = best.Timestamp
-		bestNum = best.Number
+		blocksToWait = blockNumber - best.Number
 	}
-	expectedTime := time.Unix(int64(bestTs), 0).Add(time.Duration(blockNumber-bestNum) * 10 * time.Second)
-	timeout := min(max(time.Until(expectedTime), 300*time.Millisecond), 2*time.Second)
 
-	slog.Info("waiting for block...", "block", blockNumber, "deadline", timeout.String())
+	// Use 10s per block + 5s buffer, with min 1s and max 30s
+	timeout := time.Duration(blocksToWait)*10*time.Second + 5*time.Second
+	timeout = min(max(timeout, 1*time.Second), 30*time.Second)
+
+	slog.Info("waiting for block...", "block", blockNumber, "current", func() uint32 {
+		if best != nil {
+			return best.Number
+		}
+		return 0
+	}(), "timeout", timeout.String())
 
 	return t.WaitForCondition(timeout, func() (bool, error) {
-		b, e := t.client.ExpandedBlockInfo(strconv.Itoa(int(blockNumber)))
-		if e != nil || b == nil {
+		// Try to get the specific block first
+		b, e := t.client.ExpandedBlockInfo(fmt.Sprintf("%d", blockNumber))
+		if e == nil && b != nil && b.Number >= blockNumber {
+			return true, nil
+		}
+		// Fallback to checking best block
+		best, e := t.client.ExpandedBlockInfo("best")
+		if e != nil || best == nil {
 			return false, nil
 		}
-		return b.Number >= blockNumber, nil
+		return best.Number >= blockNumber, nil
 	})
 }
 
