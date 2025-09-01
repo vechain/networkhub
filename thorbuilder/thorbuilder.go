@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 )
 
 type Config struct {
@@ -71,9 +72,13 @@ func (b *Builder) Download() error {
 		slog.Info("Skipping Download... No download config was provided")
 		return nil
 	}
+	isSha := isCommitSHA(b.config.DownloadConfig.Branch)
 	if b.config.DownloadConfig.IsReusable {
 		// Check if the folder exists and ensure it contains a cloned repository
 		if _, err := os.Stat(filepath.Join(b.DownloadPath, ".git")); err == nil {
+			if isSha {
+				return nil
+			}
 			slog.Info("Reusable directory with repository exists: ", "path", b.DownloadPath)
 			cmd := exec.Command("git", "pull")
 			cmd.Dir = b.DownloadPath
@@ -91,11 +96,17 @@ func (b *Builder) Download() error {
 	}
 
 	args := make([]string, 0)
-	args = append(args, "clone")
-	if b.config.DownloadConfig.Branch != "" {
-		args = append(args, "--branch", b.config.DownloadConfig.Branch)
+	if isSha {
+		// For commit SHAs, clone the full repository first
+		args = append(args, "clone", b.config.DownloadConfig.RepoUrl, b.DownloadPath)
+	} else {
+		// Current logic for branches/tags with shallow clone
+		args = append(args, "clone")
+		if b.config.DownloadConfig.Branch != "" {
+			args = append(args, "--branch", b.config.DownloadConfig.Branch)
+		}
+		args = append(args, "--depth", "1", b.config.DownloadConfig.RepoUrl, b.DownloadPath)
 	}
-	args = append(args, "--depth", "1", b.config.DownloadConfig.RepoUrl, b.DownloadPath)
 
 	cmd := exec.Command("git", args...)
 	cmd.Stdout = os.Stdout
@@ -103,6 +114,19 @@ func (b *Builder) Download() error {
 
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to clone repository: %w", err)
+	}
+
+	// If it's a commit SHA, checkout the specific commit after cloning
+	if isSha {
+		cmd := exec.Command("git", "checkout", b.config.DownloadConfig.Branch)
+		cmd.Dir = b.DownloadPath
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("failed to checkout commit SHA %s: %w", b.config.DownloadConfig.Branch, err)
+		}
+		slog.Info("Successfully checked out commit SHA", "sha", b.config.DownloadConfig.Branch)
 	}
 
 	return nil
@@ -172,6 +196,20 @@ func (b *Builder) BuildDockerImage() (string, error) {
 
 	slog.Info("Successfully built Docker image", "tag", tag)
 	return tag, nil
+}
+
+// isCommitSHA checks if the given string looks like a Git commit SHA.
+// It returns true if the string is 7-40 characters long and contains only hexadecimal characters.
+func isCommitSHA(ref string) bool {
+	// Git commit SHAs are hexadecimal strings, typically 40 characters (full SHA)
+	// but can be abbreviated to 7+ characters for uniqueness
+	if len(ref) != 7 && len(ref) != 40 {
+		return false
+	}
+
+	// Check if it contains only hexadecimal characters
+	matched, _ := regexp.MatchString("^[0-9a-fA-F]+$", ref)
+	return matched
 }
 
 // generateRandomSuffix returns a random hexadecimal string.
