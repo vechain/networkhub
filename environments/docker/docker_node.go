@@ -5,11 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
+	"os"
 	"strings"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
+	"github.com/docker/docker/api/types/strslice"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/vechain/networkhub/network/node"
@@ -17,24 +20,50 @@ import (
 )
 
 // NewDockerNode initializes a new DockerNode
-func NewDockerNode(cfg node.Config, enodes []string, networkID string, exposedPorts *exposedPort, ipAddr string) *Node {
+func NewDockerNode(
+	cfg node.Config,
+	enodes []string,
+	networkID string,
+	hostPort string,
+	containerPort string,
+	ipAddr string,
+) *Node {
 	return &Node{
-		cfg:          cfg,
-		enodes:       enodes,
-		networkID:    networkID,
-		exposedPorts: exposedPorts,
-		ipAddr:       ipAddr,
+		cfg:           cfg,
+		enodes:        enodes,
+		networkID:     networkID,
+		hostPort:      hostPort,
+		containerPort: containerPort,
+		ipAddr:        ipAddr,
 	}
 }
 
 // Node represents a Docker container node
 type Node struct {
-	cfg          node.Config
-	enodes       []string
-	id           string
-	networkID    string
-	exposedPorts *exposedPort
-	ipAddr       string
+	cfg           node.Config
+	enodes        []string
+	id            string
+	networkID     string
+	hostPort      string
+	containerPort string
+	ipAddr        string
+	hostDataDir   string
+	logConfig     container.LogConfig
+}
+
+// SetHostVolume sets the base directory on the host where node data will be stored.
+// The system will automatically create subdirectories: {hostDataDir}/{nodeID}/config and {hostDataDir}/{nodeID}/data
+func (n *Node) SetHostVolume(hostDataDir string) {
+	n.hostDataDir = hostDataDir
+}
+
+func (n *Node) SetLogConfig(logConfig container.LogConfig) {
+	n.logConfig = logConfig
+}
+
+// Helper function to write files with open permissions for dev use
+func writeConfigFile(path string, data []byte) error {
+	return os.WriteFile(path, data, 0777)
 }
 
 // Start runs the node as a Docker container
@@ -71,7 +100,7 @@ func (n *Node) Start() error {
 		}
 	}
 
-	cleanEnode := []string{} // todo theres a clever way of doing this
+	var cleanEnode []string // todo theres a clever way of doing this
 	for _, enode := range n.enodes {
 		nodeEnode, err := n.cfg.Enode(n.ipAddr)
 		if err != nil {
@@ -83,56 +112,111 @@ func (n *Node) Start() error {
 	}
 	enodeString := strings.Join(cleanEnode, ",")
 
-	args := "cd /home/thor; " +
-		"echo $GENESIS > genesis.json;" +
-		"echo $PRIVATEKEY > master.key;" +
-		"echo $PRIVATEKEY > p2p.key;" +
-		"thor " +
-		"--network genesis.json " +
-		"--nat none " +
-		fmt.Sprintf("--config-dir='%s' ", n.cfg.GetConfigDir()) +
-		fmt.Sprintf("--api-addr='%s' ", n.cfg.GetAPIAddr()) +
-		fmt.Sprintf("--api-cors='%s' ", n.cfg.GetAPICORS()) +
-		fmt.Sprintf("--p2p-port=%d ", n.cfg.GetP2PListenPort()) +
-		fmt.Sprintf("--bootnode=%s", enodeString)
-
-	for key, value := range n.cfg.GetAdditionalArgs() {
-		args += fmt.Sprintf(" --%s=%s", key, value)
+	if n.hostDataDir == "" {
+		n.hostDataDir = os.TempDir()
+		slog.Info("host data directory not specified, using temporary directory", "dir", n.hostDataDir)
 	}
+	baseHostDir := fmt.Sprintf("%s/%s", n.hostDataDir, n.cfg.GetID())
 
-	cmd := []string{"sh", "-c", args}
-
-	//serialize genesis
+	// write configuration files to the host directory
 	genesisBytes, err := nodegenesis.Marshal(n.cfg.GetGenesis())
 	if err != nil {
-		return fmt.Errorf("unable to marshal genesis - %w", err)
+		return fmt.Errorf("unable to marshal genesis: %w", err)
+	}
+
+	configDir := fmt.Sprintf("%s/config", baseHostDir)
+	if err := os.MkdirAll(configDir, 0777); err != nil {
+		return fmt.Errorf("failed to create config directory %s: %w", configDir, err)
+	}
+	// Explicitly set permissions to ensure they're correct regardless of umask
+	if err := os.Chmod(configDir, 0777); err != nil {
+		return fmt.Errorf("failed to set permissions for config directory %s: %w", configDir, err)
+	}
+
+	// Write all config files with open permissions for development
+	files := map[string][]byte{
+		"genesis.json": genesisBytes,
+		"master.key":   []byte(n.cfg.GetKey()),
+		"p2p.key":      []byte(n.cfg.GetKey()),
+	}
+
+	for filename, data := range files {
+		filePath := fmt.Sprintf("%s/%s", configDir, filename)
+		if err := writeConfigFile(filePath, data); err != nil {
+			return fmt.Errorf("failed to write %s to %s: %w", filename, filePath, err)
+		}
+	}
+
+	var binds []string
+	// Mount config directory: eg /host/nodes/{nodeID}/config -> container's config dir
+	if configDir := n.cfg.GetConfigDir(); configDir != "" {
+		hostConfigPath := fmt.Sprintf("%s/config", baseHostDir)
+		volumeBind := fmt.Sprintf("%s:%s", hostConfigPath, configDir)
+		binds = append(binds, volumeBind)
+	}
+
+	// Mount data directory: eg /host/nodes/{nodeID}/data -> container's data dir
+	if dataDir := n.cfg.GetDataDir(); dataDir != "" {
+		hostDataPath := fmt.Sprintf("%s/data", baseHostDir)
+
+		// Create the data directory with full permissions so container can write to it
+		if err := os.MkdirAll(hostDataPath, 0777); err != nil {
+			return fmt.Errorf("failed to create data directory %s: %w", hostDataPath, err)
+		}
+
+		// Explicitly set permissions to ensure they're correct regardless of umask
+		if err := os.Chmod(hostDataPath, 0777); err != nil {
+			return fmt.Errorf("failed to set permissions for data directory %s: %w", hostDataPath, err)
+		}
+
+		volumeBind := fmt.Sprintf("%s:%s", hostDataPath, dataDir)
+		binds = append(binds, volumeBind)
+	}
+
+	containerConfigDir := strings.TrimSuffix(n.cfg.GetConfigDir(), "/")
+
+	var cmd strslice.StrSlice
+	cmd = append(cmd, "--network", containerConfigDir+"/genesis.json")
+	cmd = append(cmd, "--nat", "none")
+	cmd = append(cmd, "--config-dir", n.cfg.GetConfigDir())
+	cmd = append(cmd, "--data-dir", n.cfg.GetDataDir())
+	cmd = append(cmd, "--api-addr", n.cfg.GetAPIAddr())
+	cmd = append(cmd, "--api-cors", n.cfg.GetAPICORS())
+	cmd = append(cmd, "--p2p-port", fmt.Sprintf("%d", n.cfg.GetP2PListenPort()))
+
+	if enodeString != "" {
+		cmd = append(cmd, "--bootnode", enodeString)
+	}
+
+	for key, value := range n.cfg.GetAdditionalArgs() {
+		cmd = append(cmd, "--"+key, value)
 	}
 
 	exposedPorts := nat.PortSet{
-		nat.Port(fmt.Sprintf("%s/tcp", n.exposedPorts.containerPort)): struct{}{},
+		nat.Port(fmt.Sprintf("%s/tcp", n.containerPort)): struct{}{},
 	}
 	portBindings := map[nat.Port][]nat.PortBinding{
-		nat.Port(fmt.Sprintf("%s/tcp", n.exposedPorts.containerPort)): {
+		nat.Port(fmt.Sprintf("%s/tcp", n.containerPort)): {
 			{
-				HostPort: n.exposedPorts.hostPort,
+				HostPort: n.hostPort,
 			},
 		},
 	}
 
 	// Construct Docker container configuration
 	config := &container.Config{
-		Image:      n.cfg.GetExecArtifact(),
-		Cmd:        cmd,
-		Entrypoint: []string{},
-		Env: []string{
-			fmt.Sprintf("GENESIS=%s", string(genesisBytes)),
-			fmt.Sprintf("PRIVATEKEY=%s", n.cfg.GetKey()),
+		Image: n.cfg.GetExecArtifact(),
+		Cmd:   cmd,
+		Entrypoint: []string{
+			"thor",
 		},
 		ExposedPorts: exposedPorts,
 	}
 
 	hostConfig := &container.HostConfig{
 		PortBindings: portBindings,
+		LogConfig:    n.logConfig,
+		Binds:        binds,
 	}
 
 	// Define the network configuration

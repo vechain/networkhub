@@ -17,12 +17,13 @@ type CustomGenesis struct {
 	Params     genesis.Params           `json:"params"`
 	Executor   genesis.Executor         `json:"executor"`
 	ForkConfig *CustomGenesisForkConfig `json:"forkConfig"`
+	Config     *thor.Config             `json:"config,omitempty"`
 }
 
 func HandleAdditionalFields(raw *map[string]interface{}) {
-	if forkConfig, ok := (*raw)["forkConfig"].(map[string]interface{}); ok {
+	if forkConfig, ok := (*raw)["forkConfig"].(map[string]any); ok {
 		// Handle AdditionalFields
-		if additionalFields, ok := forkConfig["additionalFields"].(map[string]interface{}); ok {
+		if additionalFields, ok := forkConfig["additionalFields"].(map[string]any); ok {
 			for key, value := range additionalFields {
 				if num, ok := value.(float64); ok { // JSON numbers are float64 by default
 					forkConfig[key] = uint32(num)
@@ -42,7 +43,7 @@ func Marshal(customGenesis *CustomGenesis) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	var raw map[string]interface{}
+	var raw map[string]any
 	if err = json.Unmarshal(data, &raw); err != nil {
 		return nil, err
 	}

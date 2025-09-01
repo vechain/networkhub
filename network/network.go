@@ -6,6 +6,7 @@ import (
 
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/network/node/genesis"
+	"github.com/vechain/networkhub/network/node/health"
 	"github.com/vechain/networkhub/thorbuilder"
 )
 
@@ -48,12 +49,12 @@ func NewNetwork(opts ...BuilderOptionsFunc) (*Network, error) {
 
 // UnmarshalNode function unmarshals JSON data into the appropriate type based on the presence of VIP212
 func UnmarshalNode(data []byte) (node.Config, error) {
-	var raw map[string]interface{}
+	var raw map[string]any
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return nil, err
 	}
 
-	if genesisData, ok := raw["genesis"].(map[string]interface{}); ok {
+	if genesisData, ok := raw["genesis"].(map[string]any); ok {
 		genesis.HandleAdditionalFields(&genesisData)
 	}
 
@@ -72,7 +73,7 @@ func UnmarshalNode(data []byte) (node.Config, error) {
 
 func (n *Network) HealthCheck(block uint32, timeout time.Duration) error {
 	for _, n := range n.Nodes {
-		if err := n.HealthCheck(block, timeout); err != nil {
+		if err := health.HealthCheck(block, timeout, n.GetHTTPAddr()); err != nil {
 			return err
 		}
 	}

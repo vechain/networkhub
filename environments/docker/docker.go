@@ -3,6 +3,7 @@ package docker
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"log/slog"
 	"strconv"
@@ -67,16 +68,19 @@ func (d *Docker) LoadConfig(cfg *network.Network) (string, error) {
 	for i, node := range cfg.Nodes {
 		// use preset dirs if not defined
 		if node.GetConfigDir() == "" {
-			node.SetConfigDir("/home/thor")
+			node.SetConfigDir("/home/thor/config")
 		}
 		if node.GetDataDir() == "" {
-			node.SetDataDir("/home/thor")
+			node.SetDataDir("/home/thor/data")
 		}
 		if node.GetExecArtifact() == "" {
 			if d.dockerImage == "" {
 				return "", fmt.Errorf("docker image is not set, please provide a valid docker image")
 			}
 			node.SetExecArtifact(d.dockerImage)
+		}
+		if node.GetConfigDir() == node.GetDataDir() {
+			return "", fmt.Errorf("config and data dir cannot be the same")
 		}
 
 		// ensure API ports are exposed to the localhost
@@ -101,7 +105,7 @@ func (d *Docker) LoadConfig(cfg *network.Network) (string, error) {
 
 func (d *Docker) StartNetwork() error {
 	// create a network for fixed ip addresses (enodes cannot have dns names)
-	if err := d.checkOrCreateNetwork(d.networkID, d.ipManager.Subnet()); err != nil {
+	if err := CheckOrCreateNetwork(d.networkID, d.ipManager.Subnet()); err != nil {
 		return fmt.Errorf("unable to create network: %w", err)
 	}
 
@@ -125,7 +129,8 @@ func (d *Docker) StartNetwork() error {
 			enodes = append(enodes, enode)
 		}
 
-		dockerNode := NewDockerNode(nodeCfg, enodes, d.networkID, d.exposedPorts[nodeCfg.GetID()], nextIpAddr)
+		ports := d.exposedPorts[nodeCfg.GetID()]
+		dockerNode := NewDockerNode(nodeCfg, enodes, d.networkID, ports.hostPort, ports.containerPort, nextIpAddr)
 		if err := dockerNode.Start(); err != nil {
 			return fmt.Errorf("unable to start node - %w", err)
 		}
@@ -154,16 +159,11 @@ func (d *Docker) StopNetwork() error {
 	return nil
 }
 
-func (d *Docker) Info() error {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (d *Docker) Config() *network.Network {
 	return d.networkCfg
 }
 
-func (d *Docker) checkOrCreateNetwork(networkName, subnet string) error {
+func CheckOrCreateNetwork(networkName, subnet string) error {
 	// Create a Docker client
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -214,4 +214,16 @@ func (d *Docker) checkOrCreateNetwork(networkName, subnet string) error {
 type exposedPort struct {
 	hostPort      string
 	containerPort string
+}
+
+func GetDockerImageTag() string {
+	env := os.Getenv("THOR_BRANCH")
+	if env != "" {
+		if env == "release/hayabusa" {
+			return "ghcr.io/vechain/thor:release-hayabusa-latest"
+		}
+	}
+
+	// Default to the latest tag if no specific branch is set
+	return "vechain/thor:latest"
 }

@@ -23,9 +23,9 @@ func TestDockerNetwork(t *testing.T) {
 		Nodes: []node.Config{
 			&node.BaseNode{
 				ID:             "node1",
-				ExecArtifact:   "vechain/thor:latest",
-				DataDir:        "/home/thor",
-				ConfigDir:      "/home/thor",
+				ExecArtifact:   docker.GetDockerImageTag(),
+				DataDir:        "/home/thor/data",
+				ConfigDir:      "/home/thor/config",
 				APIAddr:        "0.0.0.0:8545",
 				APICORS:        "*",
 				P2PListenPort:  30303,
@@ -35,9 +35,9 @@ func TestDockerNetwork(t *testing.T) {
 			},
 			&node.BaseNode{
 				ID:             "node2",
-				ExecArtifact:   "vechain/thor:latest",
-				DataDir:        "/home/thor",
-				ConfigDir:      "/home/thor",
+				ExecArtifact:   docker.GetDockerImageTag(),
+				DataDir:        "/home/thor/data",
+				ConfigDir:      "/home/thor/config",
 				APIAddr:        "0.0.0.0:8545",
 				APICORS:        "*",
 				P2PListenPort:  30303,
@@ -47,9 +47,9 @@ func TestDockerNetwork(t *testing.T) {
 			},
 			&node.BaseNode{
 				ID:             "node3",
-				ExecArtifact:   "vechain/thor:latest",
-				DataDir:        "/home/thor",
-				ConfigDir:      "/home/thor",
+				ExecArtifact:   docker.GetDockerImageTag(),
+				DataDir:        "/home/thor/data",
+				ConfigDir:      "/home/thor/config",
 				APIAddr:        "0.0.0.0:8545",
 				APICORS:        "*",
 				P2PListenPort:  30303,

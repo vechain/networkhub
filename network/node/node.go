@@ -1,8 +1,6 @@
 package node
 
 import (
-	"time"
-
 	"github.com/vechain/networkhub/network/node/genesis"
 )
 
@@ -24,11 +22,10 @@ type Config interface {
 	GetKey() string
 	GetGenesis() *genesis.CustomGenesis
 	SetGenesis(genesis *genesis.CustomGenesis)
-	SetAPIHost(host string)
-	GetAPIHost() string
 	GetAPIAddr() string
 	SetAPIAddr(addr string)
 	GetAPICORS() string
+	SetAPICORS(origins string)
 	GetP2PListenPort() int
 	SetP2PListenPort(port int)
 	GetAdditionalArgs() map[string]string
@@ -37,7 +34,6 @@ type Config interface {
 	GetVerbosity() int
 	GetHTTPAddr() string
 	GetFakeExecution() bool
-	HealthCheck(block uint32, timeout time.Duration) error
 }
 
 type Lifecycle interface {
