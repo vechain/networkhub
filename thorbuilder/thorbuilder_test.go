@@ -80,7 +80,7 @@ func TestBuilder(t *testing.T) {
 
 	t.Run("Download by commit sha", func(t *testing.T) {
 		cfg := DefaultConfig()
-		cfg.DownloadConfig.Branch = "caebe07" // Example commit SHA
+		cfg.DownloadConfig.Branch = "6593c64" // Example commit SHA
 		cfg.DownloadConfig.IsReusable = true  // to test another download
 		builder := New(cfg)
 
