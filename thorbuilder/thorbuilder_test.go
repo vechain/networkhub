@@ -77,6 +77,20 @@ func TestBuilder(t *testing.T) {
 		_, err = os.Stat(thorBinaryPath)
 		assert.NoError(t, err)
 	})
+
+	t.Run("Download by commit sha", func(t *testing.T) {
+		cfg := DefaultConfig()
+		cfg.DownloadConfig.Branch = "6593c64" // Example commit SHA
+		cfg.DownloadConfig.IsReusable = true  // to test another download
+		builder := New(cfg)
+
+		assert.NoError(t, builder.Download())
+		binary, err := builder.Build()
+		assert.NoError(t, err)
+		_, err = os.Stat(binary)
+		assert.NoError(t, err)
+		assert.NoError(t, builder.Download())
+	})
 }
 
 func TestDefaultConfig_WithWorkingDir_PrefersBuildConfig(t *testing.T) {
