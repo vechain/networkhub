@@ -12,7 +12,7 @@ require (
 	github.com/ethereum/go-ethereum v1.8.14
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.10.0
-	github.com/vechain/thor/v2 v2.3.2-0.20250819105511-46267f777fa3
+	github.com/vechain/thor/v2 v2.3.2-0.20250903112608-b945ee4fdfe6
 )
 
 require (
