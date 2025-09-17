@@ -25,6 +25,7 @@ type DownloadConfig struct {
 type BuildConfig struct {
 	ExistingPath string
 	DebugBuild   bool
+	ReuseBinary  bool
 }
 
 type Builder struct {
@@ -39,7 +40,9 @@ func DefaultConfig() *Config {
 			Branch:     "master",
 			IsReusable: true,
 		},
-		BuildConfig: nil,
+		BuildConfig: &BuildConfig{
+			ReuseBinary: true, // Default to reusing existing binaries for efficiency
+		},
 	}
 }
 
@@ -56,7 +59,7 @@ func New(cfg *Config) *Builder {
 		}
 	}
 
-	if cfg.BuildConfig != nil {
+	if cfg.BuildConfig != nil && cfg.BuildConfig.ExistingPath != "" {
 		downloadPath = cfg.BuildConfig.ExistingPath
 	}
 
@@ -138,6 +141,15 @@ func (b *Builder) Build() (string, error) {
 		return "", fmt.Errorf("download directory does not exist: %s", b.DownloadPath)
 	}
 
+	// Check if we should reuse existing binary
+	thorBinaryPath := filepath.Join(b.DownloadPath, "bin", "thor")
+	if b.config.BuildConfig != nil && b.config.BuildConfig.ReuseBinary {
+		if _, err := os.Stat(thorBinaryPath); err == nil {
+			slog.Info("Reusing existing Thor binary", "path", thorBinaryPath)
+			return thorBinaryPath, nil
+		}
+	}
+
 	var cmd *exec.Cmd
 
 	if b.config.BuildConfig != nil && b.config.BuildConfig.DebugBuild {
@@ -167,7 +179,6 @@ func (b *Builder) Build() (string, error) {
 		return "", fmt.Errorf("failed to build project: %w", err)
 	}
 
-	thorBinaryPath := filepath.Join(b.DownloadPath, "bin", "thor")
 	if _, err := os.Stat(thorBinaryPath); err != nil {
 		if os.IsNotExist(err) {
 			return "", fmt.Errorf("thor binary not found at expected path: %s", thorBinaryPath)
