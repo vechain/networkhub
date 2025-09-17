@@ -138,6 +138,13 @@ func (b *Builder) Build() (string, error) {
 		return "", fmt.Errorf("download directory does not exist: %s", b.DownloadPath)
 	}
 
+	// Check if the binary already exists
+	thorBinaryPath := filepath.Join(b.DownloadPath, "bin", "thor")
+	if _, err := os.Stat(thorBinaryPath); err == nil {
+		slog.Info("Thor binary already exists, skipping build", "path", thorBinaryPath)
+		return thorBinaryPath, nil
+	}
+
 	var cmd *exec.Cmd
 
 	if b.config.BuildConfig != nil && b.config.BuildConfig.DebugBuild {
@@ -167,7 +174,6 @@ func (b *Builder) Build() (string, error) {
 		return "", fmt.Errorf("failed to build project: %w", err)
 	}
 
-	thorBinaryPath := filepath.Join(b.DownloadPath, "bin", "thor")
 	if _, err := os.Stat(thorBinaryPath); err != nil {
 		if os.IsNotExist(err) {
 			return "", fmt.Errorf("thor binary not found at expected path: %s", thorBinaryPath)
