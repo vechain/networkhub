@@ -447,6 +447,7 @@ func testPublicNetworkConnection(t *testing.T, config publicNetworkTestConfig) {
 	t.Cleanup(func() {
 		if err := localEnv.StopNetwork(); err != nil {
 			t.Logf("Warning: failed to stop network during test cleanup: %v", err)
+			t.Fail()
 		}
 	})
 
@@ -530,6 +531,7 @@ func testAttachNodeConnection(t *testing.T, config attachNodeTestConfig) {
 	t.Cleanup(func() {
 		if err := localEnv.StopNetwork(); err != nil {
 			t.Logf("Warning: failed to stop network during test cleanup: %v", err)
+			t.Fail()
 		}
 	})
 
@@ -647,6 +649,7 @@ func TestAttachToPublicNetworkAndStart(t *testing.T) {
 	t.Cleanup(func() {
 		if err := localEnv.StopNetwork(); err != nil {
 			t.Logf("Warning: failed to stop network during test cleanup: %v", err)
+			t.Fail()
 		}
 	})
 
