@@ -140,7 +140,8 @@ func (b *Builder) Build() (string, error) {
 
 	// Check if the binary already exists
 	thorBinaryPath := filepath.Join(b.DownloadPath, "bin", "thor")
-	if _, err := os.Stat(thorBinaryPath); err == nil {
+	
+	if _, err := os.Stat(thorBinaryPath); err == nil && b.config.DownloadConfig.IsReusable {
 		slog.Info("Thor binary already exists, skipping build", "path", thorBinaryPath)
 		return thorBinaryPath, nil
 	}
