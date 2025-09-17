@@ -41,7 +41,7 @@ func DefaultConfig() *Config {
 			IsReusable: true,
 		},
 		BuildConfig: &BuildConfig{
-			ReuseBinary: true, // Default to reusing existing binaries for efficiency
+			ReuseBinary: true,
 		},
 	}
 }
