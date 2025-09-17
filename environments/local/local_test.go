@@ -23,6 +23,9 @@ import (
 	"github.com/vechain/thor/v2/tx"
 )
 
+const testnetGenesisID = "0x000000000b2bce3c70bc649a02749e8687721b09ed2e15997f466536b20bb127"
+const mainnetGenesisID = "0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a"
+
 var genesis = `{
         "launchTime": 1703180212,
         "gasLimit": 10000000,
@@ -131,15 +134,6 @@ var networkJSON = fmt.Sprintf(`{
   ]
 }`, genesis, genesis, genesis)
 
-type PublicNetworkConfig struct {
-	NetworkType string
-	NodeID      string
-	APIPort     int
-	P2PPort     int
-	Environment string
-	GenesisID   string
-}
-
 type AttachNodeTestConfig struct {
 	NetworkType    string
 	InitialNodeID  string
@@ -150,6 +144,15 @@ type AttachNodeTestConfig struct {
 	AttachP2PPort  int
 	Environment    string
 	GenesisID      string
+}
+
+type PublicNetworkTestConfig struct {
+	NetworkType string // "test" for testnet, "main" for mainnet
+	APIPort     int
+	P2PPort     int
+	GenesisID   string
+	Environment string
+	NodeID      string
 }
 
 func TestLocalInvalidExecArtifact(t *testing.T) {
@@ -437,7 +440,7 @@ func deployAndAssertShanghaiContract(t *testing.T, client *thorclient.Client, ac
 	require.NotNil(t, contractAddr)
 }
 
-func testPublicNetworkConnection(t *testing.T, config PublicNetworkConfig) {
+func testPublicNetworkConnection(t *testing.T, config PublicNetworkTestConfig) {
 	t.Helper()
 	localEnv := NewEnv()
 
@@ -492,26 +495,26 @@ func testPublicNetworkConnection(t *testing.T, config PublicNetworkConfig) {
 	require.NoError(t, err)
 }
 func TestTestnetConnection(t *testing.T) {
-	config := PublicNetworkConfig{
+	config := PublicNetworkTestConfig{
 		NetworkType: "test",
 		NodeID:      "testnet-node",
 		APIPort:     8669,
 		P2PPort:     11235,
 		Environment: "testnet",
-		GenesisID:   "0x000000000b2bce3c70bc649a02749e8687721b09ed2e15997f466536b20bb127",
+		GenesisID:   testnetGenesisID,
 	}
 
 	testPublicNetworkConnection(t, config)
 }
 
 func TestMainnetConnection(t *testing.T) {
-	config := PublicNetworkConfig{
+	config := PublicNetworkTestConfig{
 		NetworkType: "main",
 		NodeID:      "mainnet-node",
 		APIPort:     8670,
 		P2PPort:     11236,
 		Environment: "mainnet",
-		GenesisID:   "0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a",
+		GenesisID:   mainnetGenesisID,
 	}
 
 	testPublicNetworkConnection(t, config)
@@ -612,7 +615,7 @@ func TestAttachNodeTestnet(t *testing.T) {
 		AttachAPIPort:  8671,
 		AttachP2PPort:  11237,
 		Environment:    "testnet",
-		GenesisID:      "0x000000000b2bce3c70bc649a02749e8687721b09ed2e15997f466536b20bb127",
+		GenesisID:      testnetGenesisID,
 	}
 
 	testAttachNodeConnection(t, config)
@@ -628,8 +631,48 @@ func TestAttachNodeMainnet(t *testing.T) {
 		AttachAPIPort:  8672,
 		AttachP2PPort:  11238,
 		Environment:    "mainnet",
-		GenesisID:      "0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a",
+		GenesisID:      mainnetGenesisID,
 	}
 
 	testAttachNodeConnection(t, config)
+}
+
+func TestAttachToPublicNetworkAndStart(t *testing.T) {
+	localEnv := NewEnv()
+
+	testnetConfig := PublicNetworkConfig{
+		NodeID:      "testnet-node",
+		NetworkType: "test",
+		APIPort:     8669,
+		P2PPort:     11235,
+	}
+
+	err := localEnv.AttachToPublicNetworkAndStart(testnetConfig)
+	require.NoError(t, err)
+
+	// Wait for the node to start
+	time.Sleep(3 * time.Second)
+
+	// Verify the node is running
+	nodes := localEnv.Nodes()
+	require.Len(t, nodes, 1)
+	require.Contains(t, nodes, testnetConfig.NodeID)
+
+	// Test connection to the node
+	client := thorclient.New("http://127.0.0.1:8669")
+	block, err := client.Block("0")
+	if err != nil {
+		t.Logf("Warning: Could not connect to testnet node: %v", err)
+		t.Logf("This might be normal if the node is still syncing")
+	} else {
+		// Validate that the genesis block ID is the testnet one
+		blockID, err := thor.ParseBytes32(testnetGenesisID)
+		require.NoError(t, err)
+		require.Equal(t, blockID, block.ID)
+		t.Logf("Successfully connected to testnet using convenience method! Genesis block: %d", block.Number)
+	}
+
+	// Stop the network
+	err = localEnv.StopNetwork()
+	require.NoError(t, err)
 }

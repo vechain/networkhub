@@ -24,6 +24,13 @@ type Local struct {
 
 type Factory struct{}
 
+type PublicNetworkConfig struct {
+	NodeID      string
+	NetworkType string // "test" for testnet, "main" for mainnet
+	APIPort     int
+	P2PPort     int
+}
+
 func NewFactory() *Factory {
 	return &Factory{}
 }
@@ -235,5 +242,45 @@ func (l *Local) checkNode(n node.Config) error {
 	if n.GetDataDir() == "" {
 		n.SetDataDir(filepath.Join(filepath.Dir(n.GetExecArtifact()), n.GetID(), "data"))
 	}
+	return nil
+}
+
+// AttachToPublicNetworkAndStart creates and starts a node connected to a public network (testnet/mainnet)
+func (l *Local) AttachToPublicNetworkAndStart(config PublicNetworkConfig) error {
+	publicNode := &node.BaseNode{
+		ID:             config.NodeID,
+		APICORS:        "*",
+		Type:           node.RegularNode,
+		Verbosity:      3,
+		P2PListenPort:  config.P2PPort,
+		APIAddr:        fmt.Sprintf("127.0.0.1:%d", config.APIPort),
+		AdditionalArgs: map[string]string{"network": config.NetworkType},
+	}
+
+	environment := "testnet"
+	if config.NetworkType == "main" {
+		environment = "mainnet"
+	}
+
+	// Create network configuration
+	networkCfg := &network.Network{
+		BaseID:      "baseID",
+		Environment: environment,
+		Nodes:       []node.Config{publicNode},
+		ThorBuilder: thorbuilder.DefaultConfig(),
+	}
+
+	// Load the configuration
+	_, err := l.LoadConfig(networkCfg)
+	if err != nil {
+		return fmt.Errorf("failed to load network configuration: %w", err)
+	}
+
+	// Start the network (this will start the public network node)
+	err = l.StartNetwork()
+	if err != nil {
+		return fmt.Errorf("failed to start public network: %w", err)
+	}
+
 	return nil
 }
