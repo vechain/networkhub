@@ -134,7 +134,7 @@ var networkJSON = fmt.Sprintf(`{
   ]
 }`, genesis, genesis, genesis)
 
-type AttachNodeTestConfig struct {
+type attachNodeTestConfig struct {
 	NetworkType    string
 	InitialNodeID  string
 	InitialAPIPort int
@@ -146,7 +146,7 @@ type AttachNodeTestConfig struct {
 	GenesisID      string
 }
 
-type PublicNetworkTestConfig struct {
+type publicNetworkTestConfig struct {
 	NetworkType string // "test" for testnet, "main" for mainnet
 	APIPort     int
 	P2PPort     int
@@ -440,7 +440,7 @@ func deployAndAssertShanghaiContract(t *testing.T, client *thorclient.Client, ac
 	require.NotNil(t, contractAddr)
 }
 
-func testPublicNetworkConnection(t *testing.T, config PublicNetworkTestConfig) {
+func testPublicNetworkConnection(t *testing.T, config publicNetworkTestConfig) {
 	t.Helper()
 	localEnv := NewEnv()
 
@@ -495,7 +495,7 @@ func testPublicNetworkConnection(t *testing.T, config PublicNetworkTestConfig) {
 	require.NoError(t, err)
 }
 func TestTestnetConnection(t *testing.T) {
-	config := PublicNetworkTestConfig{
+	config := publicNetworkTestConfig{
 		NetworkType: "test",
 		NodeID:      "testnet-node",
 		APIPort:     8669,
@@ -508,7 +508,7 @@ func TestTestnetConnection(t *testing.T) {
 }
 
 func TestMainnetConnection(t *testing.T) {
-	config := PublicNetworkTestConfig{
+	config := publicNetworkTestConfig{
 		NetworkType: "main",
 		NodeID:      "mainnet-node",
 		APIPort:     8670,
@@ -520,7 +520,7 @@ func TestMainnetConnection(t *testing.T) {
 	testPublicNetworkConnection(t, config)
 }
 
-func testAttachNodeConnection(t *testing.T, config AttachNodeTestConfig) {
+func testAttachNodeConnection(t *testing.T, config attachNodeTestConfig) {
 	t.Helper()
 
 	localEnv := NewEnv()
@@ -606,7 +606,7 @@ func testAttachNodeConnection(t *testing.T, config AttachNodeTestConfig) {
 	require.NoError(t, err)
 }
 func TestAttachNodeTestnet(t *testing.T) {
-	config := AttachNodeTestConfig{
+	config := attachNodeTestConfig{
 		NetworkType:    "test",
 		InitialNodeID:  "initial-testnet-node",
 		InitialAPIPort: 8669,
@@ -622,7 +622,7 @@ func TestAttachNodeTestnet(t *testing.T) {
 }
 
 func TestAttachNodeMainnet(t *testing.T) {
-	config := AttachNodeTestConfig{
+	config := attachNodeTestConfig{
 		NetworkType:    "main",
 		InitialNodeID:  "initial-mainnet-node",
 		InitialAPIPort: 8670,

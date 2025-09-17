@@ -303,7 +303,7 @@ func (n *Node) addCommonArgs(args []string) []string {
 func (n *Node) addBootnodes(args []string) ([]string, error) {
 	isPublicNetwork := n.isPublicNetwork()
 	if isPublicNetwork {
-		return args, nil // Public networks don't need local bootnodes
+		return args, nil
 	}
 
 	cleanEnodes := n.cleanEnodes()
