@@ -56,24 +56,20 @@ func (n *Node) cleanup() error {
 }
 
 func (n *Node) Start() error {
-	// Prepare the node for startup
 	if err := n.prepareNode(); err != nil {
 		return fmt.Errorf("failed to prepare node: %w", err)
 	}
 
-	// Build command arguments
 	args, err := n.buildCommandArgs()
 	if err != nil {
 		return fmt.Errorf("failed to build command args: %w", err)
 	}
 
-	// Create and start the command
 	cmd, err := n.createCommand(args)
 	if err != nil {
 		return fmt.Errorf("failed to create command: %w", err)
 	}
 
-	// Execute the command
 	return n.executeCommand(cmd)
 }
 

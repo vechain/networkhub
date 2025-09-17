@@ -140,6 +140,18 @@ type PublicNetworkConfig struct {
 	GenesisID   string
 }
 
+type AttachNodeTestConfig struct {
+	NetworkType    string
+	InitialNodeID  string
+	InitialAPIPort int
+	InitialP2PPort int
+	AttachNodeID   string
+	AttachAPIPort  int
+	AttachP2PPort  int
+	Environment    string
+	GenesisID      string
+}
+
 func TestLocalInvalidExecArtifact(t *testing.T) {
 	networkCfg, err := network.NewNetwork(
 		network.WithJSON(networkJSON),
@@ -503,4 +515,121 @@ func TestMainnetConnection(t *testing.T) {
 	}
 
 	testPublicNetworkConnection(t, config)
+}
+
+func testAttachNodeConnection(t *testing.T, config AttachNodeTestConfig) {
+	t.Helper()
+
+	localEnv := NewEnv()
+
+	initialNode := &node.BaseNode{
+		ID:             config.InitialNodeID,
+		APICORS:        "*",
+		Type:           node.RegularNode,
+		Verbosity:      3,
+		P2PListenPort:  config.InitialP2PPort,
+		APIAddr:        fmt.Sprintf("127.0.0.1:%d", config.InitialAPIPort),
+		AdditionalArgs: map[string]string{"network": config.NetworkType},
+	}
+
+	networkCfg := &network.Network{
+		BaseID:      "baseID",
+		Environment: config.Environment,
+		Nodes:       []node.Config{initialNode},
+		ThorBuilder: thorbuilder.DefaultConfig(),
+	}
+
+	// Load and start the initial network
+	networkID, err := localEnv.LoadConfig(networkCfg)
+	require.NoError(t, err)
+	expectedNetworkID := fmt.Sprintf("%sbaseID", config.Environment)
+	require.Equal(t, expectedNetworkID, networkID)
+
+	err = localEnv.StartNetwork()
+	require.NoError(t, err)
+
+	// Wait for initial node to start
+	time.Sleep(3 * time.Second)
+
+	// Create a new node to attach
+	attachNode := &node.BaseNode{
+		ID:             config.AttachNodeID,
+		APICORS:        "*",
+		Type:           node.RegularNode,
+		Verbosity:      3,
+		P2PListenPort:  config.AttachP2PPort,
+		APIAddr:        fmt.Sprintf("127.0.0.1:%d", config.AttachAPIPort),
+		AdditionalArgs: map[string]string{"network": config.NetworkType},
+	}
+	err = localEnv.AttachNode(attachNode)
+	require.NoError(t, err)
+
+	// Wait for attached node to start
+	time.Sleep(3 * time.Second)
+
+	// Verify both nodes are running
+	nodes := localEnv.Nodes()
+	require.Len(t, nodes, 2)
+	require.Contains(t, nodes, config.InitialNodeID)
+	require.Contains(t, nodes, config.AttachNodeID)
+
+	// Test connection to the attached node
+	apiURL := fmt.Sprintf("http://127.0.0.1:%d", config.AttachAPIPort)
+	client := thorclient.New(apiURL)
+	block, err := client.Block("0")
+	if err != nil {
+		t.Logf("Warning: Could not connect to attached %s node: %v", config.NetworkType, err)
+		t.Logf("This might be normal if the node is still syncing")
+	} else {
+		// Validate that the genesis block ID matches the expected one
+		blockID, err := thor.ParseBytes32(config.GenesisID)
+		require.NoError(t, err)
+		require.Equal(t, blockID, block.ID)
+		t.Logf("Successfully connected to attached %s node! Genesis block: %d", config.NetworkType, block.Number)
+	}
+
+	// Remove the attached node
+	err = localEnv.RemoveNode(config.AttachNodeID)
+	require.NoError(t, err)
+
+	// Verify the node was removed
+	nodes = localEnv.Nodes()
+	require.Len(t, nodes, 1)
+	require.Contains(t, nodes, config.InitialNodeID)
+	require.NotContains(t, nodes, config.AttachNodeID)
+
+	// Stop the network
+	err = localEnv.StopNetwork()
+	require.NoError(t, err)
+}
+func TestAttachNodeTestnet(t *testing.T) {
+	config := AttachNodeTestConfig{
+		NetworkType:    "test",
+		InitialNodeID:  "initial-testnet-node",
+		InitialAPIPort: 8669,
+		InitialP2PPort: 11235,
+		AttachNodeID:   "attach-testnet-node",
+		AttachAPIPort:  8671,
+		AttachP2PPort:  11237,
+		Environment:    "testnet",
+		GenesisID:      "0x000000000b2bce3c70bc649a02749e8687721b09ed2e15997f466536b20bb127",
+	}
+
+	testAttachNodeConnection(t, config)
+}
+
+func TestAttachNodeMainnet(t *testing.T) {
+	config := AttachNodeTestConfig{
+		NetworkType:    "main",
+		InitialNodeID:  "initial-mainnet-node",
+		InitialAPIPort: 8670,
+		InitialP2PPort: 11236,
+		AttachNodeID:   "attach-mainnet-node",
+		AttachAPIPort:  8672,
+		AttachP2PPort:  11238,
+		Environment:    "mainnet",
+		GenesisID:      "0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a",
+	}
+
+	testAttachNodeConnection(t, config)
 }
