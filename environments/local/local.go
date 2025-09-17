@@ -27,7 +27,7 @@ type Factory struct{}
 type PublicNetworkConfig struct {
 	NodeID      string
 	NetworkType string // "test" for testnet, "main" for mainnet
-	APIPort     int
+	APIAddr     string
 	P2PPort     int
 }
 
@@ -253,7 +253,7 @@ func (l *Local) AttachToPublicNetworkAndStart(config PublicNetworkConfig) error 
 		Type:           node.RegularNode,
 		Verbosity:      3,
 		P2PListenPort:  config.P2PPort,
-		APIAddr:        fmt.Sprintf("127.0.0.1:%d", config.APIPort),
+		APIAddr:        config.APIAddr,
 		AdditionalArgs: map[string]string{"network": config.NetworkType},
 	}
 

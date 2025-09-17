@@ -656,7 +656,7 @@ func TestAttachToPublicNetworkAndStart(t *testing.T) {
 	testnetConfig := PublicNetworkConfig{
 		NodeID:      "testnet-node",
 		NetworkType: "test",
-		APIPort:     8669,
+		APIAddr:     "127.0.0.1:8669",
 		P2PPort:     11235,
 	}
 
