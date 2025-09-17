@@ -207,7 +207,7 @@ func (l *Local) enodes() ([]string, error) {
 	var enodes []string
 	for _, node := range l.networkCfg.Nodes {
 		// Skip enode generation for public network nodes (testnet/mainnet)
-		if l.isPublicNetworkNode(node) {
+		if isPublicNetworkNode(node) {
 			continue
 		}
 
@@ -218,12 +218,6 @@ func (l *Local) enodes() ([]string, error) {
 		enodes = append(enodes, enode)
 	}
 	return enodes, nil
-}
-
-// isPublicNetworkNode checks if a node is configured for a public network (testnet/mainnet)
-func (l *Local) isPublicNetworkNode(node node.Config) bool {
-	networkArg, exists := node.GetAdditionalArgs()["network"]
-	return exists && (networkArg == "test" || networkArg == "main")
 }
 
 func (l *Local) checkNode(n node.Config) error {

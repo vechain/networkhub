@@ -377,3 +377,9 @@ func (n *Node) executeCommand(cmd *exec.Cmd) error {
 	slog.Info("started node", "id", n.nodeCfg.GetID(), "pid", n.cmdExec.Process.Pid)
 	return nil
 }
+
+// isPublicNetworkNode checks if a node is configured for a public network (testnet/mainnet)
+func isPublicNetworkNode(node node.Config) bool {
+	networkArg, exists := node.GetAdditionalArgs()["network"]
+	return exists && (networkArg == "test" || networkArg == "main")
+}
