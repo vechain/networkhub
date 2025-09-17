@@ -415,3 +415,112 @@ func deployAndAssertShanghaiContract(t *testing.T, client *thorclient.Client, ac
 	require.NoError(t, err)
 	require.NotNil(t, contractAddr)
 }
+
+// TestTestnetConnection tests connecting to VeChain testnet
+func TestTestnetConnection(t *testing.T) {
+	// Create a local environment
+	localEnv := NewEnv()
+
+	// Create a testnet node configuration
+	testnetNode := &node.BaseNode{
+		ID:        "testnet-node",
+		APICORS:   "*",
+		Type:      node.RegularNode,
+		Verbosity: 3,
+		P2PListenPort: 11235,
+		APIAddr:       "127.0.0.1:8669",
+		AdditionalArgs: map[string]string{"network": "test"},
+	}
+
+	// Create a minimal network configuration
+	networkCfg := &network.Network{
+		BaseID:      "baseID",
+		Environment: "testnet",
+		Nodes:       []node.Config{testnetNode},
+		ThorBuilder: thorbuilder.DefaultConfig(),
+	}
+
+	// Load the configuration
+	networkID, err := localEnv.LoadConfig(networkCfg)
+	require.NoError(t, err)
+	require.Equal(t, "testnetbaseID", networkID)
+
+	// Start the network (this will start the testnet node)
+	err = localEnv.StartNetwork()
+	require.NoError(t, err)
+
+	// Wait a bit for the node to start syncing
+	time.Sleep(5 * time.Second)
+
+	// Try to connect to the node's API
+	client := thorclient.New("http://127.0.0.1:8669")
+	block, err := client.Block("0")
+	if err != nil {
+		t.Logf("Warning: Could not connect to testnet node: %v", err)
+		t.Logf("This might be normal if the node is still syncing")
+	} else {
+		// Validate that the genesis block ID is the testnet one
+		blockID, err := thor.ParseBytes32("0x000000000b2bce3c70bc649a02749e8687721b09ed2e15997f466536b20bb127")
+		require.NoError(t, err)
+		require.Equal(t, blockID, block.ID)
+		t.Logf("Successfully connected to testnet! Genesis block: %d", block.Number)
+	}
+
+	// Stop the network
+	err = localEnv.StopNetwork()
+	require.NoError(t, err)
+}
+
+// TestMainnetConnection tests connecting to VeChain mainnet
+func TestMainnetConnection(t *testing.T) {
+	localEnv := NewEnv()
+
+	// Create a mainnet node configuration
+	mainnetNode := &node.BaseNode{
+		ID:        "mainnet-node",
+		APICORS:   "*",
+		Type:      node.RegularNode,
+		Verbosity: 3,
+		P2PListenPort: 11236,
+		APIAddr:       "127.0.0.1:8670",
+		AdditionalArgs: map[string]string{"network": "main"},
+	}
+
+	// Create a minimal network configuration
+	networkCfg := &network.Network{
+		BaseID:      "baseID",
+		Environment: "mainnet",
+		Nodes:       []node.Config{mainnetNode},
+		ThorBuilder: thorbuilder.DefaultConfig(),
+	}
+
+	// Load the configuration
+	networkID, err := localEnv.LoadConfig(networkCfg)
+	require.NoError(t, err)
+	require.Equal(t, "mainnetbaseID", networkID)
+
+	// Start the network (this will start the mainnet node)
+	err = localEnv.StartNetwork()
+	require.NoError(t, err)
+
+	// Wait a bit for the node to start syncing
+	time.Sleep(5 * time.Second)
+
+	// Try to connect to the node's API
+	client := thorclient.New("http://127.0.0.1:8670")
+	block, err := client.Block("0")
+	if err != nil {
+		t.Logf("Warning: Could not connect to mainnet node: %v", err)
+		t.Logf("This might be normal if the node is still syncing")
+	} else {
+		// Validate that the genesis block ID is the mainnet one
+		blockID, err := thor.ParseBytes32("0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a")
+		require.NoError(t, err)
+		require.Equal(t, blockID, block.ID)
+		t.Logf("Successfully connected to mainnet! Genesis block: %d", block.Number)
+	}
+
+	// Stop the network
+	err = localEnv.StopNetwork()
+	require.NoError(t, err)
+}

@@ -199,6 +199,11 @@ func fileExists(path string) bool {
 func (l *Local) enodes() ([]string, error) {
 	var enodes []string
 	for _, node := range l.networkCfg.Nodes {
+		// Skip enode generation for public network nodes (testnet/mainnet)
+		if l.isPublicNetworkNode(node) {
+			continue
+		}
+
 		enode, err := node.Enode("127.0.0.1")
 		if err != nil {
 			return nil, fmt.Errorf("failed to get enode for node %s: %w", node.GetID(), err)
@@ -206,6 +211,12 @@ func (l *Local) enodes() ([]string, error) {
 		enodes = append(enodes, enode)
 	}
 	return enodes, nil
+}
+
+// isPublicNetworkNode checks if a node is configured for a public network (testnet/mainnet)
+func (l *Local) isPublicNetworkNode(node node.Config) bool {
+	networkArg, exists := node.GetAdditionalArgs()["network"]
+	return exists && (networkArg == "test" || networkArg == "main")
 }
 
 func (l *Local) checkNode(n node.Config) error {

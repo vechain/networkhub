@@ -68,8 +68,11 @@ func (n *Node) Start() error {
 		return fmt.Errorf("unable to create configDir - %w", err)
 	}
 
-	// write keys to disk
-	if n.nodeCfg.GetKey() != "" {
+	// Check if this is a public network (testnet/mainnet) or local network
+	isPublicNetwork := n.isPublicNetwork()
+
+	// write keys to disk (only for local networks or master nodes)
+	if n.nodeCfg.GetKey() != "" && !isPublicNetwork {
 		err := os.WriteFile(filepath.Join(n.nodeCfg.GetConfigDir(), "master.key"), []byte(n.nodeCfg.GetKey()), 0644)
 		if err != nil {
 			return fmt.Errorf("failed to write master key file - %w", err)
@@ -80,36 +83,44 @@ func (n *Node) Start() error {
 		}
 	}
 
-	// write genesis to disk
-	genesisPath := filepath.Join(n.nodeCfg.GetConfigDir(), "genesis.json")
-	genesisBytes, err := nodegenesis.Marshal(n.nodeCfg.GetGenesis())
-	if err != nil {
-		return fmt.Errorf("unable to marshal genesis - %w", err)
-	}
-	err = os.WriteFile(genesisPath, genesisBytes, 0777)
-	if err != nil {
-		return fmt.Errorf("failed to write genesis file - %w", err)
-	}
-
-	cleanEnode := []string{} // todo theres a clever way of doing this
-	for _, enode := range n.enodes {
-		nodeEnode, err := n.nodeCfg.Enode("127.0.0.1")
+	// write genesis to disk (only for local networks)
+	var genesisPath string
+	if !isPublicNetwork {
+		genesisPath = filepath.Join(n.nodeCfg.GetConfigDir(), "genesis.json")
+		genesisBytes, err := nodegenesis.Marshal(n.nodeCfg.GetGenesis())
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to marshal genesis - %w", err)
 		}
-		if nodeEnode != enode {
-			cleanEnode = append(cleanEnode, enode)
+		err = os.WriteFile(genesisPath, genesisBytes, 0777)
+		if err != nil {
+			return fmt.Errorf("failed to write genesis file - %w", err)
 		}
 	}
-	enodeString := strings.Join(cleanEnode, ",")
 
-	if err := os.RemoveAll(n.nodeCfg.GetDataDir()); err != nil {
-		return fmt.Errorf("failed to remove data dir - %w", err)
+	// Only clean data dir for local networks (public networks should sync from scratch)
+	if !isPublicNetwork {
+		if err := os.RemoveAll(n.nodeCfg.GetDataDir()); err != nil {
+			return fmt.Errorf("failed to remove data dir - %w", err)
+		}
 	}
 
+	// Build command arguments
 	args := []string{
 		"thor",
-		"--network", genesisPath,
+	}
+
+	// Set network parameter
+	if isPublicNetwork {
+		// For public networks, use the network name directly
+		networkName := n.getPublicNetworkName()
+		args = append(args, "--network", networkName)
+	} else {
+		// For local networks, use genesis file
+		args = append(args, "--network", genesisPath)
+	}
+
+	// Add common arguments
+	args = append(args,
 		"--data-dir", n.nodeCfg.GetDataDir(),
 		"--config-dir", n.nodeCfg.GetConfigDir(),
 		"--api-addr", n.nodeCfg.GetAPIAddr(),
@@ -117,9 +128,27 @@ func (n *Node) Start() error {
 		"--verbosity", strconv.Itoa(n.nodeCfg.GetVerbosity()),
 		"--nat", "none",
 		"--p2p-port", fmt.Sprintf("%d", n.nodeCfg.GetP2PListenPort()),
-		"--bootnode", enodeString,
+	)
+
+	// Add bootnodes (only for local networks or if explicitly specified)
+	if !isPublicNetwork {
+		cleanEnode := []string{}
+		for _, enode := range n.enodes {
+			nodeEnode, err := n.nodeCfg.Enode("127.0.0.1")
+			if err != nil {
+				return err
+			}
+			if nodeEnode != enode {
+				cleanEnode = append(cleanEnode, enode)
+			}
+		}
+		enodeString := strings.Join(cleanEnode, ",")
+		if enodeString != "" {
+			args = append(args, "--bootnode", enodeString)
+		}
 	}
 
+	// Add additional arguments (including bootnodes for public networks)
 	for key, value := range n.nodeCfg.GetAdditionalArgs() {
 		args = append(args, fmt.Sprintf("--%s", key))
 		args = append(args, value)
@@ -205,4 +234,18 @@ func (nw *nodeWriter) Write(p []byte) (int, error) {
 		}
 	}
 	return len(p), nil
+}
+
+// isPublicNetwork checks if this node is configured to connect to a public network (testnet/mainnet)
+func (n *Node) isPublicNetwork() bool {
+	networkArg, exists := n.nodeCfg.GetAdditionalArgs()["network"]
+	return exists && (networkArg == "test" || networkArg == "main")
+}
+
+// getPublicNetworkName returns the public network name from additional args
+func (n *Node) getPublicNetworkName() string {
+	if networkArg, exists := n.nodeCfg.GetAdditionalArgs()["network"]; exists {
+		return networkArg
+	}
+	return "test" // default to testnet
 }
