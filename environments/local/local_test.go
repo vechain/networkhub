@@ -444,6 +444,12 @@ func testPublicNetworkConnection(t *testing.T, config publicNetworkTestConfig) {
 	t.Helper()
 	localEnv := NewEnv()
 
+	t.Cleanup(func() {
+		if err := localEnv.StopNetwork(); err != nil {
+			t.Logf("Warning: failed to stop network during test cleanup: %v", err)
+		}
+	})
+
 	publicNode := &node.BaseNode{
 		ID:             config.NodeID,
 		APICORS:        "*",
@@ -489,10 +495,6 @@ func testPublicNetworkConnection(t *testing.T, config publicNetworkTestConfig) {
 		require.Equal(t, blockID, block.ID)
 		t.Logf("Successfully connected to %s! Genesis block: %d", config.NetworkType, block.Number)
 	}
-
-	// Stop the network
-	err = localEnv.StopNetwork()
-	require.NoError(t, err)
 }
 func TestTestnetConnection(t *testing.T) {
 	config := publicNetworkTestConfig{
@@ -524,6 +526,12 @@ func testAttachNodeConnection(t *testing.T, config attachNodeTestConfig) {
 	t.Helper()
 
 	localEnv := NewEnv()
+
+	t.Cleanup(func() {
+		if err := localEnv.StopNetwork(); err != nil {
+			t.Logf("Warning: failed to stop network during test cleanup: %v", err)
+		}
+	})
 
 	initialNode := &node.BaseNode{
 		ID:             config.InitialNodeID,
@@ -600,10 +608,6 @@ func testAttachNodeConnection(t *testing.T, config attachNodeTestConfig) {
 	require.Len(t, nodes, 1)
 	require.Contains(t, nodes, config.InitialNodeID)
 	require.NotContains(t, nodes, config.AttachNodeID)
-
-	// Stop the network
-	err = localEnv.StopNetwork()
-	require.NoError(t, err)
 }
 func TestAttachNodeTestnet(t *testing.T) {
 	config := attachNodeTestConfig{
@@ -640,6 +644,12 @@ func TestAttachNodeMainnet(t *testing.T) {
 func TestAttachToPublicNetworkAndStart(t *testing.T) {
 	localEnv := NewEnv()
 
+	t.Cleanup(func() {
+		if err := localEnv.StopNetwork(); err != nil {
+			t.Logf("Warning: failed to stop network during test cleanup: %v", err)
+		}
+	})
+
 	testnetConfig := PublicNetworkConfig{
 		NodeID:      "testnet-node",
 		NetworkType: "test",
@@ -671,8 +681,4 @@ func TestAttachToPublicNetworkAndStart(t *testing.T) {
 		require.Equal(t, blockID, block.ID)
 		t.Logf("Successfully connected to testnet using convenience method! Genesis block: %d", block.Number)
 	}
-
-	// Stop the network
-	err = localEnv.StopNetwork()
-	require.NoError(t, err)
 }
