@@ -29,6 +29,7 @@ type PublicNetworkConfig struct {
 	NetworkType string // "test" for testnet, "main" for mainnet
 	APIAddr     string
 	P2PPort     int
+	Branch      string
 }
 
 func NewFactory() *Factory {
@@ -256,12 +257,23 @@ func (l *Local) AttachToPublicNetworkAndStart(config PublicNetworkConfig) error 
 		environment = "mainnet"
 	}
 
+	thorBranch := "master"
+	if config.Branch != "" {
+		thorBranch = config.Branch
+	}
+
 	// Create network configuration
 	networkCfg := &network.Network{
 		BaseID:      "baseID",
 		Environment: environment,
 		Nodes:       []node.Config{publicNode},
-		ThorBuilder: thorbuilder.DefaultConfig(),
+		ThorBuilder: &thorbuilder.Config{
+			DownloadConfig: &thorbuilder.DownloadConfig{
+				RepoUrl:    "https://github.com/vechain/thor",
+				Branch:     thorBranch,
+				IsReusable: true,
+			},
+		},
 	}
 
 	// Load the configuration
