@@ -150,11 +150,9 @@ func (n *Node) prepareNode() error {
 		return fmt.Errorf("failed to create directories: %w", err)
 	}
 
-	// Write configuration files (skip for solo nodes)
-	if !isSoloNode(n.nodeCfg) {
-		if err := n.writeConfigFiles(); err != nil {
-			return fmt.Errorf("failed to write config files: %w", err)
-		}
+	// Write configuration files based on node type
+	if err := n.writeConfigFiles(); err != nil {
+		return fmt.Errorf("failed to write config files: %w", err)
 	}
 
 	return nil
@@ -173,30 +171,36 @@ func (n *Node) createDirectories() error {
 
 // writeConfigFiles writes keys and genesis files as needed
 func (n *Node) writeConfigFiles() error {
-	isPublicNetwork := n.isPublicNetwork()
+	nodeType := n.nodeCfg.GetType()
 
-	// Write keys to disk (only for local networks or master nodes)
-	if err := n.writeKeys(isPublicNetwork); err != nil {
-		return fmt.Errorf("failed to write keys: %w", err)
+	// Determine what operations to perform based on node type
+	shouldWriteKeys := nodeType == node.RegularNode || nodeType == node.MasterNode
+	isLocalNetwork := nodeType == node.RegularNode
+
+	// Execute operations based on node type
+	if shouldWriteKeys {
+		if err := n.writeKeys(); err != nil {
+			return fmt.Errorf("failed to write keys: %w", err)
+		}
 	}
 
-	// Write genesis to disk (only for local networks)
-	if err := n.writeGenesis(isPublicNetwork); err != nil {
-		return fmt.Errorf("failed to write genesis: %w", err)
-	}
+	if isLocalNetwork {
+		if err := n.writeGenesis(); err != nil {
+			return fmt.Errorf("failed to write genesis: %w", err)
+		}
 
-	// Clean data directory (only for local networks)
-	if err := n.cleanDataDirectory(isPublicNetwork); err != nil {
-		return fmt.Errorf("failed to clean data directory: %w", err)
+		if err := n.cleanDataDirectory(); err != nil {
+			return fmt.Errorf("failed to clean data directory: %w", err)
+		}
 	}
 
 	return nil
 }
 
 // writeKeys writes master and p2p keys to disk if needed
-func (n *Node) writeKeys(isPublicNetwork bool) error {
-	if n.nodeCfg.GetKey() == "" || isPublicNetwork {
-		return nil // No keys needed for public networks or nodes without keys
+func (n *Node) writeKeys() error {
+	if n.nodeCfg.GetKey() == "" {
+		return nil // No keys needed for nodes without keys
 	}
 
 	keyData := []byte(n.nodeCfg.GetKey())
@@ -217,10 +221,7 @@ func (n *Node) writeKeys(isPublicNetwork bool) error {
 }
 
 // writeGenesis writes the genesis file to disk if needed
-func (n *Node) writeGenesis(isPublicNetwork bool) error {
-	if isPublicNetwork {
-		return nil // Public networks don't need genesis files
-	}
+func (n *Node) writeGenesis() error {
 
 	genesisPath := filepath.Join(n.nodeCfg.GetConfigDir(), "genesis.json")
 	genesisBytes, err := nodegenesis.Marshal(n.nodeCfg.GetGenesis())
@@ -236,10 +237,7 @@ func (n *Node) writeGenesis(isPublicNetwork bool) error {
 }
 
 // cleanDataDirectory removes the data directory for local networks
-func (n *Node) cleanDataDirectory(isPublicNetwork bool) error {
-	if isPublicNetwork {
-		return nil // Public networks should sync from scratch, don't clean
-	}
+func (n *Node) cleanDataDirectory() error {
 
 	if err := os.RemoveAll(n.nodeCfg.GetDataDir()); err != nil {
 		return fmt.Errorf("failed to remove data dir: %w", err)
