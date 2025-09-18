@@ -374,6 +374,13 @@ func (n *Node) createCommand(args []string) (*exec.Cmd, error) {
 func (n *Node) executeCommand(cmd *exec.Cmd) error {
 	slog.Info(cmd.String())
 
+	if n.nodeCfg.GetFakeExecution() {
+		slog.Info("FakeExecution enabled - Not starting node: ", "id", n.nodeCfg.GetID())
+		slog.Info("Waiting 10 seconds for node to start...")
+		time.Sleep(10 * time.Second)
+		return nil
+	}
+
 	// Start the command and check for errors
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("failed to start thor command: %w", err)
@@ -384,10 +391,10 @@ func (n *Node) executeCommand(cmd *exec.Cmd) error {
 	return nil
 }
 
-// isPublicNetworkNode checks if a node is configured for a public network (testnet/mainnet)
-func isPublicNetworkNode(node node.Config) bool {
+func shouldNotAppendEnodes(node node.Config) bool {
 	networkArg, exists := node.GetAdditionalArgs()["network"]
-	return exists && (networkArg == "test" || networkArg == "main")
+	isPublicNetwork := exists && (networkArg == "test" || networkArg == "main")
+	return !isPublicNetwork && !isSoloNode(node)
 }
 
 // isSoloNode checks if a node is configured as a solo node
@@ -396,8 +403,21 @@ func isSoloNode(node node.Config) bool {
 	return hasSolo
 }
 
+type SoloNodeConfig struct {
+	NodeID                string
+	APIAddr               string
+	APICORS               string
+	GasLimit              string
+	APICallGasLimit       string
+	TxPoolLimit           string
+	TxPoolLimitPerAccount string
+	Cache                 string
+	DataDir               string
+	Verbosity             int
+	BlockInterval         string
+}
+
 // CreateSoloNodeConfig creates a configuration for a Thor solo node
-// A solo node runs in solo mode without connecting to other peers
 func CreateSoloNodeConfig(config SoloNodeConfig) node.Config {
 	// Set default values if not provided
 	if config.APIAddr == "" {
@@ -457,19 +477,4 @@ func CreateSoloNodeConfig(config SoloNodeConfig) node.Config {
 	}
 
 	return soloNode
-}
-
-// SoloNodeConfig represents the configuration for a Thor solo node
-type SoloNodeConfig struct {
-	NodeID                string // Unique identifier for the node
-	APIAddr               string // API address (default: "0.0.0.0:8669")
-	APICORS               string // API CORS settings (default: "*")
-	GasLimit              string // Gas limit (default: "10000000000000")
-	APICallGasLimit       string // API call gas limit (default: "10000000000000")
-	TxPoolLimit           string // Transaction pool limit (default: "100000000000")
-	TxPoolLimitPerAccount string // Transaction pool limit per account (default: "256")
-	Cache                 string // Cache size (default: "1024")
-	DataDir               string // Data directory (default: "/data")
-	Verbosity             int    // Log verbosity level (default: 9)
-	BlockInterval         string // Block interval in seconds (default: "1")
 }

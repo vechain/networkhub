@@ -207,13 +207,8 @@ func fileExists(path string) bool {
 func (l *Local) enodes() ([]string, error) {
 	var enodes []string
 	for _, node := range l.networkCfg.Nodes {
-		// Skip enode generation for public network nodes (testnet/mainnet)
-		if isPublicNetworkNode(node) {
-			continue
-		}
-
-		// Skip enode generation for solo nodes (they don't connect to other peers)
-		if isSoloNode(node) {
+		// Skip enode generation for public network nodes (testnet/mainnet) and solo nodes
+		if shouldNotAppendEnodes(node) {
 			continue
 		}
 
