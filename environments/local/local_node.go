@@ -398,9 +398,8 @@ func shouldNotAppendEnodes(node node.Config) bool {
 }
 
 // isSoloNode checks if a node is configured as a solo node
-func isSoloNode(node node.Config) bool {
-	_, hasSolo := node.GetAdditionalArgs()["solo"]
-	return hasSolo
+func isSoloNode(nodeConfig node.Config) bool {
+	return nodeConfig.GetType() == node.SoloNode
 }
 
 type SoloNodeConfig struct {
@@ -453,7 +452,6 @@ func CreateSoloNodeConfig(config SoloNodeConfig) node.Config {
 
 	// Create additional arguments map with all solo-specific parameters
 	additionalArgs := map[string]string{
-		"solo":                     "",
 		"on-demand":                "",
 		"api-enable-txpool":        "",
 		"gas-limit":                config.GasLimit,
@@ -472,7 +470,7 @@ func CreateSoloNodeConfig(config SoloNodeConfig) node.Config {
 		APICORS:        config.APICORS,
 		DataDir:        config.DataDir,
 		Verbosity:      config.Verbosity,
-		Type:           "solo",
+		Type:           node.SoloNode,
 		AdditionalArgs: additionalArgs,
 	}
 

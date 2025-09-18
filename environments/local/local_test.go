@@ -25,9 +25,38 @@ import (
 
 const testnetGenesisID = "0x000000000b2bce3c70bc649a02749e8687721b09ed2e15997f466536b20bb127"
 const mainnetGenesisID = "0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a"
+const soloGenesisID = "0x00000000c05a20fbca2bf6ae3affba6af4a74b800b585bf7a4988aba7aea69f6"
 
 const localNodeAPIAddr = "127.0.0.1:8669"
 
+// verifySoloNodeConfig verifies the basic configuration of a solo node
+func verifySoloNodeConfig(t *testing.T, nodeConfig node.Config, expectedID, expectedAPIAddr, expectedAPICORS, expectedDataDir string, expectedVerbosity int) {
+	t.Helper()
+	require.Equal(t, expectedID, nodeConfig.GetID())
+	require.Equal(t, expectedAPIAddr, nodeConfig.GetAPIAddr())
+	require.Equal(t, expectedAPICORS, nodeConfig.GetAPICORS())
+	require.Equal(t, expectedDataDir, nodeConfig.GetDataDir())
+	require.Equal(t, expectedVerbosity, nodeConfig.GetVerbosity())
+}
+
+// verifySoloNodeArguments verifies the solo-specific arguments in the configuration
+func verifySoloNodeArguments(t *testing.T, nodeConfig node.Config, expectedGasLimit, expectedAPICallGasLimit, expectedTxPoolLimit, expectedTxPoolLimitPerAccount, expectedCache, expectedBlockInterval string) {
+	t.Helper()
+	additionalArgs := nodeConfig.GetAdditionalArgs()
+
+	// Verify solo-specific flags are present
+	require.Contains(t, additionalArgs, "on-demand")
+	require.Contains(t, additionalArgs, "api-enable-txpool")
+	require.Contains(t, additionalArgs, "persist")
+
+	// Verify argument values
+	require.Equal(t, expectedGasLimit, additionalArgs["gas-limit"])
+	require.Equal(t, expectedAPICallGasLimit, additionalArgs["api-call-gas-limit"])
+	require.Equal(t, expectedTxPoolLimit, additionalArgs["txpool-limit"])
+	require.Equal(t, expectedTxPoolLimitPerAccount, additionalArgs["txpool-limit-per-account"])
+	require.Equal(t, expectedCache, additionalArgs["cache"])
+	require.Equal(t, expectedBlockInterval, additionalArgs["block-interval"])
+}
 
 var genesis = `{
         "launchTime": 1703180212,
@@ -697,25 +726,11 @@ func TestSoloNodeConfig(t *testing.T) {
 
 		nodeConfig := CreateSoloNodeConfig(config)
 
-		// Verify basic configuration
-		require.Equal(t, "solo-test-node", nodeConfig.GetID())
-		require.Equal(t, "0.0.0.0:8669", nodeConfig.GetAPIAddr())
-		require.Equal(t, "*", nodeConfig.GetAPICORS())
-		require.Equal(t, "/data", nodeConfig.GetDataDir())
-		require.Equal(t, 9, nodeConfig.GetVerbosity())
+		// Verify basic configuration with defaults
+		verifySoloNodeConfig(t, nodeConfig, "solo-test-node", "0.0.0.0:8669", "*", "/data", 9)
 
-		// Verify solo-specific arguments
-		additionalArgs := nodeConfig.GetAdditionalArgs()
-		require.Contains(t, additionalArgs, "solo")
-		require.Contains(t, additionalArgs, "on-demand")
-		require.Contains(t, additionalArgs, "api-enable-txpool")
-		require.Contains(t, additionalArgs, "persist")
-		require.Equal(t, "10000000000000", additionalArgs["gas-limit"])
-		require.Equal(t, "10000000000000", additionalArgs["api-call-gas-limit"])
-		require.Equal(t, "100000000000", additionalArgs["txpool-limit"])
-		require.Equal(t, "256", additionalArgs["txpool-limit-per-account"])
-		require.Equal(t, "1024", additionalArgs["cache"])
-		require.Equal(t, "1", additionalArgs["block-interval"])
+		// Verify solo-specific arguments with defaults
+		verifySoloNodeArguments(t, nodeConfig, "10000000000000", "10000000000000", "100000000000", "256", "1024", "1")
 	})
 
 	t.Run("CreateSoloNodeConfig with custom values", func(t *testing.T) {
@@ -736,48 +751,12 @@ func TestSoloNodeConfig(t *testing.T) {
 		nodeConfig := CreateSoloNodeConfig(config)
 
 		// Verify custom configuration
-		require.Equal(t, "custom-solo-node", nodeConfig.GetID())
-		require.Equal(t, "127.0.0.1:8670", nodeConfig.GetAPIAddr())
-		require.Equal(t, "http://localhost:3000", nodeConfig.GetAPICORS())
-		require.Equal(t, "/custom/data", nodeConfig.GetDataDir())
-		require.Equal(t, 5, nodeConfig.GetVerbosity())
+		verifySoloNodeConfig(t, nodeConfig, "custom-solo-node", "127.0.0.1:8670", "http://localhost:3000", "/custom/data", 5)
 
 		// Verify custom arguments
-		additionalArgs := nodeConfig.GetAdditionalArgs()
-		require.Equal(t, "5000000000000", additionalArgs["gas-limit"])
-		require.Equal(t, "5000000000000", additionalArgs["api-call-gas-limit"])
-		require.Equal(t, "50000000000", additionalArgs["txpool-limit"])
-		require.Equal(t, "128", additionalArgs["txpool-limit-per-account"])
-		require.Equal(t, "512", additionalArgs["cache"])
-		require.Equal(t, "2", additionalArgs["block-interval"])
+		verifySoloNodeArguments(t, nodeConfig, "5000000000000", "5000000000000", "50000000000", "128", "512", "2")
 	})
 
-	t.Run("Solo node command generation", func(t *testing.T) {
-		config := SoloNodeConfig{
-			NodeID:    "solo-command-test",
-			APIAddr:   localNodeAPIAddr,
-			DataDir:   "/tmp/solo-test",
-			Verbosity: 3,
-		}
-
-		nodeConfig := CreateSoloNodeConfig(config)
-
-		// Test that the node is detected as solo
-		require.True(t, isSoloNode(nodeConfig))
-
-		// Verify solo-specific arguments are present in the configuration
-		additionalArgs := nodeConfig.GetAdditionalArgs()
-		require.Contains(t, additionalArgs, "solo")
-		require.Contains(t, additionalArgs, "on-demand")
-		require.Contains(t, additionalArgs, "api-enable-txpool")
-		require.Contains(t, additionalArgs, "persist")
-		require.Equal(t, "10000000000000", additionalArgs["gas-limit"])
-		require.Equal(t, "10000000000000", additionalArgs["api-call-gas-limit"])
-		require.Equal(t, "100000000000", additionalArgs["txpool-limit"])
-		require.Equal(t, "256", additionalArgs["txpool-limit-per-account"])
-		require.Equal(t, "1024", additionalArgs["cache"])
-		require.Equal(t, "1", additionalArgs["block-interval"])
-	})
 }
 
 func TestSoloNodeIntegration(t *testing.T) {
@@ -800,25 +779,9 @@ func TestSoloNodeIntegration(t *testing.T) {
 		// Create the node configuration
 		nodeConfig := CreateSoloNodeConfig(soloConfig)
 
-		// Verify the node configuration
-		require.Equal(t, "test-solo-node", nodeConfig.GetID())
-		require.Equal(t, localNodeAPIAddr, nodeConfig.GetAPIAddr())
-		require.Equal(t, "*", nodeConfig.GetAPICORS())
-		require.Equal(t, "/tmp/solo-test-data", nodeConfig.GetDataDir())
-		require.Equal(t, 3, nodeConfig.GetVerbosity())
-
-		// Verify solo-specific arguments are present
-		additionalArgs := nodeConfig.GetAdditionalArgs()
-		require.Contains(t, additionalArgs, "solo")
-		require.Contains(t, additionalArgs, "on-demand")
-		require.Contains(t, additionalArgs, "api-enable-txpool")
-		require.Contains(t, additionalArgs, "persist")
-		require.Equal(t, "10000000000000", additionalArgs["gas-limit"])
-		require.Equal(t, "10000000000000", additionalArgs["api-call-gas-limit"])
-		require.Equal(t, "100000000000", additionalArgs["txpool-limit"])
-		require.Equal(t, "256", additionalArgs["txpool-limit-per-account"])
-		require.Equal(t, "1024", additionalArgs["cache"])
-		require.Equal(t, "1", additionalArgs["block-interval"])
+		// Verify the node configuration using helper functions
+		verifySoloNodeConfig(t, nodeConfig, "test-solo-node", localNodeAPIAddr, "*", "/tmp/solo-test-data", 3)
+		verifySoloNodeArguments(t, nodeConfig, "10000000000000", "10000000000000", "100000000000", "256", "1024", "1")
 
 		// Create a network configuration with the solo node
 		networkCfg := &network.Network{
@@ -862,8 +825,9 @@ func TestSoloNodeIntegration(t *testing.T) {
 			t.Logf("This might be normal if the node is still starting up")
 		} else {
 			// Validate that we got the genesis block
-			require.Equal(t, uint32(0), block.Number)
-			require.NotEmpty(t, block.ID)
+			blockID, err := thor.ParseBytes32(soloGenesisID)
+			require.NoError(t, err)
+			require.Equal(t, blockID, block.ID)
 			t.Logf("Successfully connected to solo node! Genesis block: %d, ID: %s", block.Number, block.ID)
 		}
 
@@ -879,19 +843,12 @@ func TestSoloNodeIntegration(t *testing.T) {
 
 		nodeConfig := CreateSoloNodeConfig(soloConfig)
 
-		// Verify defaults are applied
-		require.Equal(t, "minimal-solo-node", nodeConfig.GetID())
-		require.Equal(t, "0.0.0.0:8669", nodeConfig.GetAPIAddr())
-		require.Equal(t, "*", nodeConfig.GetAPICORS())
-		require.Equal(t, "/data", nodeConfig.GetDataDir())
-		require.Equal(t, 9, nodeConfig.GetVerbosity())
+		// Test that the node is detected as solo
+		require.True(t, isSoloNode(nodeConfig))
 
-		// Verify solo arguments are present
-		additionalArgs := nodeConfig.GetAdditionalArgs()
-		require.Contains(t, additionalArgs, "solo")
-		require.Contains(t, additionalArgs, "on-demand")
-		require.Contains(t, additionalArgs, "api-enable-txpool")
-		require.Contains(t, additionalArgs, "persist")
+		// Verify defaults are applied using helper functions
+		verifySoloNodeConfig(t, nodeConfig, "minimal-solo-node", "0.0.0.0:8669", "*", "/data", 9)
+		verifySoloNodeArguments(t, nodeConfig, "10000000000000", "10000000000000", "100000000000", "256", "1024", "1")
 
 		t.Logf("Minimal solo node configuration created successfully")
 	})
