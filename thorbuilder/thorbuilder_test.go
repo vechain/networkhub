@@ -92,3 +92,72 @@ func TestBuilder(t *testing.T) {
 		assert.NoError(t, builder.Download())
 	})
 }
+
+func TestReuseBinary(t *testing.T) {
+	t.Run("ReuseBinary enabled - should skip build if binary exists", func(t *testing.T) {
+		// Create a config with ReuseBinary enabled
+		config := &Config{
+			DownloadConfig: &DownloadConfig{
+				RepoUrl:    "https://github.com/vechain/thor",
+				Branch:     "master",
+				IsReusable: true,
+			},
+			BuildConfig: &BuildConfig{
+				ReuseBinary: true,
+			},
+		}
+
+		builder := New(config)
+
+		// First build - should compile
+		err := builder.Download()
+		require.NoError(t, err)
+
+		thorBinaryPath, err := builder.Build()
+		require.NoError(t, err)
+		require.NotEmpty(t, thorBinaryPath)
+
+		// Verify binary exists
+		_, err = os.Stat(thorBinaryPath)
+		require.NoError(t, err)
+
+		// Second build - should reuse existing binary
+		thorBinaryPath2, err := builder.Build()
+		require.NoError(t, err)
+		require.Equal(t, thorBinaryPath, thorBinaryPath2)
+	})
+
+	t.Run("ReuseBinary disabled - should always build", func(t *testing.T) {
+		// Create a config with ReuseBinary disabled
+		config := &Config{
+			DownloadConfig: &DownloadConfig{
+				RepoUrl:    "https://github.com/vechain/thor",
+				Branch:     "master",
+				IsReusable: true,
+			},
+			BuildConfig: &BuildConfig{
+				ReuseBinary: false,
+			},
+		}
+
+		builder := New(config)
+
+		err := builder.Download()
+		require.NoError(t, err)
+
+		// Build should always execute make, even if binary exists
+		thorBinaryPath, err := builder.Build()
+		require.NoError(t, err)
+		require.NotEmpty(t, thorBinaryPath)
+
+		// Verify binary exists
+		_, err = os.Stat(thorBinaryPath)
+		require.NoError(t, err)
+	})
+
+	t.Run("DefaultConfig should have ReuseBinary enabled", func(t *testing.T) {
+		config := DefaultConfig()
+		require.NotNil(t, config.BuildConfig)
+		require.True(t, config.BuildConfig.ReuseBinary)
+	})
+}
