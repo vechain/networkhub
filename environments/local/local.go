@@ -212,6 +212,11 @@ func (l *Local) enodes() ([]string, error) {
 			continue
 		}
 
+		// Skip enode generation for solo nodes (they don't connect to other peers)
+		if isSoloNode(node) {
+			continue
+		}
+
 		enode, err := node.Enode("127.0.0.1")
 		if err != nil {
 			return nil, fmt.Errorf("failed to get enode for node %s: %w", node.GetID(), err)

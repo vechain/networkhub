@@ -150,9 +150,11 @@ func (n *Node) prepareNode() error {
 		return fmt.Errorf("failed to create directories: %w", err)
 	}
 
-	// Write configuration files
-	if err := n.writeConfigFiles(); err != nil {
-		return fmt.Errorf("failed to write config files: %w", err)
+	// Write configuration files (skip for solo nodes)
+	if !isSoloNode(n.nodeCfg) {
+		if err := n.writeConfigFiles(); err != nil {
+			return fmt.Errorf("failed to write config files: %w", err)
+		}
 	}
 
 	return nil
@@ -271,8 +273,12 @@ func (n *Node) buildCommandArgs() ([]string, error) {
 // addNetworkArg adds the network parameter to the command args
 func (n *Node) addNetworkArg(args []string) []string {
 	isPublicNetwork := n.isPublicNetwork()
+	isSolo := isSoloNode(n.nodeCfg)
 
-	if isPublicNetwork {
+	if isSolo {
+		// For solo nodes, add "solo" mode
+		args = append(args, "solo")
+	} else if isPublicNetwork {
 		// For public networks, use the network name directly
 		networkName := n.getPublicNetworkName()
 		args = append(args, "--network", networkName)
@@ -361,13 +367,6 @@ func (n *Node) createCommand(args []string) (*exec.Cmd, error) {
 func (n *Node) executeCommand(cmd *exec.Cmd) error {
 	slog.Info(cmd.String())
 
-	if n.nodeCfg.GetFakeExecution() {
-		slog.Info("FakeExecution enabled - Not starting node: ", "id", n.nodeCfg.GetID())
-		slog.Info("Waiting 10 seconds for node to start...")
-		time.Sleep(10 * time.Second)
-		return nil
-	}
-
 	// Start the command and check for errors
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("failed to start thor command: %w", err)
@@ -382,4 +381,88 @@ func (n *Node) executeCommand(cmd *exec.Cmd) error {
 func isPublicNetworkNode(node node.Config) bool {
 	networkArg, exists := node.GetAdditionalArgs()["network"]
 	return exists && (networkArg == "test" || networkArg == "main")
+}
+
+// isSoloNode checks if a node is configured as a solo node
+func isSoloNode(node node.Config) bool {
+	_, hasSolo := node.GetAdditionalArgs()["solo"]
+	return hasSolo
+}
+
+// CreateSoloNodeConfig creates a configuration for a Thor solo node
+// A solo node runs in solo mode without connecting to other peers
+func CreateSoloNodeConfig(config SoloNodeConfig) node.Config {
+	// Set default values if not provided
+	if config.APIAddr == "" {
+		config.APIAddr = "0.0.0.0:8669"
+	}
+	if config.APICORS == "" {
+		config.APICORS = "*"
+	}
+	if config.GasLimit == "" {
+		config.GasLimit = "10000000000000"
+	}
+	if config.APICallGasLimit == "" {
+		config.APICallGasLimit = "10000000000000"
+	}
+	if config.TxPoolLimit == "" {
+		config.TxPoolLimit = "100000000000"
+	}
+	if config.TxPoolLimitPerAccount == "" {
+		config.TxPoolLimitPerAccount = "256"
+	}
+	if config.Cache == "" {
+		config.Cache = "1024"
+	}
+	if config.DataDir == "" {
+		config.DataDir = "/data"
+	}
+	if config.Verbosity == 0 {
+		config.Verbosity = 9
+	}
+	if config.BlockInterval == "" {
+		config.BlockInterval = "1"
+	}
+
+	// Create additional arguments map with all solo-specific parameters
+	additionalArgs := map[string]string{
+		"solo":                     "",
+		"on-demand":                "",
+		"api-enable-txpool":        "",
+		"gas-limit":                config.GasLimit,
+		"api-call-gas-limit":       config.APICallGasLimit,
+		"txpool-limit":             config.TxPoolLimit,
+		"txpool-limit-per-account": config.TxPoolLimitPerAccount,
+		"cache":                    config.Cache,
+		"persist":                  "",
+		"block-interval":           config.BlockInterval,
+	}
+
+	// Create the node configuration
+	soloNode := &node.BaseNode{
+		ID:             config.NodeID,
+		APIAddr:        config.APIAddr,
+		APICORS:        config.APICORS,
+		DataDir:        config.DataDir,
+		Verbosity:      config.Verbosity,
+		Type:           "solo",
+		AdditionalArgs: additionalArgs,
+	}
+
+	return soloNode
+}
+
+// SoloNodeConfig represents the configuration for a Thor solo node
+type SoloNodeConfig struct {
+	NodeID                string // Unique identifier for the node
+	APIAddr               string // API address (default: "0.0.0.0:8669")
+	APICORS               string // API CORS settings (default: "*")
+	GasLimit              string // Gas limit (default: "10000000000000")
+	APICallGasLimit       string // API call gas limit (default: "10000000000000")
+	TxPoolLimit           string // Transaction pool limit (default: "100000000000")
+	TxPoolLimitPerAccount string // Transaction pool limit per account (default: "256")
+	Cache                 string // Cache size (default: "1024")
+	DataDir               string // Data directory (default: "/data")
+	Verbosity             int    // Log verbosity level (default: 9)
+	BlockInterval         string // Block interval in seconds (default: "1")
 }
