@@ -172,26 +172,22 @@ func (n *Node) createDirectories() error {
 // writeConfigFiles writes keys and genesis files as needed
 func (n *Node) writeConfigFiles() error {
 	nodeType := n.nodeCfg.GetType()
+	isPublicNetwork := n.isPublicNetwork()
 
-	// Determine what operations to perform based on node type
-	shouldWriteKeys := nodeType == node.RegularNode || nodeType == node.MasterNode
-	isLocalNetwork := nodeType == node.RegularNode
-
-	// Execute operations based on node type
-	if shouldWriteKeys {
-		if err := n.writeKeys(); err != nil {
-			return fmt.Errorf("failed to write keys: %w", err)
-		}
+	// Determine what operations to perform based on node type and if it is a public network
+	if nodeType == node.SoloNode || isPublicNetwork {
+		return nil
 	}
 
-	if isLocalNetwork {
-		if err := n.writeGenesis(); err != nil {
-			return fmt.Errorf("failed to write genesis: %w", err)
-		}
+	if err := n.writeKeys(); err != nil {
+		return fmt.Errorf("failed to write keys: %w", err)
+	}
+	if err := n.writeGenesis(); err != nil {
+		return fmt.Errorf("failed to write genesis: %w", err)
+	}
 
-		if err := n.cleanDataDirectory(); err != nil {
-			return fmt.Errorf("failed to clean data directory: %w", err)
-		}
+	if err := n.cleanDataDirectory(); err != nil {
+		return fmt.Errorf("failed to clean data directory: %w", err)
 	}
 
 	return nil
