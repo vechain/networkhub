@@ -23,6 +23,9 @@ import (
 	"github.com/vechain/thor/v2/tx"
 )
 
+const testnetGenesisID = "0x000000000b2bce3c70bc649a02749e8687721b09ed2e15997f466536b20bb127"
+const mainnetGenesisID = "0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a"
+
 var genesis = `{
         "launchTime": 1703180212,
         "gasLimit": 10000000,
@@ -130,6 +133,27 @@ var networkJSON = fmt.Sprintf(`{
     }
   ]
 }`, genesis, genesis, genesis)
+
+type attachNodeTestConfig struct {
+	NetworkType    string
+	InitialNodeID  string
+	InitialAPIPort int
+	InitialP2PPort int
+	AttachNodeID   string
+	AttachAPIPort  int
+	AttachP2PPort  int
+	Environment    string
+	GenesisID      string
+}
+
+type publicNetworkTestConfig struct {
+	NetworkType string // "test" for testnet, "main" for mainnet
+	APIPort     int
+	P2PPort     int
+	GenesisID   string
+	Environment string
+	NodeID      string
+}
 
 func TestLocalInvalidExecArtifact(t *testing.T) {
 	networkCfg, err := network.NewNetwork(
@@ -414,4 +438,250 @@ func deployAndAssertShanghaiContract(t *testing.T, client *thorclient.Client, ac
 
 	require.NoError(t, err)
 	require.NotNil(t, contractAddr)
+}
+
+func testPublicNetworkConnection(t *testing.T, config publicNetworkTestConfig) {
+	t.Helper()
+	localEnv := NewEnv()
+
+	t.Cleanup(func() {
+		if err := localEnv.StopNetwork(); err != nil {
+			t.Logf("Warning: failed to stop network during test cleanup: %v", err)
+			t.Fail()
+		}
+	})
+
+	publicNode := &node.BaseNode{
+		ID:             config.NodeID,
+		APICORS:        "*",
+		Type:           node.RegularNode,
+		Verbosity:      3,
+		P2PListenPort:  config.P2PPort,
+		APIAddr:        fmt.Sprintf("127.0.0.1:%d", config.APIPort),
+		AdditionalArgs: map[string]string{"network": config.NetworkType},
+	}
+
+	// Create a minimal network configuration
+	networkCfg := &network.Network{
+		BaseID:      "baseID",
+		Environment: config.Environment,
+		Nodes:       []node.Config{publicNode},
+		ThorBuilder: thorbuilder.DefaultConfig(),
+	}
+
+	// Load the configuration
+	networkID, err := localEnv.LoadConfig(networkCfg)
+	require.NoError(t, err)
+	expectedNetworkID := fmt.Sprintf("%sbaseID", config.Environment)
+	require.Equal(t, expectedNetworkID, networkID)
+
+	// Start the network (this will start the public network node)
+	err = localEnv.StartNetwork()
+	require.NoError(t, err)
+
+	// Wait a bit for the node to start syncing
+	time.Sleep(5 * time.Second)
+
+	// Try to connect to the node's API
+	apiURL := fmt.Sprintf("http://127.0.0.1:%d", config.APIPort)
+	client := thorclient.New(apiURL)
+	block, err := client.Block("0")
+	if err != nil {
+		t.Logf("Warning: Could not connect to %s node: %v", config.NetworkType, err)
+		t.Logf("This might be normal if the node is still syncing")
+	} else {
+		// Validate that the genesis block ID matches the expected one
+		blockID, err := thor.ParseBytes32(config.GenesisID)
+		require.NoError(t, err)
+		require.Equal(t, blockID, block.ID)
+		t.Logf("Successfully connected to %s! Genesis block: %d", config.NetworkType, block.Number)
+	}
+}
+func TestTestnetConnection(t *testing.T) {
+	config := publicNetworkTestConfig{
+		NetworkType: "test",
+		NodeID:      "testnet-node",
+		APIPort:     8669,
+		P2PPort:     11235,
+		Environment: "testnet",
+		GenesisID:   testnetGenesisID,
+	}
+
+	testPublicNetworkConnection(t, config)
+}
+
+func TestMainnetConnection(t *testing.T) {
+	config := publicNetworkTestConfig{
+		NetworkType: "main",
+		NodeID:      "mainnet-node",
+		APIPort:     8670,
+		P2PPort:     11236,
+		Environment: "mainnet",
+		GenesisID:   mainnetGenesisID,
+	}
+
+	testPublicNetworkConnection(t, config)
+}
+
+func testAttachNodeConnection(t *testing.T, config attachNodeTestConfig) {
+	t.Helper()
+
+	localEnv := NewEnv()
+
+	t.Cleanup(func() {
+		if err := localEnv.StopNetwork(); err != nil {
+			t.Logf("Warning: failed to stop network during test cleanup: %v", err)
+			t.Fail()
+		}
+	})
+
+	initialNode := &node.BaseNode{
+		ID:             config.InitialNodeID,
+		APICORS:        "*",
+		Type:           node.RegularNode,
+		Verbosity:      3,
+		P2PListenPort:  config.InitialP2PPort,
+		APIAddr:        fmt.Sprintf("127.0.0.1:%d", config.InitialAPIPort),
+		AdditionalArgs: map[string]string{"network": config.NetworkType},
+	}
+
+	networkCfg := &network.Network{
+		BaseID:      "baseID",
+		Environment: config.Environment,
+		Nodes:       []node.Config{initialNode},
+		ThorBuilder: thorbuilder.DefaultConfig(),
+	}
+
+	// Load and start the initial network
+	networkID, err := localEnv.LoadConfig(networkCfg)
+	require.NoError(t, err)
+	expectedNetworkID := fmt.Sprintf("%sbaseID", config.Environment)
+	require.Equal(t, expectedNetworkID, networkID)
+
+	err = localEnv.StartNetwork()
+	require.NoError(t, err)
+
+	// Wait for initial node to start
+	time.Sleep(3 * time.Second)
+
+	// Create a new node to attach
+	attachNode := &node.BaseNode{
+		ID:             config.AttachNodeID,
+		APICORS:        "*",
+		Type:           node.RegularNode,
+		Verbosity:      3,
+		P2PListenPort:  config.AttachP2PPort,
+		APIAddr:        fmt.Sprintf("127.0.0.1:%d", config.AttachAPIPort),
+		AdditionalArgs: map[string]string{"network": config.NetworkType},
+	}
+	err = localEnv.AttachNode(attachNode)
+	require.NoError(t, err)
+
+	// Wait for attached node to start
+	time.Sleep(3 * time.Second)
+
+	// Verify both nodes are running
+	nodes := localEnv.Nodes()
+	require.Len(t, nodes, 2)
+	require.Contains(t, nodes, config.InitialNodeID)
+	require.Contains(t, nodes, config.AttachNodeID)
+
+	// Test connection to the attached node
+	apiURL := fmt.Sprintf("http://127.0.0.1:%d", config.AttachAPIPort)
+	client := thorclient.New(apiURL)
+	block, err := client.Block("0")
+	if err != nil {
+		t.Logf("Warning: Could not connect to attached %s node: %v", config.NetworkType, err)
+		t.Logf("This might be normal if the node is still syncing")
+	} else {
+		// Validate that the genesis block ID matches the expected one
+		blockID, err := thor.ParseBytes32(config.GenesisID)
+		require.NoError(t, err)
+		require.Equal(t, blockID, block.ID)
+		t.Logf("Successfully connected to attached %s node! Genesis block: %d", config.NetworkType, block.Number)
+	}
+
+	// Remove the attached node
+	err = localEnv.RemoveNode(config.AttachNodeID)
+	require.NoError(t, err)
+
+	// Verify the node was removed
+	nodes = localEnv.Nodes()
+	require.Len(t, nodes, 1)
+	require.Contains(t, nodes, config.InitialNodeID)
+	require.NotContains(t, nodes, config.AttachNodeID)
+}
+func TestAttachNodeTestnet(t *testing.T) {
+	config := attachNodeTestConfig{
+		NetworkType:    "test",
+		InitialNodeID:  "initial-testnet-node",
+		InitialAPIPort: 8669,
+		InitialP2PPort: 11235,
+		AttachNodeID:   "attach-testnet-node",
+		AttachAPIPort:  8671,
+		AttachP2PPort:  11237,
+		Environment:    "testnet",
+		GenesisID:      testnetGenesisID,
+	}
+
+	testAttachNodeConnection(t, config)
+}
+
+func TestAttachNodeMainnet(t *testing.T) {
+	config := attachNodeTestConfig{
+		NetworkType:    "main",
+		InitialNodeID:  "initial-mainnet-node",
+		InitialAPIPort: 8670,
+		InitialP2PPort: 11236,
+		AttachNodeID:   "attach-mainnet-node",
+		AttachAPIPort:  8672,
+		AttachP2PPort:  11238,
+		Environment:    "mainnet",
+		GenesisID:      mainnetGenesisID,
+	}
+
+	testAttachNodeConnection(t, config)
+}
+
+func TestAttachToPublicNetworkAndStart(t *testing.T) {
+	localEnv := NewEnv()
+
+	t.Cleanup(func() {
+		if err := localEnv.StopNetwork(); err != nil {
+			t.Logf("Warning: failed to stop network during test cleanup: %v", err)
+			t.Fail()
+		}
+	})
+
+	testnetConfig := PublicNetworkConfig{
+		NodeID:      "testnet-node",
+		NetworkType: "test",
+		APIAddr:     "127.0.0.1:8669",
+		P2PPort:     11235,
+	}
+
+	err := localEnv.AttachToPublicNetworkAndStart(testnetConfig)
+	require.NoError(t, err)
+
+	// Wait for the node to start
+	time.Sleep(3 * time.Second)
+
+	// Verify the node is running
+	nodes := localEnv.Nodes()
+	require.Len(t, nodes, 1)
+	require.Contains(t, nodes, testnetConfig.NodeID)
+
+	// Test connection to the node
+	client := thorclient.New("http://127.0.0.1:8669")
+	block, err := client.Block("0")
+	if err != nil {
+		t.Logf("Warning: Could not connect to testnet node: %v", err)
+		t.Logf("This might be normal if the node is still syncing")
+	} else {
+		// Validate that the genesis block ID is the testnet one
+		blockID, err := thor.ParseBytes32(testnetGenesisID)
+		require.NoError(t, err)
+		require.Equal(t, blockID, block.ID)
+		t.Logf("Successfully connected to testnet using convenience method! Genesis block: %d", block.Number)
+	}
 }

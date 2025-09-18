@@ -24,6 +24,14 @@ type Local struct {
 
 type Factory struct{}
 
+type PublicNetworkConfig struct {
+	NodeID      string
+	NetworkType string // "test" for testnet, "main" for mainnet
+	APIAddr     string
+	P2PPort     int
+	Branch      string
+}
+
 func NewFactory() *Factory {
 	return &Factory{}
 }
@@ -199,6 +207,11 @@ func fileExists(path string) bool {
 func (l *Local) enodes() ([]string, error) {
 	var enodes []string
 	for _, node := range l.networkCfg.Nodes {
+		// Skip enode generation for public network nodes (testnet/mainnet)
+		if isPublicNetworkNode(node) {
+			continue
+		}
+
 		enode, err := node.Enode("127.0.0.1")
 		if err != nil {
 			return nil, fmt.Errorf("failed to get enode for node %s: %w", node.GetID(), err)
@@ -224,5 +237,56 @@ func (l *Local) checkNode(n node.Config) error {
 	if n.GetDataDir() == "" {
 		n.SetDataDir(filepath.Join(filepath.Dir(n.GetExecArtifact()), n.GetID(), "data"))
 	}
+	return nil
+}
+
+// AttachToPublicNetworkAndStart creates and starts a node connected to a public network (testnet/mainnet)
+func (l *Local) AttachToPublicNetworkAndStart(config PublicNetworkConfig) error {
+	publicNode := &node.BaseNode{
+		ID:             config.NodeID,
+		APICORS:        "*",
+		Type:           node.RegularNode,
+		Verbosity:      3,
+		P2PListenPort:  config.P2PPort,
+		APIAddr:        config.APIAddr,
+		AdditionalArgs: map[string]string{"network": config.NetworkType},
+	}
+
+	environment := "testnet"
+	if config.NetworkType == "main" {
+		environment = "mainnet"
+	}
+
+	thorBranch := "master"
+	if config.Branch != "" {
+		thorBranch = config.Branch
+	}
+
+	// Create network configuration
+	networkCfg := &network.Network{
+		BaseID:      "baseID",
+		Environment: environment,
+		Nodes:       []node.Config{publicNode},
+		ThorBuilder: &thorbuilder.Config{
+			DownloadConfig: &thorbuilder.DownloadConfig{
+				RepoUrl:    "https://github.com/vechain/thor",
+				Branch:     thorBranch,
+				IsReusable: true,
+			},
+		},
+	}
+
+	// Load the configuration
+	_, err := l.LoadConfig(networkCfg)
+	if err != nil {
+		return fmt.Errorf("failed to load network configuration: %w", err)
+	}
+
+	// Start the network (this will start the public network node)
+	err = l.StartNetwork()
+	if err != nil {
+		return fmt.Errorf("failed to start public network: %w", err)
+	}
+
 	return nil
 }
