@@ -900,8 +900,9 @@ func TestStartSoloNode(t *testing.T) {
 		t.Logf("This might be normal if the node is still starting up")
 	} else {
 		// Validate that we got the genesis block
-		require.Equal(t, uint32(0), block.Number)
-		require.NotEmpty(t, block.ID)
+		blockID, err := thor.ParseBytes32(soloGenesisID)
+		require.NoError(t, err)
+		require.Equal(t, blockID, block.ID)
 		t.Logf("Successfully connected to solo node using convenience method! Genesis block: %d, ID: %s", block.Number, block.ID)
 	}
 
