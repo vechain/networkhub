@@ -26,6 +26,9 @@ import (
 const testnetGenesisID = "0x000000000b2bce3c70bc649a02749e8687721b09ed2e15997f466536b20bb127"
 const mainnetGenesisID = "0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a"
 
+const localNodeAPIAddr = "127.0.0.1:8669"
+
+
 var genesis = `{
         "launchTime": 1703180212,
         "gasLimit": 10000000,
@@ -615,11 +618,11 @@ func TestAttachNodeTestnet(t *testing.T) {
 	config := attachNodeTestConfig{
 		NetworkType:    "test",
 		InitialNodeID:  "initial-testnet-node",
-		InitialAPIPort: 8669,
-		InitialP2PPort: 11235,
+		InitialAPIPort: 8671,
+		InitialP2PPort: 11237,
 		AttachNodeID:   "attach-testnet-node",
-		AttachAPIPort:  8671,
-		AttachP2PPort:  11237,
+		AttachAPIPort:  8672,
+		AttachP2PPort:  11238,
 		Environment:    "testnet",
 		GenesisID:      testnetGenesisID,
 	}
@@ -634,7 +637,7 @@ func TestAttachNodeMainnet(t *testing.T) {
 		InitialAPIPort: 8670,
 		InitialP2PPort: 11236,
 		AttachNodeID:   "attach-mainnet-node",
-		AttachAPIPort:  8672,
+		AttachAPIPort:  8671,
 		AttachP2PPort:  11238,
 		Environment:    "mainnet",
 		GenesisID:      mainnetGenesisID,
@@ -656,8 +659,8 @@ func TestAttachToPublicNetworkAndStart(t *testing.T) {
 	testnetConfig := PublicNetworkConfig{
 		NodeID:      "testnet-node",
 		NetworkType: "test",
-		APIAddr:     "127.0.0.1:8669",
-		P2PPort:     11235,
+		APIAddr:     "127.0.0.1:8672",
+		P2PPort:     11239,
 	}
 
 	err := localEnv.AttachToPublicNetworkAndStart(testnetConfig)
@@ -672,7 +675,7 @@ func TestAttachToPublicNetworkAndStart(t *testing.T) {
 	require.Contains(t, nodes, testnetConfig.NodeID)
 
 	// Test connection to the node
-	client := thorclient.New("http://127.0.0.1:8669")
+	client := thorclient.New("http://" + localNodeAPIAddr)
 	block, err := client.Block("0")
 	if err != nil {
 		t.Logf("Warning: Could not connect to testnet node: %v", err)
@@ -752,7 +755,7 @@ func TestSoloNodeConfig(t *testing.T) {
 	t.Run("Solo node command generation", func(t *testing.T) {
 		config := SoloNodeConfig{
 			NodeID:    "solo-command-test",
-			APIAddr:   "127.0.0.1:8669",
+			APIAddr:   localNodeAPIAddr,
 			DataDir:   "/tmp/solo-test",
 			Verbosity: 3,
 		}
@@ -782,7 +785,7 @@ func TestSoloNodeIntegration(t *testing.T) {
 		// Create a solo node configuration
 		soloConfig := SoloNodeConfig{
 			NodeID:                "test-solo-node",
-			APIAddr:               "127.0.0.1:8669",
+			APIAddr:               localNodeAPIAddr,
 			APICORS:               "*",
 			GasLimit:              "10000000000000",
 			APICallGasLimit:       "10000000000000",
@@ -799,7 +802,7 @@ func TestSoloNodeIntegration(t *testing.T) {
 
 		// Verify the node configuration
 		require.Equal(t, "test-solo-node", nodeConfig.GetID())
-		require.Equal(t, "127.0.0.1:8669", nodeConfig.GetAPIAddr())
+		require.Equal(t, localNodeAPIAddr, nodeConfig.GetAPIAddr())
 		require.Equal(t, "*", nodeConfig.GetAPICORS())
 		require.Equal(t, "/tmp/solo-test-data", nodeConfig.GetDataDir())
 		require.Equal(t, 3, nodeConfig.GetVerbosity())
@@ -852,8 +855,7 @@ func TestSoloNodeIntegration(t *testing.T) {
 		require.Contains(t, nodes, "test-solo-node")
 
 		// Test connection to the solo node and validate genesis block
-		apiURL := "http://127.0.0.1:8669"
-		client := thorclient.New(apiURL)
+		client := thorclient.New("http://" + localNodeAPIAddr)
 		block, err := client.Block("0")
 		if err != nil {
 			t.Logf("Warning: Could not connect to solo node: %v", err)
@@ -866,7 +868,7 @@ func TestSoloNodeIntegration(t *testing.T) {
 		}
 
 		t.Logf("Solo node started successfully with network ID: %s", networkID)
-		t.Logf("The node is configured to run with: thor solo --on-demand --api-addr=127.0.0.1:8669 --api-cors=* --gas-limit=10000000000000 --api-enable-txpool --api-call-gas-limit=10000000000000 --txpool-limit=100000000000 --txpool-limit-per-account=256 --cache=1024 --data-dir=/tmp/solo-test-data --verbosity=3 --persist --block-interval=1")
+		t.Logf("The node is configured to run with: thor solo --on-demand --api-addr=%s --api-cors=* --gas-limit=10000000000000 --api-enable-txpool --api-call-gas-limit=10000000000000 --txpool-limit=100000000000 --txpool-limit-per-account=256 --cache=1024 --data-dir=/tmp/solo-test-data --verbosity=3 --persist --block-interval=1", localNodeAPIAddr)
 	})
 
 	t.Run("Solo node with minimal configuration", func(t *testing.T) {
