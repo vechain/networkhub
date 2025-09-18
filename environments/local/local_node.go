@@ -222,7 +222,6 @@ func (n *Node) writeKeys() error {
 
 // writeGenesis writes the genesis file to disk if needed
 func (n *Node) writeGenesis() error {
-
 	genesisPath := filepath.Join(n.nodeCfg.GetConfigDir(), "genesis.json")
 	genesisBytes, err := nodegenesis.Marshal(n.nodeCfg.GetGenesis())
 	if err != nil {
@@ -238,7 +237,6 @@ func (n *Node) writeGenesis() error {
 
 // cleanDataDirectory removes the data directory for local networks
 func (n *Node) cleanDataDirectory() error {
-
 	if err := os.RemoveAll(n.nodeCfg.GetDataDir()); err != nil {
 		return fmt.Errorf("failed to remove data dir: %w", err)
 	}

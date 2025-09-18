@@ -756,7 +756,6 @@ func TestSoloNodeConfig(t *testing.T) {
 		// Verify custom arguments
 		verifySoloNodeArguments(t, nodeConfig, "5000000000000", "5000000000000", "50000000000", "128", "512", "2")
 	})
-
 }
 
 func TestSoloNodeIntegration(t *testing.T) {
