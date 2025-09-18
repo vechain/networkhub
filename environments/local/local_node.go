@@ -150,7 +150,7 @@ func (n *Node) prepareNode() error {
 		return fmt.Errorf("failed to create directories: %w", err)
 	}
 
-	// Write configuration files
+	// Write configuration files based on node type
 	if err := n.writeConfigFiles(); err != nil {
 		return fmt.Errorf("failed to write config files: %w", err)
 	}
@@ -171,20 +171,22 @@ func (n *Node) createDirectories() error {
 
 // writeConfigFiles writes keys and genesis files as needed
 func (n *Node) writeConfigFiles() error {
+	nodeType := n.nodeCfg.GetType()
 	isPublicNetwork := n.isPublicNetwork()
 
-	// Write keys to disk (only for local networks or master nodes)
-	if err := n.writeKeys(isPublicNetwork); err != nil {
-		return fmt.Errorf("failed to write keys: %w", err)
+	// Determine what operations to perform based on node type and if it is a public network
+	if nodeType == node.SoloNode || isPublicNetwork {
+		return nil
 	}
 
-	// Write genesis to disk (only for local networks)
-	if err := n.writeGenesis(isPublicNetwork); err != nil {
+	if err := n.writeKeys(); err != nil {
+		return fmt.Errorf("failed to write keys: %w", err)
+	}
+	if err := n.writeGenesis(); err != nil {
 		return fmt.Errorf("failed to write genesis: %w", err)
 	}
 
-	// Clean data directory (only for local networks)
-	if err := n.cleanDataDirectory(isPublicNetwork); err != nil {
+	if err := n.cleanDataDirectory(); err != nil {
 		return fmt.Errorf("failed to clean data directory: %w", err)
 	}
 
@@ -192,9 +194,9 @@ func (n *Node) writeConfigFiles() error {
 }
 
 // writeKeys writes master and p2p keys to disk if needed
-func (n *Node) writeKeys(isPublicNetwork bool) error {
-	if n.nodeCfg.GetKey() == "" || isPublicNetwork {
-		return nil // No keys needed for public networks or nodes without keys
+func (n *Node) writeKeys() error {
+	if n.nodeCfg.GetKey() == "" {
+		return nil // No keys needed for nodes without keys
 	}
 
 	keyData := []byte(n.nodeCfg.GetKey())
@@ -215,11 +217,7 @@ func (n *Node) writeKeys(isPublicNetwork bool) error {
 }
 
 // writeGenesis writes the genesis file to disk if needed
-func (n *Node) writeGenesis(isPublicNetwork bool) error {
-	if isPublicNetwork {
-		return nil // Public networks don't need genesis files
-	}
-
+func (n *Node) writeGenesis() error {
 	genesisPath := filepath.Join(n.nodeCfg.GetConfigDir(), "genesis.json")
 	genesisBytes, err := nodegenesis.Marshal(n.nodeCfg.GetGenesis())
 	if err != nil {
@@ -234,11 +232,7 @@ func (n *Node) writeGenesis(isPublicNetwork bool) error {
 }
 
 // cleanDataDirectory removes the data directory for local networks
-func (n *Node) cleanDataDirectory(isPublicNetwork bool) error {
-	if isPublicNetwork {
-		return nil // Public networks should sync from scratch, don't clean
-	}
-
+func (n *Node) cleanDataDirectory() error {
 	if err := os.RemoveAll(n.nodeCfg.GetDataDir()); err != nil {
 		return fmt.Errorf("failed to remove data dir: %w", err)
 	}
@@ -271,8 +265,12 @@ func (n *Node) buildCommandArgs() ([]string, error) {
 // addNetworkArg adds the network parameter to the command args
 func (n *Node) addNetworkArg(args []string) []string {
 	isPublicNetwork := n.isPublicNetwork()
+	isSolo := isSoloNode(n.nodeCfg)
 
-	if isPublicNetwork {
+	if isSolo {
+		// For solo nodes, add "solo" mode
+		args = append(args, "solo")
+	} else if isPublicNetwork {
 		// For public networks, use the network name directly
 		networkName := n.getPublicNetworkName()
 		args = append(args, "--network", networkName)
@@ -289,13 +287,20 @@ func (n *Node) addNetworkArg(args []string) []string {
 func (n *Node) addCommonArgs(args []string) []string {
 	args = append(args,
 		"--data-dir", n.nodeCfg.GetDataDir(),
-		"--config-dir", n.nodeCfg.GetConfigDir(),
 		"--api-addr", n.nodeCfg.GetAPIAddr(),
 		"--api-cors", n.nodeCfg.GetAPICORS(),
 		"--verbosity", strconv.Itoa(n.nodeCfg.GetVerbosity()),
-		"--nat", "none",
-		"--p2p-port", fmt.Sprintf("%d", n.nodeCfg.GetP2PListenPort()),
 	)
+
+	// Only add network-specific arguments for non-solo nodes
+	if !isSoloNode(n.nodeCfg) {
+		args = append(args,
+			"--config-dir", n.nodeCfg.GetConfigDir(),
+			"--nat", "none",
+			"--p2p-port", fmt.Sprintf("%d", n.nodeCfg.GetP2PListenPort()),
+		)
+	}
+
 	return args
 }
 
@@ -378,8 +383,89 @@ func (n *Node) executeCommand(cmd *exec.Cmd) error {
 	return nil
 }
 
-// isPublicNetworkNode checks if a node is configured for a public network (testnet/mainnet)
-func isPublicNetworkNode(node node.Config) bool {
+func shouldNotAppendEnodes(node node.Config) bool {
 	networkArg, exists := node.GetAdditionalArgs()["network"]
-	return exists && (networkArg == "test" || networkArg == "main")
+	isPublicNetwork := exists && (networkArg == "test" || networkArg == "main")
+	return isPublicNetwork || isSoloNode(node)
+}
+
+// isSoloNode checks if a node is configured as a solo node
+func isSoloNode(nodeConfig node.Config) bool {
+	return nodeConfig.GetType() == node.SoloNode
+}
+
+type SoloNodeConfig struct {
+	NodeID                string
+	APIAddr               string
+	APICORS               string
+	GasLimit              string
+	APICallGasLimit       string
+	TxPoolLimit           string
+	TxPoolLimitPerAccount string
+	Cache                 string
+	DataDir               string
+	Verbosity             int
+	BlockInterval         string
+	Branch                string
+}
+
+// CreateSoloNodeConfig creates a configuration for a Thor solo node
+func CreateSoloNodeConfig(config SoloNodeConfig) node.Config {
+	// Set default values if not provided
+	if config.APIAddr == "" {
+		config.APIAddr = "0.0.0.0:8669"
+	}
+	if config.APICORS == "" {
+		config.APICORS = "*"
+	}
+	if config.GasLimit == "" {
+		config.GasLimit = "10000000000000"
+	}
+	if config.APICallGasLimit == "" {
+		config.APICallGasLimit = "10000000000000"
+	}
+	if config.TxPoolLimit == "" {
+		config.TxPoolLimit = "100000000000"
+	}
+	if config.TxPoolLimitPerAccount == "" {
+		config.TxPoolLimitPerAccount = "256"
+	}
+	if config.Cache == "" {
+		config.Cache = "1024"
+	}
+	if config.DataDir == "" {
+		config.DataDir = "/data"
+	}
+	if config.Verbosity == 0 {
+		config.Verbosity = 9
+	}
+	if config.BlockInterval == "" {
+		config.BlockInterval = "1"
+	}
+
+	// Create additional arguments map with all solo-specific parameters
+	additionalArgs := map[string]string{
+		"on-demand":                "",
+		"api-enable-txpool":        "",
+		"gas-limit":                config.GasLimit,
+		"api-call-gas-limit":       config.APICallGasLimit,
+		"txpool-limit":             config.TxPoolLimit,
+		"txpool-limit-per-account": config.TxPoolLimitPerAccount,
+		"cache":                    config.Cache,
+		"persist":                  "",
+		"block-interval":           config.BlockInterval,
+	}
+
+	// Create the node configuration
+	soloNode := &node.BaseNode{
+		ID:             config.NodeID,
+		APIAddr:        config.APIAddr,
+		APICORS:        config.APICORS,
+		DataDir:        config.DataDir,
+		Verbosity:      config.Verbosity,
+		Type:           node.SoloNode,
+		AdditionalArgs: additionalArgs,
+	}
+
+	return soloNode
 }

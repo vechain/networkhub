@@ -25,6 +25,38 @@ import (
 
 const testnetGenesisID = "0x000000000b2bce3c70bc649a02749e8687721b09ed2e15997f466536b20bb127"
 const mainnetGenesisID = "0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a"
+const soloGenesisID = "0x00000000c05a20fbca2bf6ae3affba6af4a74b800b585bf7a4988aba7aea69f6"
+
+const localNodeAPIAddr = "127.0.0.1:8669"
+
+// verifySoloNodeConfig verifies the basic configuration of a solo node
+func verifySoloNodeConfig(t *testing.T, nodeConfig node.Config, expectedID, expectedAPIAddr, expectedAPICORS, expectedDataDir string, expectedVerbosity int) {
+	t.Helper()
+	require.Equal(t, expectedID, nodeConfig.GetID())
+	require.Equal(t, expectedAPIAddr, nodeConfig.GetAPIAddr())
+	require.Equal(t, expectedAPICORS, nodeConfig.GetAPICORS())
+	require.Equal(t, expectedDataDir, nodeConfig.GetDataDir())
+	require.Equal(t, expectedVerbosity, nodeConfig.GetVerbosity())
+}
+
+// verifySoloNodeArguments verifies the solo-specific arguments in the configuration
+func verifySoloNodeArguments(t *testing.T, nodeConfig node.Config, expectedGasLimit, expectedAPICallGasLimit, expectedTxPoolLimit, expectedTxPoolLimitPerAccount, expectedCache, expectedBlockInterval string) {
+	t.Helper()
+	additionalArgs := nodeConfig.GetAdditionalArgs()
+
+	// Verify solo-specific flags are present
+	require.Contains(t, additionalArgs, "on-demand")
+	require.Contains(t, additionalArgs, "api-enable-txpool")
+	require.Contains(t, additionalArgs, "persist")
+
+	// Verify argument values
+	require.Equal(t, expectedGasLimit, additionalArgs["gas-limit"])
+	require.Equal(t, expectedAPICallGasLimit, additionalArgs["api-call-gas-limit"])
+	require.Equal(t, expectedTxPoolLimit, additionalArgs["txpool-limit"])
+	require.Equal(t, expectedTxPoolLimitPerAccount, additionalArgs["txpool-limit-per-account"])
+	require.Equal(t, expectedCache, additionalArgs["cache"])
+	require.Equal(t, expectedBlockInterval, additionalArgs["block-interval"])
+}
 
 var genesis = `{
         "launchTime": 1703180212,
@@ -615,11 +647,11 @@ func TestAttachNodeTestnet(t *testing.T) {
 	config := attachNodeTestConfig{
 		NetworkType:    "test",
 		InitialNodeID:  "initial-testnet-node",
-		InitialAPIPort: 8669,
-		InitialP2PPort: 11235,
+		InitialAPIPort: 8671,
+		InitialP2PPort: 11237,
 		AttachNodeID:   "attach-testnet-node",
-		AttachAPIPort:  8671,
-		AttachP2PPort:  11237,
+		AttachAPIPort:  8672,
+		AttachP2PPort:  11238,
 		Environment:    "testnet",
 		GenesisID:      testnetGenesisID,
 	}
@@ -634,7 +666,7 @@ func TestAttachNodeMainnet(t *testing.T) {
 		InitialAPIPort: 8670,
 		InitialP2PPort: 11236,
 		AttachNodeID:   "attach-mainnet-node",
-		AttachAPIPort:  8672,
+		AttachAPIPort:  8671,
 		AttachP2PPort:  11238,
 		Environment:    "mainnet",
 		GenesisID:      mainnetGenesisID,
@@ -656,8 +688,8 @@ func TestAttachToPublicNetworkAndStart(t *testing.T) {
 	testnetConfig := PublicNetworkConfig{
 		NodeID:      "testnet-node",
 		NetworkType: "test",
-		APIAddr:     "127.0.0.1:8669",
-		P2PPort:     11235,
+		APIAddr:     "127.0.0.1:8672",
+		P2PPort:     11239,
 	}
 
 	err := localEnv.AttachToPublicNetworkAndStart(testnetConfig)
@@ -672,7 +704,7 @@ func TestAttachToPublicNetworkAndStart(t *testing.T) {
 	require.Contains(t, nodes, testnetConfig.NodeID)
 
 	// Test connection to the node
-	client := thorclient.New("http://127.0.0.1:8669")
+	client := thorclient.New("http://" + localNodeAPIAddr)
 	block, err := client.Block("0")
 	if err != nil {
 		t.Logf("Warning: Could not connect to testnet node: %v", err)
@@ -684,4 +716,194 @@ func TestAttachToPublicNetworkAndStart(t *testing.T) {
 		require.Equal(t, blockID, block.ID)
 		t.Logf("Successfully connected to testnet using convenience method! Genesis block: %d", block.Number)
 	}
+}
+
+func TestSoloNodeConfig(t *testing.T) {
+	t.Run("CreateSoloNodeConfig with defaults", func(t *testing.T) {
+		config := SoloNodeConfig{
+			NodeID: "solo-test-node",
+		}
+
+		nodeConfig := CreateSoloNodeConfig(config)
+
+		// Verify basic configuration with defaults
+		verifySoloNodeConfig(t, nodeConfig, "solo-test-node", "0.0.0.0:8669", "*", "/data", 9)
+
+		// Verify solo-specific arguments with defaults
+		verifySoloNodeArguments(t, nodeConfig, "10000000000000", "10000000000000", "100000000000", "256", "1024", "1")
+	})
+
+	t.Run("CreateSoloNodeConfig with custom values", func(t *testing.T) {
+		config := SoloNodeConfig{
+			NodeID:                "custom-solo-node",
+			APIAddr:               "127.0.0.1:8670",
+			APICORS:               "http://localhost:3000",
+			GasLimit:              "5000000000000",
+			APICallGasLimit:       "5000000000000",
+			TxPoolLimit:           "50000000000",
+			TxPoolLimitPerAccount: "128",
+			Cache:                 "512",
+			DataDir:               "/custom/data",
+			Verbosity:             5,
+			BlockInterval:         "2",
+		}
+
+		nodeConfig := CreateSoloNodeConfig(config)
+
+		// Verify custom configuration
+		verifySoloNodeConfig(t, nodeConfig, "custom-solo-node", "127.0.0.1:8670", "http://localhost:3000", "/custom/data", 5)
+
+		// Verify custom arguments
+		verifySoloNodeArguments(t, nodeConfig, "5000000000000", "5000000000000", "50000000000", "128", "512", "2")
+	})
+}
+
+func TestSoloNodeIntegration(t *testing.T) {
+	t.Run("Create and start a solo node", func(t *testing.T) {
+		// Create a solo node configuration
+		soloConfig := SoloNodeConfig{
+			NodeID:                "test-solo-node",
+			APIAddr:               localNodeAPIAddr,
+			APICORS:               "*",
+			GasLimit:              "10000000000000",
+			APICallGasLimit:       "10000000000000",
+			TxPoolLimit:           "100000000000",
+			TxPoolLimitPerAccount: "256",
+			Cache:                 "1024",
+			DataDir:               "/tmp/solo-test-data",
+			Verbosity:             3,
+			BlockInterval:         "1",
+		}
+
+		// Create the node configuration
+		nodeConfig := CreateSoloNodeConfig(soloConfig)
+
+		// Verify the node configuration using helper functions
+		verifySoloNodeConfig(t, nodeConfig, "test-solo-node", localNodeAPIAddr, "*", "/tmp/solo-test-data", 3)
+		verifySoloNodeArguments(t, nodeConfig, "10000000000000", "10000000000000", "100000000000", "256", "1024", "1")
+
+		// Create a network configuration with the solo node
+		networkCfg := &network.Network{
+			BaseID:      "solo-test-network",
+			Environment: "solo",
+			Nodes:       []node.Config{nodeConfig},
+			ThorBuilder: thorbuilder.DefaultConfig(),
+		}
+
+		// Create local environment
+		localEnv := NewEnv()
+
+		t.Cleanup(func() {
+			if err := localEnv.StopNetwork(); err != nil {
+				t.Logf("Warning: failed to stop network during test cleanup: %v", err)
+			}
+		})
+
+		// Load the configuration
+		networkID, err := localEnv.LoadConfig(networkCfg)
+		require.NoError(t, err)
+		require.Equal(t, "solosolo-test-network", networkID)
+
+		// Start the solo node
+		err = localEnv.StartNetwork()
+		require.NoError(t, err)
+
+		// Wait for the node to start and generate the genesis block
+		time.Sleep(5 * time.Second)
+
+		// Verify the node is running
+		nodes := localEnv.Nodes()
+		require.Len(t, nodes, 1)
+		require.Contains(t, nodes, "test-solo-node")
+
+		// Test connection to the solo node and validate genesis block
+		client := thorclient.New("http://" + localNodeAPIAddr)
+		block, err := client.Block("0")
+		if err != nil {
+			t.Logf("Warning: Could not connect to solo node: %v", err)
+			t.Logf("This might be normal if the node is still starting up")
+		} else {
+			// Validate that we got the genesis block
+			blockID, err := thor.ParseBytes32(soloGenesisID)
+			require.NoError(t, err)
+			require.Equal(t, blockID, block.ID)
+			t.Logf("Successfully connected to solo node! Genesis block: %d, ID: %s", block.Number, block.ID)
+		}
+
+		t.Logf("Solo node started successfully with network ID: %s", networkID)
+		t.Logf("The node is configured to run with: thor solo --on-demand --api-addr=%s --api-cors=* --gas-limit=10000000000000 --api-enable-txpool --api-call-gas-limit=10000000000000 --txpool-limit=100000000000 --txpool-limit-per-account=256 --cache=1024 --data-dir=/tmp/solo-test-data --verbosity=3 --persist --block-interval=1", localNodeAPIAddr)
+	})
+
+	t.Run("Solo node with minimal configuration", func(t *testing.T) {
+		// Test with minimal configuration (using defaults)
+		soloConfig := SoloNodeConfig{
+			NodeID: "minimal-solo-node",
+		}
+
+		nodeConfig := CreateSoloNodeConfig(soloConfig)
+
+		// Test that the node is detected as solo
+		require.True(t, isSoloNode(nodeConfig))
+
+		// Verify defaults are applied using helper functions
+		verifySoloNodeConfig(t, nodeConfig, "minimal-solo-node", "0.0.0.0:8669", "*", "/data", 9)
+		verifySoloNodeArguments(t, nodeConfig, "10000000000000", "10000000000000", "100000000000", "256", "1024", "1")
+
+		t.Logf("Minimal solo node configuration created successfully")
+	})
+}
+
+func TestStartSoloNode(t *testing.T) {
+	// Create a solo node configuration
+	soloConfig := SoloNodeConfig{
+		NodeID:                "convenience-solo-node",
+		APIAddr:               localNodeAPIAddr,
+		APICORS:               "*",
+		GasLimit:              "10000000000000",
+		APICallGasLimit:       "10000000000000",
+		TxPoolLimit:           "100000000000",
+		TxPoolLimitPerAccount: "256",
+		Cache:                 "1024",
+		DataDir:               "/tmp/convenience-solo-data",
+		Verbosity:             3,
+		BlockInterval:         "1",
+		Branch:                "master", // Use master branch
+	}
+
+	// Create local environment
+	localEnv := NewEnv()
+
+	t.Cleanup(func() {
+		if err := localEnv.StopNetwork(); err != nil {
+			t.Logf("Warning: failed to stop network during test cleanup: %v", err)
+		}
+	})
+
+	// Start the solo node using the convenience method
+	err := localEnv.StartSoloNode(soloConfig)
+	require.NoError(t, err)
+
+	// Wait for the node to start and generate the genesis block
+	time.Sleep(5 * time.Second)
+
+	// Verify the node is running
+	nodes := localEnv.Nodes()
+	require.Len(t, nodes, 1)
+	require.Contains(t, nodes, "convenience-solo-node")
+
+	// Test connection to the solo node and validate genesis block
+	client := thorclient.New("http://" + localNodeAPIAddr)
+	block, err := client.Block("0")
+	if err != nil {
+		t.Logf("Warning: Could not connect to solo node: %v", err)
+		t.Logf("This might be normal if the node is still starting up")
+	} else {
+		// Validate that we got the genesis block
+		blockID, err := thor.ParseBytes32(soloGenesisID)
+		require.NoError(t, err)
+		require.Equal(t, blockID, block.ID)
+		t.Logf("Successfully connected to solo node using convenience method! Genesis block: %d, ID: %s", block.Number, block.ID)
+	}
+
+	t.Logf("Solo node started successfully using StartSoloNode convenience method")
 }

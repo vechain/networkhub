@@ -9,6 +9,7 @@ import (
 const (
 	MasterNode  = "masterNode"
 	RegularNode = "regularNode"
+	SoloNode    = "soloNode"
 )
 
 type Config interface {
@@ -38,6 +39,8 @@ type Config interface {
 	GetHTTPAddr() string
 	GetFakeExecution() bool
 	HealthCheck(block uint32, timeout time.Duration) error
+	GetType() string
+	SetType(t string)
 }
 
 type Lifecycle interface {

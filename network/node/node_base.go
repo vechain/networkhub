@@ -172,3 +172,11 @@ func (b *BaseNode) GetGenesis() *genesis.CustomGenesis {
 func (b *BaseNode) SetGenesis(genesis *genesis.CustomGenesis) {
 	b.Genesis = genesis
 }
+
+func (b *BaseNode) GetType() string {
+	return b.Type
+}
+
+func (b *BaseNode) SetType(t string) {
+	b.Type = t
+}
