@@ -295,13 +295,20 @@ func (n *Node) addNetworkArg(args []string) []string {
 func (n *Node) addCommonArgs(args []string) []string {
 	args = append(args,
 		"--data-dir", n.nodeCfg.GetDataDir(),
-		"--config-dir", n.nodeCfg.GetConfigDir(),
 		"--api-addr", n.nodeCfg.GetAPIAddr(),
 		"--api-cors", n.nodeCfg.GetAPICORS(),
 		"--verbosity", strconv.Itoa(n.nodeCfg.GetVerbosity()),
-		"--nat", "none",
-		"--p2p-port", fmt.Sprintf("%d", n.nodeCfg.GetP2PListenPort()),
 	)
+
+	// Only add network-specific arguments for non-solo nodes
+	if !isSoloNode(n.nodeCfg) {
+		args = append(args,
+			"--config-dir", n.nodeCfg.GetConfigDir(),
+			"--nat", "none",
+			"--p2p-port", fmt.Sprintf("%d", n.nodeCfg.GetP2PListenPort()),
+		)
+	}
+
 	return args
 }
 
