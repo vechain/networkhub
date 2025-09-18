@@ -394,7 +394,7 @@ func (n *Node) executeCommand(cmd *exec.Cmd) error {
 func shouldNotAppendEnodes(node node.Config) bool {
 	networkArg, exists := node.GetAdditionalArgs()["network"]
 	isPublicNetwork := exists && (networkArg == "test" || networkArg == "main")
-	return isPublicNetwork && isSoloNode(node)
+	return isPublicNetwork || isSoloNode(node)
 }
 
 // isSoloNode checks if a node is configured as a solo node
