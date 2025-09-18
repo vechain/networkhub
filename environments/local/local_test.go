@@ -853,3 +853,57 @@ func TestSoloNodeIntegration(t *testing.T) {
 		t.Logf("Minimal solo node configuration created successfully")
 	})
 }
+
+func TestStartSoloNode(t *testing.T) {
+	// Create a solo node configuration
+	soloConfig := SoloNodeConfig{
+		NodeID:                "convenience-solo-node",
+		APIAddr:               localNodeAPIAddr,
+		APICORS:               "*",
+		GasLimit:              "10000000000000",
+		APICallGasLimit:       "10000000000000",
+		TxPoolLimit:           "100000000000",
+		TxPoolLimitPerAccount: "256",
+		Cache:                 "1024",
+		DataDir:               "/tmp/convenience-solo-data",
+		Verbosity:             3,
+		BlockInterval:         "1",
+		Branch:                "master", // Use master branch
+	}
+
+	// Create local environment
+	localEnv := NewEnv()
+
+	t.Cleanup(func() {
+		if err := localEnv.StopNetwork(); err != nil {
+			t.Logf("Warning: failed to stop network during test cleanup: %v", err)
+		}
+	})
+
+	// Start the solo node using the convenience method
+	err := localEnv.StartSoloNode(soloConfig)
+	require.NoError(t, err)
+
+	// Wait for the node to start and generate the genesis block
+	time.Sleep(5 * time.Second)
+
+	// Verify the node is running
+	nodes := localEnv.Nodes()
+	require.Len(t, nodes, 1)
+	require.Contains(t, nodes, "convenience-solo-node")
+
+	// Test connection to the solo node and validate genesis block
+	client := thorclient.New("http://" + localNodeAPIAddr)
+	block, err := client.Block("0")
+	if err != nil {
+		t.Logf("Warning: Could not connect to solo node: %v", err)
+		t.Logf("This might be normal if the node is still starting up")
+	} else {
+		// Validate that we got the genesis block
+		require.Equal(t, uint32(0), block.Number)
+		require.NotEmpty(t, block.ID)
+		t.Logf("Successfully connected to solo node using convenience method! Genesis block: %d, ID: %s", block.Number, block.ID)
+	}
+
+	t.Logf("Solo node started successfully using StartSoloNode convenience method")
+}

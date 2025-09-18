@@ -414,6 +414,7 @@ type SoloNodeConfig struct {
 	DataDir               string
 	Verbosity             int
 	BlockInterval         string
+	Branch                string
 }
 
 // CreateSoloNodeConfig creates a configuration for a Thor solo node

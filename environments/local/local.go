@@ -240,6 +240,43 @@ func (l *Local) checkNode(n node.Config) error {
 	return nil
 }
 
+// startNetworkWithConfig is a helper function that creates and starts a network with the given configuration
+func (l *Local) startNetworkWithConfig(nodes []node.Config, environment, baseID, branch string) error {
+	// Determine Thor branch to use
+	thorBranch := "master"
+	if branch != "" {
+		thorBranch = branch
+	}
+
+	// Create network configuration
+	networkCfg := &network.Network{
+		BaseID:      baseID,
+		Environment: environment,
+		Nodes:       nodes,
+		ThorBuilder: &thorbuilder.Config{
+			DownloadConfig: &thorbuilder.DownloadConfig{
+				RepoUrl:    "https://github.com/vechain/thor",
+				Branch:     thorBranch,
+				IsReusable: true,
+			},
+		},
+	}
+
+	// Load the configuration
+	_, err := l.LoadConfig(networkCfg)
+	if err != nil {
+		return fmt.Errorf("failed to load network configuration: %w", err)
+	}
+
+	// Start the network
+	err = l.StartNetwork()
+	if err != nil {
+		return fmt.Errorf("failed to start network: %w", err)
+	}
+
+	return nil
+}
+
 // AttachToPublicNetworkAndStart creates and starts a node connected to a public network (testnet/mainnet)
 func (l *Local) AttachToPublicNetworkAndStart(config PublicNetworkConfig) error {
 	publicNode := &node.BaseNode{
@@ -257,36 +294,11 @@ func (l *Local) AttachToPublicNetworkAndStart(config PublicNetworkConfig) error 
 		environment = "mainnet"
 	}
 
-	thorBranch := "master"
-	if config.Branch != "" {
-		thorBranch = config.Branch
-	}
+	return l.startNetworkWithConfig([]node.Config{publicNode}, environment, "baseID", config.Branch)
+}
 
-	// Create network configuration
-	networkCfg := &network.Network{
-		BaseID:      "baseID",
-		Environment: environment,
-		Nodes:       []node.Config{publicNode},
-		ThorBuilder: &thorbuilder.Config{
-			DownloadConfig: &thorbuilder.DownloadConfig{
-				RepoUrl:    "https://github.com/vechain/thor",
-				Branch:     thorBranch,
-				IsReusable: true,
-			},
-		},
-	}
-
-	// Load the configuration
-	_, err := l.LoadConfig(networkCfg)
-	if err != nil {
-		return fmt.Errorf("failed to load network configuration: %w", err)
-	}
-
-	// Start the network (this will start the public network node)
-	err = l.StartNetwork()
-	if err != nil {
-		return fmt.Errorf("failed to start public network: %w", err)
-	}
-
-	return nil
+// StartSoloNode creates and starts a solo node
+func (l *Local) StartSoloNode(config SoloNodeConfig) error {
+	soloNodeConfig := CreateSoloNodeConfig(config)
+	return l.startNetworkWithConfig([]node.Config{soloNodeConfig}, "solo", "solo-network", config.Branch)
 }
