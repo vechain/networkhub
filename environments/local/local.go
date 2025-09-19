@@ -244,9 +244,6 @@ func (l *Local) checkNode(n node.Config) error {
 func (l *Local) AttachToPublicNetworkAndStart(config PublicNetworkConfig) error {
 	publicNode := &node.BaseNode{
 		ID:             config.NodeID,
-		APICORS:        "*",
-		Type:           node.RegularNode,
-		Verbosity:      3,
 		P2PListenPort:  config.P2PPort,
 		APIAddr:        config.APIAddr,
 		AdditionalArgs: map[string]string{"network": config.NetworkType},

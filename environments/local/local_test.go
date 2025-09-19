@@ -453,9 +453,6 @@ func testPublicNetworkConnection(t *testing.T, config publicNetworkTestConfig) {
 
 	publicNode := &node.BaseNode{
 		ID:             config.NodeID,
-		APICORS:        "*",
-		Type:           node.RegularNode,
-		Verbosity:      3,
 		P2PListenPort:  config.P2PPort,
 		APIAddr:        fmt.Sprintf("127.0.0.1:%d", config.APIPort),
 		AdditionalArgs: map[string]string{"network": config.NetworkType},
@@ -537,9 +534,6 @@ func testAttachNodeConnection(t *testing.T, config attachNodeTestConfig) {
 
 	initialNode := &node.BaseNode{
 		ID:             config.InitialNodeID,
-		APICORS:        "*",
-		Type:           node.RegularNode,
-		Verbosity:      3,
 		P2PListenPort:  config.InitialP2PPort,
 		APIAddr:        fmt.Sprintf("127.0.0.1:%d", config.InitialAPIPort),
 		AdditionalArgs: map[string]string{"network": config.NetworkType},
@@ -567,9 +561,6 @@ func testAttachNodeConnection(t *testing.T, config attachNodeTestConfig) {
 	// Create a new node to attach
 	attachNode := &node.BaseNode{
 		ID:             config.AttachNodeID,
-		APICORS:        "*",
-		Type:           node.RegularNode,
-		Verbosity:      3,
 		P2PListenPort:  config.AttachP2PPort,
 		APIAddr:        fmt.Sprintf("127.0.0.1:%d", config.AttachAPIPort),
 		AdditionalArgs: map[string]string{"network": config.NetworkType},
