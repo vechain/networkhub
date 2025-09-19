@@ -6,11 +6,6 @@ import (
 	"github.com/vechain/networkhub/network/node/genesis"
 )
 
-const (
-	MasterNode  = "masterNode"
-	RegularNode = "regularNode"
-)
-
 type Config interface {
 	Enode(ipAddr string) (string, error)
 	SetExecArtifact(artifact string)

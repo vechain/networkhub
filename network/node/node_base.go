@@ -24,13 +24,15 @@ type BaseNode struct {
 	P2PListenPort  int                    `json:"p2pListenPort"`
 	Verbosity      int                    `json:"verbosity"`
 	EnodeData      string                 `json:"enode"` // todo: this should be a generated method
-	Type           string                 `json:"type"`
 	FakeExecution  bool                   `json:"fakeExecution"`
 	Genesis        *genesis.CustomGenesis `json:"genesis"`
 	AdditionalArgs map[string]string      `json:"additionalArgs"`
 }
 
 func (b *BaseNode) GetVerbosity() int {
+	if b.Verbosity == 0 {
+		return 3
+	}
 	return b.Verbosity
 }
 
