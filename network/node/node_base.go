@@ -2,6 +2,7 @@ package node
 
 import (
 	"fmt"
+	"github.com/vechain/thor/v2/api/blocks"
 	"log/slog"
 	"strconv"
 	"strings"
@@ -152,13 +153,25 @@ func (b *BaseNode) HealthCheck(block uint32, timeout time.Duration) error {
 	ticker := time.NewTicker(timeout)
 	defer ticker.Stop()
 
+	var blk *blocks.JSONCollapsedBlock
+
 	for {
 		select {
 		case <-ticker.C:
 			return fmt.Errorf("timeout waiting for node %s to be healthy", b.ID)
 		default:
-			blk, err := client.Block(strconv.Itoa(int(block)))
-			if err == nil && blk != nil {
+			newBlk, err := client.Block(strconv.Itoa(int(block)))
+			if err == nil && newBlk != nil {
+				if blk == nil {
+					blk = newBlk
+				}
+				if blk.ID.String() != newBlk.ID.String() {
+					return fmt.Errorf("unexpected blocks at the same height - height: %d hashNewBlk: %s hashBlk: %s",
+						block,
+						newBlk.ID.String(),
+						blk.ID.String(),
+					)
+				}
 				return nil
 			}
 			slog.Debug("waiting for node to be healthy", "node", b.ID, "block", block, "error", err)
