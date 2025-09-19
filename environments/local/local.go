@@ -116,9 +116,9 @@ func (l *Local) StopNetwork() error {
 	return nil
 }
 
-// AttachNode adds a node to the existing network.
+// AddNode adds a node to the existing network.
 // If the network has started, it will start the node.
-func (l *Local) AttachNode(n node.Config) error {
+func (l *Local) AddNode(n node.Config) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
@@ -244,9 +244,6 @@ func (l *Local) checkNode(n node.Config) error {
 func (l *Local) AttachToPublicNetworkAndStart(config PublicNetworkConfig) error {
 	publicNode := &node.BaseNode{
 		ID:             config.NodeID,
-		APICORS:        "*",
-		Type:           node.RegularNode,
-		Verbosity:      3,
 		P2PListenPort:  config.P2PPort,
 		APIAddr:        config.APIAddr,
 		AdditionalArgs: map[string]string{"network": config.NetworkType},
