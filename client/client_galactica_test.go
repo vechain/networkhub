@@ -25,13 +25,10 @@ import (
 // 1. Set up and start a 6-node Galactica network
 // 2. Wait for all nodes to connect (5 peers each)
 // 3. Deploy and execute Shanghai-compatible smart contracts
-//
-// Currently skipped because the release/galactica branch is not yet available.
-// Remove the t.Skip() line once the Galactica branch is released.
 func TestClientSixNodesGalactica(t *testing.T) {
 	// Create the six nodes Galactica network
 	var sixNodesGalacticaNetwork *network.Network
-	require.NotPanics(t, func() { sixNodesGalacticaNetwork = preset.LocalSixNodesGalacticaNetwork() })
+	require.NotPanics(t, func() { sixNodesGalacticaNetwork = preset.LocalSixNodesNetwork() })
 
 	// Configure thor builder for reusable builds
 	cfg := thorbuilder.DefaultConfig()
@@ -42,6 +39,7 @@ func TestClientSixNodesGalactica(t *testing.T) {
 	c, err := NewWithNetwork(sixNodesGalacticaNetwork)
 	require.NoError(t, err)
 
+	require.NoError(t, c.Start())
 	// Cleanup
 	defer func() {
 		if err := c.Stop(); err != nil {
