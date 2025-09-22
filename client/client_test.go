@@ -256,3 +256,70 @@ func TestAddRemoveNodes(t *testing.T) {
 	err = c.Stop()
 	require.NoError(t, err)
 }
+
+func TestClientAdditionalArgs(t *testing.T) {
+	// Create network with LocalThreeMasterNodes preset
+	networkCfg := preset.LocalThreeMasterNodesNetwork()
+
+	// Configure thor builder
+	cfg := thorbuilder.DefaultConfig()
+	cfg.DownloadConfig.IsReusable = false
+	networkCfg.ThorBuilder = cfg
+
+	// Update ports to avoid conflicts with other tests
+	basePort := 8600 // Different range from other tests
+	for _, node := range networkCfg.Nodes {
+		basePort++
+		node.SetAPIAddr(fmt.Sprintf("127.0.0.1:%d", basePort))
+		basePort++
+		node.SetP2PListenPort(basePort)
+
+		// Set additional args for all nodes to enable call tracer
+		node.SetAdditionalArgs(map[string]string{
+			"api-allowed-tracers": "call",
+		})
+	}
+
+	// Create client with the network
+	c, err := NewWithNetwork(networkCfg)
+	require.NoError(t, err)
+	require.NoError(t, c.Start())
+	
+	// Cleanup
+	defer func() {
+		if err := c.Stop(); err != nil {
+			t.Logf("Warning: failed to stop client: %v", err)
+		}
+	}()
+
+	// Wait for first node to be accessible
+	client := thorclient.New(networkCfg.Nodes[0].GetHTTPAddr())
+	t.Logf("Waiting for node at %s to be ready...", networkCfg.Nodes[0].GetHTTPAddr())
+
+	require.NoError(t, common.Retry(func() error {
+		_, err := client.Block("best")
+		if err != nil {
+			t.Logf("Still waiting for node: %v", err)
+		}
+		return err
+	}, time.Second, 60))
+
+	t.Log("Node is ready, testing debug tracer API...")
+
+	// Test the additional args by making a debug tracer API call
+	res, statusCode, err := client.RawHTTPClient().RawHTTPPost("/debug/tracers/call", []byte(`{
+  "value": "0x0",
+  "to": "0x0000000000000000000000000000456E65726779",
+  "data": "0xa9059cbb0000000000000000000000000f872421dc479f3c11edd89512731814d0598db50000000000",
+  "caller": "0x7567d83b7b8d80addcb281a71d54fc7b3364ffed",
+  "gasPayer": "0xd3ae78222beadb038203be21ed5ce7c9b1bff602",
+  "name": "call"
+}`))
+	require.NoError(t, err)
+	require.Equal(t, 200, statusCode)
+
+	// Verify we got a valid response
+	body := string(res)
+	require.NotEmpty(t, body)
+	t.Logf("Successfully called debug tracer API with response: %s", body)
+}

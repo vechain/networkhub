@@ -43,3 +43,11 @@ func (n Noop) Info() error {
 }
 
 func (n Noop) Config() *network.Network { return nil }
+
+func (n Noop) AddNode(nodeConfig node.Config) error {
+	return nil
+}
+
+func (n Noop) RemoveNode(nodeID string) error {
+	return nil
+}
