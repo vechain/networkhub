@@ -22,7 +22,6 @@ type Local struct {
 
 type Factory struct{}
 
-
 func NewFactory() *Factory {
 	return &Factory{}
 }
@@ -213,4 +212,3 @@ func (l *Local) checkNode(n node.Config) error {
 	}
 	return nil
 }
-

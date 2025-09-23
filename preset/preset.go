@@ -52,4 +52,3 @@ func convToHexOrDecimal256(i *big.Int) *genesis.HexOrDecimal256 {
 	tmp := genesis.HexOrDecimal256(*i)
 	return &tmp
 }
-

@@ -1,9 +1,10 @@
 package local
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	"github.com/vechain/networkhub/preset"
-	"testing"
 )
 
 func TestLocalInvalidExecArtifact(t *testing.T) {

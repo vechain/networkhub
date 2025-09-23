@@ -43,7 +43,6 @@ func NewWithNetwork(net *network.Network) (*Client, error) {
 	return c, nil
 }
 
-
 func (c *Client) Stop() error {
 	if c.environment == nil {
 		return fmt.Errorf("no network loaded")

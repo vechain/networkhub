@@ -2,7 +2,6 @@ package node
 
 import (
 	"fmt"
-	"github.com/vechain/thor/v2/api/blocks"
 	"log/slog"
 	"strconv"
 	"strings"
@@ -10,7 +9,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/p2p/discover"
+
 	"github.com/vechain/networkhub/network/node/genesis"
+	"github.com/vechain/thor/v2/api"
 	"github.com/vechain/thor/v2/thorclient"
 )
 
@@ -153,7 +154,7 @@ func (b *BaseNode) HealthCheck(block uint32, timeout time.Duration) error {
 	ticker := time.NewTicker(timeout)
 	defer ticker.Stop()
 
-	var blk *blocks.JSONCollapsedBlock
+	var blk *api.JSONCollapsedBlock
 
 	for {
 		select {

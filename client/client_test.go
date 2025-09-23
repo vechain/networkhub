@@ -66,7 +66,7 @@ func TestLocalClient(t *testing.T) {
 
 	account, err := thorclient.New(networkCfg.Nodes[0].GetHTTPAddr()).Account(prefundedAcc)
 	require.NoError(t, err)
-	bal := big.Int(account.Balance)
+	bal := (*big.Int)(account.Balance)
 	require.Equal(t, bal.Cmp(big.NewInt(0)), 1)
 
 	// Stop network
@@ -128,7 +128,7 @@ func TestDockerClient(t *testing.T) {
 
 	account, err := thorclient.New(networkCfg.Nodes[0].GetHTTPAddr()).Account(prefundedAcc)
 	require.NoError(t, err)
-	bal := big.Int(account.Balance)
+	bal := (*big.Int)(account.Balance)
 	require.Equal(t, bal.Cmp(big.NewInt(0)), 1)
 
 	// Stop network
@@ -200,10 +200,6 @@ func TestAddRemoveNodes(t *testing.T) {
 	network, err = c.GetNetwork()
 	require.NoError(t, err)
 	require.Len(t, network.Nodes, 3)
-
-	// Verify we have 3 nodes in config
-	nodes, err = c.Nodes()
-	require.NoError(t, err)
 
 	// Wait for node to start
 	time.Sleep(5 * time.Second)
@@ -284,7 +280,7 @@ func TestClientAdditionalArgs(t *testing.T) {
 	c, err := NewWithNetwork(networkCfg)
 	require.NoError(t, err)
 	require.NoError(t, c.Start())
-	
+
 	// Cleanup
 	defer func() {
 		if err := c.Stop(); err != nil {
