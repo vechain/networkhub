@@ -3,8 +3,6 @@ package docker
 import (
 	"context"
 	"fmt"
-	"github.com/vechain/networkhub/internal/environments"
-
 	"log/slog"
 	"strconv"
 	"strings"
@@ -12,6 +10,7 @@ import (
 	dockertypes "github.com/docker/docker/api/types"
 	dockernetwork "github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
+	"github.com/vechain/networkhub/internal/environments"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/thorbuilder"

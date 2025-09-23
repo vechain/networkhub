@@ -2,11 +2,11 @@ package local
 
 import (
 	"fmt"
-	"github.com/vechain/networkhub/internal/environments"
 	"os"
 	"path/filepath"
 	"sync"
 
+	"github.com/vechain/networkhub/internal/environments"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
 )

@@ -2,11 +2,11 @@ package client
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/vechain/networkhub/internal/environments"
 	"github.com/vechain/networkhub/internal/environments/docker"
 	"github.com/vechain/networkhub/internal/environments/local"
-	"strings"
-
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/thorbuilder"
