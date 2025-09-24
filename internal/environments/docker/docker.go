@@ -3,7 +3,6 @@ package docker
 import (
 	"context"
 	"fmt"
-
 	"log/slog"
 	"strconv"
 	"strings"
@@ -11,7 +10,7 @@ import (
 	dockertypes "github.com/docker/docker/api/types"
 	dockernetwork "github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
-	"github.com/vechain/networkhub/environments"
+	"github.com/vechain/networkhub/internal/environments"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/thorbuilder"
@@ -150,6 +149,124 @@ func (d *Docker) StopNetwork() error {
 		if err != nil {
 			return fmt.Errorf("unable to stop node %s - %w", s, err)
 		}
+	}
+	return nil
+}
+
+// AddNode adds a node to the existing docker network.
+// If the network has started, it will start the node.
+func (d *Docker) AddNode(nodeConfig node.Config) error {
+	if d.networkCfg == nil {
+		return fmt.Errorf("network configuration is not loaded")
+	}
+
+	if _, exists := d.dockerNodes[nodeConfig.GetID()]; exists {
+		return fmt.Errorf("node with ID %s already exists", nodeConfig.GetID())
+	}
+
+	// Check node configuration and set defaults
+	if err := d.checkNode(nodeConfig); err != nil {
+		return err
+	}
+
+	// Add node to network configuration
+	d.networkCfg.Nodes = append(d.networkCfg.Nodes, nodeConfig)
+
+	// Setup exposed ports for the new node
+	split := strings.Split(nodeConfig.GetAPIAddr(), ":")
+	if len(split) != 2 {
+		return fmt.Errorf("unable to parse API Addr")
+	}
+
+	exposedAPIPort, err := strconv.Atoi(split[1])
+	if err != nil {
+		return err
+	}
+
+	// Use next available port number
+	nextPortIndex := len(d.exposedPorts)
+	d.exposedPorts[nodeConfig.GetID()] = &exposedPort{
+		hostPort:      fmt.Sprintf("%d", exposedAPIPort+nextPortIndex),
+		containerPort: split[1],
+	}
+
+	// If network is running, start the new node
+	if len(d.dockerNodes) > 0 {
+		// Calculate the node ip address
+		nextIpAddr, err := d.ipManager.NextIP(nodeConfig.GetID())
+		if err != nil {
+			return err
+		}
+
+		// Get enodes from existing running nodes
+		var enodes []string
+		for _, node := range d.networkCfg.Nodes {
+			if node.GetID() == nodeConfig.GetID() {
+				continue
+			}
+			if d.ipManager.GetNodeIP(node.GetID()) != "" {
+				enode, err := node.Enode(d.ipManager.GetNodeIP(node.GetID()))
+				if err != nil {
+					return err
+				}
+				enodes = append(enodes, enode)
+			}
+		}
+
+		dockerNode := NewDockerNode(nodeConfig, enodes, d.networkID, d.exposedPorts[nodeConfig.GetID()], nextIpAddr)
+		if err := dockerNode.Start(); err != nil {
+			return fmt.Errorf("unable to start node %s - %w", nodeConfig.GetID(), err)
+		}
+
+		d.dockerNodes[nodeConfig.GetID()] = dockerNode
+	}
+
+	return nil
+}
+
+// RemoveNode removes a node from the docker network.
+func (d *Docker) RemoveNode(nodeID string) error {
+	if _, exists := d.dockerNodes[nodeID]; !exists {
+		return fmt.Errorf("node with ID %s does not exist", nodeID)
+	}
+
+	// Stop and remove the docker container
+	if err := d.dockerNodes[nodeID].Stop(); err != nil {
+		return fmt.Errorf("unable to stop node %s - %w", nodeID, err)
+	}
+
+	// Remove from docker nodes map
+	delete(d.dockerNodes, nodeID)
+
+	// Remove from exposed ports
+	delete(d.exposedPorts, nodeID)
+
+	// Remove from network configuration
+	var newNodes []node.Config
+	for _, n := range d.networkCfg.Nodes {
+		if n.GetID() != nodeID {
+			newNodes = append(newNodes, n)
+		}
+	}
+	d.networkCfg.Nodes = newNodes
+
+	return nil
+}
+
+// checkNode validates and sets defaults for a docker node configuration
+func (d *Docker) checkNode(nodeConfig node.Config) error {
+	// use preset dirs if not defined
+	if nodeConfig.GetConfigDir() == "" {
+		nodeConfig.SetConfigDir("/home/thor")
+	}
+	if nodeConfig.GetDataDir() == "" {
+		nodeConfig.SetDataDir("/home/thor")
+	}
+	if nodeConfig.GetExecArtifact() == "" {
+		if d.dockerImage == "" {
+			return fmt.Errorf("docker image is not set, please provide a valid docker image")
+		}
+		nodeConfig.SetExecArtifact(d.dockerImage)
 	}
 	return nil
 }

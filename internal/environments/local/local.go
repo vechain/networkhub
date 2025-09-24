@@ -6,10 +6,9 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/vechain/networkhub/environments"
+	"github.com/vechain/networkhub/internal/environments"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
-	"github.com/vechain/networkhub/thorbuilder"
 )
 
 type Local struct {
@@ -17,20 +16,11 @@ type Local struct {
 	networkCfg *network.Network
 	id         string
 	started    bool
-	execPath   string // path to the thor binary
 
 	mu sync.Mutex
 }
 
 type Factory struct{}
-
-type PublicNetworkConfig struct {
-	NodeID      string
-	NetworkType string // "test" for testnet, "main" for mainnet
-	APIAddr     string
-	P2PPort     int
-	Branch      string
-}
 
 func NewFactory() *Factory {
 	return &Factory{}
@@ -52,20 +42,6 @@ func (l *Local) LoadConfig(cfg *network.Network) (string, error) {
 
 	l.networkCfg = cfg
 	l.id = l.networkCfg.ID()
-
-	if cfg.ThorBuilder != nil {
-		builder := thorbuilder.New(cfg.ThorBuilder)
-		if err := builder.Download(); err != nil {
-			return "", err
-		}
-
-		path, err := builder.Build()
-		if err != nil {
-			return "", fmt.Errorf("failed to build thor binary - %w", err)
-		}
-
-		l.execPath = path
-	}
 
 	for _, n := range l.networkCfg.Nodes {
 		if err := l.checkNode(n); err != nil {
@@ -116,9 +92,9 @@ func (l *Local) StopNetwork() error {
 	return nil
 }
 
-// AttachNode adds a node to the existing network.
+// AddNode adds a node to the existing network.
 // If the network has started, it will start the node.
-func (l *Local) AttachNode(n node.Config) error {
+func (l *Local) AddNode(n node.Config) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
@@ -224,10 +200,7 @@ func (l *Local) enodes() ([]string, error) {
 func (l *Local) checkNode(n node.Config) error {
 	// check if the exec artifact path exists
 	if !fileExists(n.GetExecArtifact()) {
-		if l.execPath == "" {
-			return fmt.Errorf("exec artifact path %s does not exist for node %s", n.GetExecArtifact(), n.GetID())
-		}
-		n.SetExecArtifact(l.execPath)
+		return fmt.Errorf("exec artifact path %s does not exist for node %s", n.GetExecArtifact(), n.GetID())
 	}
 
 	if n.GetConfigDir() == "" {
@@ -237,53 +210,5 @@ func (l *Local) checkNode(n node.Config) error {
 	if n.GetDataDir() == "" {
 		n.SetDataDir(filepath.Join(filepath.Dir(n.GetExecArtifact()), n.GetID(), "data"))
 	}
-	return nil
-}
-
-// AttachToPublicNetworkAndStart creates and starts a node connected to a public network (testnet/mainnet)
-func (l *Local) AttachToPublicNetworkAndStart(config PublicNetworkConfig) error {
-	publicNode := &node.BaseNode{
-		ID:             config.NodeID,
-		P2PListenPort:  config.P2PPort,
-		APIAddr:        config.APIAddr,
-		AdditionalArgs: map[string]string{"network": config.NetworkType},
-	}
-
-	environment := "testnet"
-	if config.NetworkType == "main" {
-		environment = "mainnet"
-	}
-
-	thorBranch := "master"
-	if config.Branch != "" {
-		thorBranch = config.Branch
-	}
-
-	// Create network configuration
-	networkCfg := &network.Network{
-		BaseID:      "baseID",
-		Environment: environment,
-		Nodes:       []node.Config{publicNode},
-		ThorBuilder: &thorbuilder.Config{
-			DownloadConfig: &thorbuilder.DownloadConfig{
-				RepoUrl:    "https://github.com/vechain/thor",
-				Branch:     thorBranch,
-				IsReusable: true,
-			},
-		},
-	}
-
-	// Load the configuration
-	_, err := l.LoadConfig(networkCfg)
-	if err != nil {
-		return fmt.Errorf("failed to load network configuration: %w", err)
-	}
-
-	// Start the network (this will start the public network node)
-	err = l.StartNetwork()
-	if err != nil {
-		return fmt.Errorf("failed to start public network: %w", err)
-	}
-
 	return nil
 }

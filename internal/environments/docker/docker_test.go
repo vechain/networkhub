@@ -4,13 +4,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vechain/thor/v2/thorclient"
-
 	"github.com/stretchr/testify/assert"
-	"github.com/vechain/networkhub/environments/docker"
+	"github.com/vechain/networkhub/internal/environments/docker"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/preset"
+	"github.com/vechain/thor/v2/thorclient"
 )
 
 func TestDockerNetwork(t *testing.T) {

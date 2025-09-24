@@ -69,6 +69,20 @@ func New(cfg *Config) *Builder {
 	}
 }
 
+func NewAndBuild(cfg *Config) (string, error) {
+	builder := New(cfg)
+	if err := builder.Download(); err != nil {
+		return "", fmt.Errorf("failed to download thor binary: %w", err)
+	}
+
+	execPath, err := builder.Build()
+	if err != nil {
+		return "", fmt.Errorf("failed to build thor binary: %w", err)
+	}
+
+	return execPath, nil
+}
+
 // Download clones the specified branch of the Thor repository into the downloadPath.
 func (b *Builder) Download() error {
 	if b.config.DownloadConfig == nil {
