@@ -11,7 +11,6 @@ import (
 	"github.com/ethereum/go-ethereum/p2p/discover"
 
 	"github.com/vechain/networkhub/network/node/genesis"
-	"github.com/vechain/thor/v2/api"
 	"github.com/vechain/thor/v2/thorclient"
 )
 
@@ -154,8 +153,6 @@ func (b *BaseNode) HealthCheck(block uint32, timeout time.Duration) error {
 	ticker := time.NewTicker(timeout)
 	defer ticker.Stop()
 
-	var blk *api.JSONCollapsedBlock
-
 	for {
 		select {
 		case <-ticker.C:
@@ -163,16 +160,6 @@ func (b *BaseNode) HealthCheck(block uint32, timeout time.Duration) error {
 		default:
 			newBlk, err := client.Block(strconv.Itoa(int(block)))
 			if err == nil && newBlk != nil {
-				if blk == nil {
-					blk = newBlk
-				}
-				if blk.ID.String() != newBlk.ID.String() {
-					return fmt.Errorf("unexpected blocks at the same height - height: %d hashNewBlk: %s hashBlk: %s",
-						block,
-						newBlk.ID.String(),
-						blk.ID.String(),
-					)
-				}
 				return nil
 			}
 			slog.Debug("waiting for node to be healthy", "node", b.ID, "block", block, "error", err)

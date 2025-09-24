@@ -72,12 +72,7 @@ func (c *Client) LoadNetwork(net *network.Network) error {
 
 	// Handle thor binary management at client level
 	if net.ThorBuilder != nil {
-		builder := thorbuilder.New(net.ThorBuilder)
-		if err := builder.Download(); err != nil {
-			return fmt.Errorf("failed to download thor binary: %w", err)
-		}
-
-		execPath, err := builder.Build()
+		execPath, err := thorbuilder.NewAndBuild(net.ThorBuilder)
 		if err != nil {
 			return fmt.Errorf("failed to build thor binary: %w", err)
 		}
@@ -119,12 +114,7 @@ func (c *Client) AddNode(nodeConfig node.Config) error {
 
 	// Set exec artifact for the new node if it doesn't have one and we have a thor builder
 	if nodeConfig.GetExecArtifact() == "" && c.network.ThorBuilder != nil {
-		builder := thorbuilder.New(c.network.ThorBuilder)
-		if err := builder.Download(); err != nil {
-			return fmt.Errorf("failed to download thor binary for new node: %w", err)
-		}
-
-		execPath, err := builder.Build()
+		execPath, err := thorbuilder.NewAndBuild(c.network.ThorBuilder)
 		if err != nil {
 			return fmt.Errorf("failed to build thor binary for new node: %w", err)
 		}
