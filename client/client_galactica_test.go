@@ -36,7 +36,7 @@ func TestClientSixNodesGalactica(t *testing.T) {
 	sixNodesGalacticaNetwork.ThorBuilder = cfg
 
 	// Create client with the network (automatically starts)
-	c, err := NewWithNetwork(sixNodesGalacticaNetwork)
+	c, err := New(sixNodesGalacticaNetwork)
 	require.NoError(t, err)
 
 	require.NoError(t, c.Start())

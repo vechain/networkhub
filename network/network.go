@@ -12,6 +12,13 @@ import (
 	"github.com/vechain/networkhub/thorbuilder"
 )
 
+// Network BaseID constants define the type of network
+const (
+	// Public networks
+	Mainnet = "mainnet"
+	Testnet = "testnet"
+)
+
 type Network struct {
 	Environment string              `json:"environment"`
 	Nodes       []node.Config       `json:"nodes"`
@@ -173,20 +180,28 @@ func (n *Network) checkBlockConsistency(block uint32) error {
 	return nil
 }
 
-// hasPublicNetworkNodes checks if any node is configured for public networks (testnet/mainnet)
-func (n *Network) hasPublicNetworkNodes() bool {
-	for _, node := range n.Nodes {
-		if isPublicNetworkNode(node) {
-			return true
-		}
-	}
-	return false
+// IsPublicNetwork determines if this network is a public network (mainnet/testnet)
+// based on the BaseID rather than individual node configuration
+func (n *Network) IsPublicNetwork() bool {
+	return n.BaseID == Mainnet || n.BaseID == Testnet
 }
 
-// isPublicNetworkNode checks if a node is configured for a public network
-func isPublicNetworkNode(node node.Config) bool {
-	networkArg, exists := node.GetAdditionalArgs()["network"]
-	return exists && (networkArg == "test" || networkArg == "main")
+// GetThorNetworkArg returns the appropriate --network argument for thor binary
+func (n *Network) GetThorNetworkArg() string {
+	switch n.BaseID {
+	case Mainnet:
+		return "main"
+	case Testnet:
+		return "test"
+	default:
+		// For private networks, this will be replaced with genesis file path by the environment
+		return ""
+	}
+}
+
+// hasPublicNetworkNodes checks if this is a public network (legacy method for health checks)
+func (n *Network) hasPublicNetworkNodes() bool {
+	return n.IsPublicNetwork()
 }
 
 // UnmarshalJSON implements custom unmarshalling for Network

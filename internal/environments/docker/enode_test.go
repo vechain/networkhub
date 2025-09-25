@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/vechain/networkhub/internal/environments"
 	"github.com/vechain/networkhub/internal/environments/docker"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
@@ -16,7 +17,7 @@ func TestEnodeGeneration(t *testing.T) {
 	presetNetwork := preset.LocalThreeMasterNodesNetwork()
 	
 	networkCfg := &network.Network{
-		Environment: "docker",
+		Environment: environments.Docker,
 		BaseID:      "enode-test",
 		Nodes: []node.Config{
 			&node.BaseNode{

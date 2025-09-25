@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/vechain/networkhub/internal/environments"
 	"github.com/vechain/networkhub/internal/environments/overseer"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
@@ -17,7 +18,7 @@ func TestDockerNetwork(t *testing.T) {
 	presetNetwork := preset.LocalThreeMasterNodesNetwork()
 	// Create a mock network configuration
 	networkCfg := &network.Network{
-		Environment: "docker",
+		Environment: environments.Docker,
 		BaseID:      "test-id",
 		Nodes: []node.Config{
 			&node.BaseNode{

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/vechain/networkhub/internal/environments"
 	"github.com/vechain/networkhub/preset"
 	"github.com/vechain/networkhub/thorbuilder"
 	"github.com/vechain/networkhub/utils/common"
@@ -78,7 +79,7 @@ func TestDockerClient(t *testing.T) {
 	networkCfg := preset.LocalThreeMasterNodesNetwork()
 
 	// Modify for docker usage
-	networkCfg.Environment = "docker"
+	networkCfg.Environment = environments.Docker
 	dockerImage := "vechain/thor"
 	basePort := 9000 // avoid port collision with other tests
 
@@ -271,7 +272,7 @@ func TestClientAdditionalArgs(t *testing.T) {
 	}
 
 	// Create client with the network
-	c, err := NewWithNetwork(networkCfg)
+	c, err := New(networkCfg)
 	require.NoError(t, err)
 	require.NoError(t, c.Start())
 

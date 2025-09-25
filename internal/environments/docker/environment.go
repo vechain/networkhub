@@ -283,11 +283,12 @@ func (e *Environment) buildDockerImageIfNeeded() error {
 // generateEnodes creates enode strings for all nodes (excluding public network nodes)
 func (e *Environment) generateEnodes() ([]string, error) {
 	var enodes []string
+	// Skip enode generation entirely for public networks (testnet/mainnet)
+	if e.networkCfg.IsPublicNetwork() {
+		return enodes, nil
+	}
+	
 	for _, node := range e.networkCfg.Nodes {
-		// Skip enode generation for public network nodes (testnet/mainnet)
-		if isPublicNetworkNode(node) {
-			continue
-		}
 
 		// Pre-allocate IP address if not already assigned
 		ipAddr := e.ipManager.GetNodeIP(node.GetID())
@@ -366,8 +367,3 @@ type ExposedPort struct {
 	ContainerPort string
 }
 
-// isPublicNetworkNode checks if a node is configured for a public network (testnet/mainnet)
-func isPublicNetworkNode(node node.Config) bool {
-	networkArg, exists := node.GetAdditionalArgs()["network"]
-	return exists && (networkArg == "test" || networkArg == "main")
-}

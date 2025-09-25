@@ -53,7 +53,7 @@ func (e *Environment) StartNetwork() error {
 			return fmt.Errorf("failed to validate node %s: %w", nodeCfg.GetID(), err)
 		}
 
-		nodeInstance := NewLocalNode(nodeCfg, enodes)
+		nodeInstance := NewLocalNode(nodeCfg, e.networkCfg, enodes)
 
 		if err := nodeInstance.Start(); err != nil {
 			return fmt.Errorf("unable to start node %s: %w", nodeCfg.GetID(), err)
@@ -118,7 +118,7 @@ func (e *Environment) AddNode(nodeConfig node.Config) error {
 			return fmt.Errorf("failed to generate enodes: %w", err)
 		}
 
-		nodeInstance := NewLocalNode(nodeConfig, enodes)
+		nodeInstance := NewLocalNode(nodeConfig, e.networkCfg, enodes)
 		if err := nodeInstance.Start(); err != nil {
 			return fmt.Errorf("unable to start node %s after adding: %w", nodeConfig.GetID(), err)
 		}
@@ -219,11 +219,12 @@ func (e *Environment) buildThorBinaryIfNeeded() error {
 // generateEnodes creates enode strings for all nodes (excluding public network nodes)
 func (e *Environment) generateEnodes() ([]string, error) {
 	var enodes []string
+	// Skip enode generation entirely for public networks (testnet/mainnet)
+	if e.networkCfg.IsPublicNetwork() {
+		return enodes, nil
+	}
+	
 	for _, node := range e.networkCfg.Nodes {
-		// Skip enode generation for public network nodes (testnet/mainnet)
-		if isPublicNetworkNode(node) {
-			continue
-		}
 
 		// Use localhost for local environment
 		enode, err := node.Enode("127.0.0.1")
@@ -246,4 +247,3 @@ func fileExists(path string) bool {
 	return err == nil
 }
 
-// isPublicNetworkNode is defined in local_node.go

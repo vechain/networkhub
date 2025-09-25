@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/vechain/networkhub/internal/environments"
 	"github.com/vechain/networkhub/internal/environments/docker"
 	"github.com/vechain/networkhub/internal/environments/local"
 	"github.com/vechain/networkhub/network"
@@ -38,9 +39,9 @@ func New(cfg *network.Network) (*Overseer, error) {
 	var env Environment
 	var err error
 	switch cfg.Environment {
-	case "local":
+	case environments.Local:
 		env, err = createLocalEnvironment(cfg)
-	case "docker":
+	case environments.Docker:
 		env, err = createDockerEnvironment(cfg)
 	default:
 		return nil, fmt.Errorf("unsupported environment: %s", cfg.Environment)
