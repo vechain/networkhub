@@ -49,11 +49,11 @@ func TestClientSixNodesGalactica(t *testing.T) {
 
 	// Wait for all nodes to connect to each other
 	t.Log("Waiting for nodes to connect...")
-	clients := pollingWhileConnectingPeers(t, sixNodesGalacticaNetwork.Nodes, 5) // 6 nodes = 5 peers each
+	require.NoError(t, c.network.HealthCheck(2, time.Minute))
 
 	// Deploy and test Shanghai contract to verify network functionality
 	t.Log("Deploying Shanghai contract to test Galactica network...")
-	deployAndAssertShanghaiContract(t, clients[0], preset.SixNNAccount1)
+	deployAndAssertShanghaiContract(t, thorclient.New(c.network.Nodes[0].GetHTTPAddr()), preset.SixNNAccount1)
 
 	t.Log("Successfully tested Galactica network with Shanghai contract deployment!")
 }

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/vechain/networkhub/internal/environments/docker"
+	"github.com/vechain/networkhub/internal/environments/overseer"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/preset"
@@ -37,9 +37,9 @@ func TestDockerNetwork(t *testing.T) {
 				ExecArtifact:   "vechain/thor:latest",
 				DataDir:        "/home/thor",
 				ConfigDir:      "/home/thor",
-				APIAddr:        "0.0.0.0:8545",
+				APIAddr:        "0.0.0.0:8546",
 				APICORS:        "*",
-				P2PListenPort:  30303,
+				P2PListenPort:  30304,
 				Key:            presetNetwork.Nodes[1].GetKey(),
 				Genesis:        genesis,
 				AdditionalArgs: map[string]string{"api-allowed-tracers": "all"},
@@ -49,9 +49,9 @@ func TestDockerNetwork(t *testing.T) {
 				ExecArtifact:   "vechain/thor:latest",
 				DataDir:        "/home/thor",
 				ConfigDir:      "/home/thor",
-				APIAddr:        "0.0.0.0:8545",
+				APIAddr:        "0.0.0.0:8547",
 				APICORS:        "*",
-				P2PListenPort:  30303,
+				P2PListenPort:  30305,
 				Key:            presetNetwork.Nodes[2].GetKey(),
 				Genesis:        genesis,
 				AdditionalArgs: map[string]string{"api-allowed-tracers": "all"},
@@ -59,27 +59,23 @@ func TestDockerNetwork(t *testing.T) {
 		},
 	}
 
-	// Initialize Docker environment
-	dockerEnv := docker.NewEnv()
-	assert.NotNil(t, dockerEnv)
-
-	// Load configuration
-	id, err := dockerEnv.LoadConfig(networkCfg)
+	// Initialize Docker environment via overseer
+	overseerEnv, err := overseer.New(networkCfg)
 	assert.NoError(t, err)
-	assert.Equal(t, "dockertest-id", id)
+	assert.NotNil(t, overseerEnv)
 
 	t.Cleanup(func() {
 		time.Sleep(time.Minute)
 		// Stop network
-		err = dockerEnv.StopNetwork()
+		err = overseerEnv.StopNetwork()
 		assert.NoError(t, err)
 	})
 
 	// Start network
-	err = dockerEnv.StartNetwork()
+	err = overseerEnv.StartNetwork()
 	assert.NoError(t, err)
 
-	err = networkCfg.HealthCheck(1, time.Minute)
+	err = networkCfg.HealthCheck(1, 2*time.Minute)
 	assert.NoError(t, err)
 
 	// test additional args

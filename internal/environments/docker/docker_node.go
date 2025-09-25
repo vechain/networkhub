@@ -17,7 +17,7 @@ import (
 )
 
 // NewDockerNode initializes a new DockerNode
-func NewDockerNode(cfg node.Config, enodes []string, networkID string, exposedPorts *exposedPort, ipAddr string) *Node {
+func NewDockerNode(cfg node.Config, enodes []string, networkID string, exposedPorts *ExposedPort, ipAddr string) *Node {
 	return &Node{
 		cfg:          cfg,
 		enodes:       enodes,
@@ -33,7 +33,7 @@ type Node struct {
 	enodes       []string
 	id           string
 	networkID    string
-	exposedPorts *exposedPort
+	exposedPorts *ExposedPort
 	ipAddr       string
 }
 
@@ -109,12 +109,12 @@ func (n *Node) Start() error {
 	}
 
 	exposedPorts := nat.PortSet{
-		nat.Port(fmt.Sprintf("%s/tcp", n.exposedPorts.containerPort)): struct{}{},
+		nat.Port(fmt.Sprintf("%s/tcp", n.exposedPorts.ContainerPort)): struct{}{},
 	}
 	portBindings := map[nat.Port][]nat.PortBinding{
-		nat.Port(fmt.Sprintf("%s/tcp", n.exposedPorts.containerPort)): {
+		nat.Port(fmt.Sprintf("%s/tcp", n.exposedPorts.ContainerPort)): {
 			{
-				HostPort: n.exposedPorts.hostPort,
+				HostPort: n.exposedPorts.HostPort,
 			},
 		},
 	}

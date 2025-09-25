@@ -12,8 +12,9 @@ func TestLocalInvalidExecArtifact(t *testing.T) {
 
 	networkCfg.Nodes[0].SetExecArtifact("/some_fake_dir")
 
-	localEnv := NewEnv()
-	_, err := localEnv.LoadConfig(networkCfg)
+	// Test local environment directly
+	env := NewEnvironment(networkCfg)
+	err := env.StartNetwork()
 	require.Error(t, err)
 
 	require.ErrorContains(t, err, "exec artifact path /some_fake_dir does not exist")

@@ -16,9 +16,6 @@ import (
 )
 
 func TestLocalClient(t *testing.T) {
-	// Create client
-	c := New()
-
 	// Create preset networks
 	networkCfg := preset.LocalThreeMasterNodesNetwork()
 	basePort := 9100 // avoid port collision with other tests
@@ -45,10 +42,10 @@ func TestLocalClient(t *testing.T) {
 		node.SetP2PListenPort(basePort)
 	}
 
-	// Configure and start network
-	err := c.LoadNetwork(networkCfg)
+	// Create client with network configuration
+	c, err := New(networkCfg)
 	if err != nil {
-		t.Fatalf("Failed to load network: %v", err)
+		t.Fatalf("Failed to create client: %v", err)
 	}
 
 	// Start network
@@ -77,9 +74,6 @@ func TestLocalClient(t *testing.T) {
 }
 
 func TestDockerClient(t *testing.T) {
-	// Create client
-	c := New()
-
 	// Create preset networks
 	networkCfg := preset.LocalThreeMasterNodesNetwork()
 
@@ -109,8 +103,8 @@ func TestDockerClient(t *testing.T) {
 		node.SetID(fmt.Sprintf("%s-%d", node.GetID(), i))
 	}
 
-	// Configure and start network
-	err := c.LoadNetwork(networkCfg)
+	// Create client with network configuration
+	c, err := New(networkCfg)
 	require.NoError(t, err)
 
 	// Start network
@@ -138,12 +132,9 @@ func TestDockerClient(t *testing.T) {
 }
 
 func TestAddRemoveNodes(t *testing.T) {
-	// Create client
-	c := New()
-
 	// Create initial network with 2 nodes
 	networkCfg := preset.LocalThreeMasterNodesNetwork()
-	basePort := 9300 // avoid port collision with other tests
+	basePort := 9400 // avoid port collision with other tests
 
 	// Configure thor builder
 	cfg := thorbuilder.DefaultConfig()
@@ -163,8 +154,8 @@ func TestAddRemoveNodes(t *testing.T) {
 	}
 	networkCfg.Nodes = originalNodes
 
-	// Load and start network with 2 nodes
-	err := c.LoadNetwork(networkCfg)
+	// Create client with network configuration
+	c, err := New(networkCfg)
 	require.NoError(t, err)
 
 	err = c.Start()
@@ -242,11 +233,14 @@ func TestAddRemoveNodes(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "node with ID non-existent does not exist")
 
-	// Test adding node without network loaded
-	c2 := New()
+	// Test adding node with invalid network configuration
+	// Create a minimal invalid network config for testing error conditions
+	invalidNetworkCfg := preset.LocalThreeMasterNodesNetwork()
+	invalidNetworkCfg.Nodes = nil // empty nodes
+	c2, err2 := New(invalidNetworkCfg)
+	require.NoError(t, err2) // Constructor should succeed
 	err = c2.AddNode(thirdNode)
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "no network loaded")
+	require.NoError(t, err) // Should be able to add node even to initially empty network
 
 	// Stop the original network
 	err = c.Stop()

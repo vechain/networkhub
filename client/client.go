@@ -5,42 +5,40 @@ import (
 	"strings"
 
 	"github.com/vechain/networkhub/internal/environments"
-	"github.com/vechain/networkhub/internal/environments/docker"
-	"github.com/vechain/networkhub/internal/environments/local"
+	"github.com/vechain/networkhub/internal/environments/overseer"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
-	"github.com/vechain/networkhub/thorbuilder"
 )
 
 type Client struct {
 	network     *network.Network
 	environment environments.Actions
-	factories   map[string]environments.Factory
 }
 
-func New() *Client {
-	factories := map[string]environments.Factory{
-		"local":  local.NewFactory(),
-		"docker": docker.NewFactory(),
-	}
-
-	return &Client{
-		factories: factories,
-	}
-}
-
-func NewWithNetwork(net *network.Network) (*Client, error) {
-	c := New()
-	if err := c.LoadNetwork(net); err != nil {
+func New(net *network.Network) (*Client, error) {
+	env, err := overseer.New(net)
+	if err != nil {
 		return nil, err
 	}
 
+	c := &Client{
+		network:     net,
+		environment: env,
+	}
+
+	// Auto-start for public networks (testnet/mainnet)
 	if strings.Contains(net.ID(), "mainnet") || strings.Contains(net.ID(), "testnet") {
 		if err := c.Start(); err != nil {
 			return nil, err
 		}
 	}
+
 	return c, nil
+}
+
+// NewWithNetwork is an alias for New for backward compatibility
+func NewWithNetwork(net *network.Network) (*Client, error) {
+	return New(net)
 }
 
 func (c *Client) Stop() error {
@@ -64,38 +62,6 @@ func (c *Client) GetNetwork() (*network.Network, error) {
 	return c.network, nil
 }
 
-func (c *Client) LoadNetwork(net *network.Network) error {
-	factory, ok := c.factories[net.Environment]
-	if !ok {
-		return fmt.Errorf("unsupported environment: %s", net.Environment)
-	}
-
-	// Handle thor binary management at client level
-	if net.ThorBuilder != nil {
-		execPath, err := thorbuilder.NewAndBuild(net.ThorBuilder)
-		if err != nil {
-			return fmt.Errorf("failed to build thor binary: %w", err)
-		}
-
-		// Set exec artifact for all nodes that don't have one
-		for _, nodeConfig := range net.Nodes {
-			if nodeConfig.GetExecArtifact() == "" {
-				nodeConfig.SetExecArtifact(execPath)
-			}
-		}
-	}
-
-	env := factory.New()
-	_, err := env.LoadConfig(net)
-	if err != nil {
-		return fmt.Errorf("failed to load network config: %w", err)
-	}
-
-	c.network = net
-	c.environment = env
-	return nil
-}
-
 func (c *Client) Nodes() (map[string]node.Lifecycle, error) {
 	if c.environment == nil {
 		return nil, fmt.Errorf("no network loaded")
@@ -110,16 +76,6 @@ func (c *Client) AddNode(nodeConfig node.Config) error {
 
 	if c.environment == nil {
 		return fmt.Errorf("environment not initialized")
-	}
-
-	// Set exec artifact for the new node if it doesn't have one and we have a thor builder
-	if nodeConfig.GetExecArtifact() == "" && c.network.ThorBuilder != nil {
-		execPath, err := thorbuilder.NewAndBuild(c.network.ThorBuilder)
-		if err != nil {
-			return fmt.Errorf("failed to build thor binary for new node: %w", err)
-		}
-
-		nodeConfig.SetExecArtifact(execPath)
 	}
 
 	// Use environment's AddNode method
