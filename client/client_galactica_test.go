@@ -9,7 +9,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
-	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/preset"
 	"github.com/vechain/networkhub/thorbuilder"
@@ -27,8 +26,7 @@ import (
 // 3. Deploy and execute Shanghai-compatible smart contracts
 func TestClientSixNodesGalactica(t *testing.T) {
 	// Create the six nodes Galactica network
-	var sixNodesGalacticaNetwork *network.Network
-	require.NotPanics(t, func() { sixNodesGalacticaNetwork = preset.LocalSixNodesNetwork() })
+	sixNodesGalacticaNetwork := preset.LocalSixNodesNetwork()
 
 	// Configure thor builder for reusable builds
 	cfg := thorbuilder.DefaultConfig()
