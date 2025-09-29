@@ -11,8 +11,8 @@ import (
 	"github.com/vechain/thor/v2/thor"
 )
 
-func LocalThreeMasterNodesNetwork() *network.Network {
-	genesis := LocalThreeMasterNodesNetworkGenesis()
+func LocalThreeNodesNetwork() *network.Network {
+	genesis := LocalThreeNodesNetworkGenesis()
 	return &network.Network{
 		BaseID:      "threeMaster",
 		Environment: environments.Local,
@@ -23,7 +23,6 @@ func LocalThreeMasterNodesNetwork() *network.Network {
 				APIAddr:       "127.0.0.1:8131",
 				Key:           "01a4107bfb7d5141ec519e75788c34295741a1eefbfe460320efd2ada944071e", // 0x61fF580B63D3845934610222245C116E013717ec
 				Genesis:       genesis,
-				Verbosity:     9,
 			},
 			&node.BaseNode{
 				ID:            "node2",
@@ -31,7 +30,6 @@ func LocalThreeMasterNodesNetwork() *network.Network {
 				APIAddr:       "127.0.0.1:8132",
 				Key:           "7072249b800ddac1d29a3cd06468cc1a917cbcd110dde358a905d03dad51748d", // 0x327931085B4cCbCE0baABb5a5E1C678707C51d90
 				Genesis:       genesis,
-				Verbosity:     9,
 			},
 			&node.BaseNode{
 				ID:            "node3",
@@ -46,7 +44,7 @@ func LocalThreeMasterNodesNetwork() *network.Network {
 
 var localThreeMasterEndorser = thor.MustParseAddress("0x0000000000000000000000004578656375746f72")
 
-func LocalThreeMasterNodesNetworkGenesis() *genesis.CustomGenesis {
+func LocalThreeNodesNetworkGenesis() *genesis.CustomGenesis {
 	return &genesis.CustomGenesis{
 		LaunchTime: 1703180212,
 		GasLimit:   10000000,

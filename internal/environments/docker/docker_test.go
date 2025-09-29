@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vechain/networkhub/internal/environments"
-	"github.com/vechain/networkhub/internal/environments/overseer"
+	"github.com/vechain/networkhub/internal/environments/launcher"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/preset"
@@ -14,8 +14,8 @@ import (
 )
 
 func TestDockerNetwork(t *testing.T) {
-	genesis := preset.LocalThreeMasterNodesNetworkGenesis()
-	presetNetwork := preset.LocalThreeMasterNodesNetwork()
+	genesis := preset.LocalThreeNodesNetworkGenesis()
+	presetNetwork := preset.LocalThreeNodesNetwork()
 	// Create a mock network configuration
 	networkCfg := &network.Network{
 		Environment: environments.Docker,
@@ -61,19 +61,19 @@ func TestDockerNetwork(t *testing.T) {
 	}
 
 	// Initialize Docker environment via overseer
-	overseerEnv, err := overseer.New(networkCfg)
+	launcherEnv, err := launcher.New(networkCfg)
 	assert.NoError(t, err)
-	assert.NotNil(t, overseerEnv)
+	assert.NotNil(t, launcherEnv)
 
 	t.Cleanup(func() {
 		time.Sleep(time.Minute)
 		// Stop network
-		err = overseerEnv.StopNetwork()
+		err = launcherEnv.StopNetwork()
 		assert.NoError(t, err)
 	})
 
 	// Start network
-	err = overseerEnv.StartNetwork()
+	err = launcherEnv.StartNetwork()
 	assert.NoError(t, err)
 
 	err = networkCfg.HealthCheck(1, 2*time.Minute)

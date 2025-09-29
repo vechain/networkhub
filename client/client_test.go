@@ -18,7 +18,7 @@ import (
 
 func TestLocalClient(t *testing.T) {
 	// Create preset networks
-	networkCfg := preset.LocalThreeMasterNodesNetwork()
+	networkCfg := preset.LocalThreeNodesNetwork()
 	basePort := 9100 // avoid port collision with other tests
 
 	// configure local artifacts
@@ -76,7 +76,7 @@ func TestLocalClient(t *testing.T) {
 
 func TestDockerClient(t *testing.T) {
 	// Create preset networks
-	networkCfg := preset.LocalThreeMasterNodesNetwork()
+	networkCfg := preset.LocalThreeNodesNetwork()
 
 	// Modify for docker usage
 	networkCfg.Environment = environments.Docker
@@ -131,7 +131,7 @@ func TestDockerClient(t *testing.T) {
 
 func TestAddRemoveNodes(t *testing.T) {
 	// Create initial network with 2 nodes
-	networkCfg := preset.LocalThreeMasterNodesNetwork()
+	networkCfg := preset.LocalThreeNodesNetwork()
 	basePort := 9400 // avoid port collision with other tests
 
 	// Configure thor builder
@@ -233,7 +233,7 @@ func TestAddRemoveNodes(t *testing.T) {
 
 	// Test adding node with invalid network configuration
 	// Create a minimal invalid network config for testing error conditions
-	invalidNetworkCfg := preset.LocalThreeMasterNodesNetwork()
+	invalidNetworkCfg := preset.LocalThreeNodesNetwork()
 	invalidNetworkCfg.Nodes = nil // empty nodes
 	c2, err2 := New(invalidNetworkCfg)
 	require.NoError(t, err2) // Constructor should succeed
@@ -247,7 +247,7 @@ func TestAddRemoveNodes(t *testing.T) {
 
 func TestClientAdditionalArgs(t *testing.T) {
 	// Create network with LocalThreeMasterNodes preset
-	networkCfg := preset.LocalThreeMasterNodesNetwork()
+	networkCfg := preset.LocalThreeNodesNetwork()
 
 	// Configure thor builder
 	cfg := thorbuilder.DefaultConfig()

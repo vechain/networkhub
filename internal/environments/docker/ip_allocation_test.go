@@ -15,8 +15,8 @@ import (
 
 func TestIPAllocationInEnodes(t *testing.T) {
 	// Create a test network configuration
-	genesis := preset.LocalThreeMasterNodesNetworkGenesis()
-	presetNetwork := preset.LocalThreeMasterNodesNetwork()
+	genesis := preset.LocalThreeNodesNetworkGenesis()
+	presetNetwork := preset.LocalThreeNodesNetwork()
 
 	networkCfg := &network.Network{
 		Environment: environments.Docker,

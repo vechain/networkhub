@@ -4,17 +4,17 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/vechain/networkhub/internal/environments/overseer"
+	"github.com/vechain/networkhub/internal/environments/launcher"
 	"github.com/vechain/networkhub/preset"
 )
 
 func TestLocalInvalidExecArtifact(t *testing.T) {
-	networkCfg := preset.LocalThreeMasterNodesNetwork()
+	networkCfg := preset.LocalThreeNodesNetwork()
 
 	networkCfg.Nodes[0].SetExecArtifact("/some_fake_dir")
 
 	// Test overseer with local environment
-	env, err := overseer.New(networkCfg)
+	env, err := launcher.New(networkCfg)
 	require.NoError(t, err)
 
 	err = env.StartNetwork()

@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/vechain/networkhub/internal/environments"
-	"github.com/vechain/networkhub/internal/environments/overseer"
+	"github.com/vechain/networkhub/internal/environments/launcher"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
 )
@@ -16,7 +16,7 @@ type Client struct {
 }
 
 func New(net *network.Network) (*Client, error) {
-	env, err := overseer.New(net)
+	env, err := launcher.New(net)
 	if err != nil {
 		return nil, err
 	}
