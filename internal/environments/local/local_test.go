@@ -16,9 +16,9 @@ func TestLocalInvalidExecArtifact(t *testing.T) {
 	// Test overseer with local environment
 	env, err := overseer.New(networkCfg)
 	require.NoError(t, err)
-	
+
 	err = env.StartNetwork()
 	require.Error(t, err)
 
-	require.ErrorContains(t, err, "unable to find executable /some_fake_dir")
+	require.ErrorContains(t, err, "artifact path /some_fake_dir does not exist for node")
 }

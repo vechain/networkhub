@@ -71,36 +71,21 @@ func (n *Node) Start() error {
 		}
 	}
 
-	cleanEnode := []string{} // todo theres a clever way of doing this
-	for _, enode := range n.enodes {
-		nodeEnode, err := n.cfg.Enode(n.ipAddr)
-		if err != nil {
-			return err
-		}
-		if nodeEnode != enode {
-			cleanEnode = append(cleanEnode, enode)
-		}
-	}
-	enodeString := strings.Join(cleanEnode, ",")
+	cleanEnode := n.cleanEnodes()
 
-	args := "cd /home/thor; " +
-		"echo $GENESIS > genesis.json;" +
-		"echo $PRIVATEKEY > master.key;" +
-		"echo $PRIVATEKEY > p2p.key;" +
-		"thor " +
-		"--network genesis.json " +
-		"--nat none " +
-		fmt.Sprintf("--config-dir='%s' ", n.cfg.GetConfigDir()) +
-		fmt.Sprintf("--api-addr='%s' ", n.cfg.GetAPIAddr()) +
-		fmt.Sprintf("--api-cors='%s' ", n.cfg.GetAPICORS()) +
-		fmt.Sprintf("--p2p-port=%d ", n.cfg.GetP2PListenPort()) +
-		fmt.Sprintf("--bootnode=%s", enodeString)
+	// Build thor command arguments
+	thorArgs := n.buildThorArgs(cleanEnode)
 
-	for key, value := range n.cfg.GetAdditionalArgs() {
-		args += fmt.Sprintf(" --%s=%s", key, value)
+	// Build the full shell command
+	shellCommands := []string{
+		"cd /home/thor",
+		"echo $GENESIS > genesis.json",
+		"echo $PRIVATEKEY > master.key",
+		"echo $PRIVATEKEY > p2p.key",
+		strings.Join(thorArgs, " "),
 	}
 
-	cmd := []string{"sh", "-c", args}
+	cmd := []string{"sh", "-c", strings.Join(shellCommands, "; ")}
 
 	//serialize genesis
 	genesisBytes, err := nodegenesis.Marshal(n.cfg.GetGenesis())
@@ -181,4 +166,50 @@ func (n *Node) Stop() error {
 	}
 
 	return nil
+}
+
+// cleanEnodes filters out the current node's enode from the list
+func (n *Node) cleanEnodes() []string {
+	var cleanEnodes []string
+	for _, enode := range n.enodes {
+		nodeEnode, err := n.cfg.Enode(n.ipAddr)
+		if err != nil {
+			continue // Skip invalid enodes
+		}
+		if nodeEnode != enode {
+			cleanEnodes = append(cleanEnodes, enode)
+		}
+	}
+	return cleanEnodes
+}
+
+// buildThorArgs builds the thor command arguments array
+func (n *Node) buildThorArgs(cleanEnodes []string) []string {
+	args := []string{"thor"}
+
+	// Add network parameter
+	args = append(args, "--network", "genesis.json")
+
+	// Add common arguments
+	args = append(args,
+		"--nat", "none",
+		"--config-dir", n.cfg.GetConfigDir(),
+		"--api-addr", n.cfg.GetAPIAddr(),
+		fmt.Sprintf("--api-cors '%s' ", n.cfg.GetAPICORS()),
+		"--verbosity", fmt.Sprintf("%d", n.cfg.GetVerbosity()),
+		"--p2p-port", fmt.Sprintf("%d", n.cfg.GetP2PListenPort()),
+	)
+
+	// Add bootnodes if any
+	if len(cleanEnodes) > 0 {
+		enodeString := strings.Join(cleanEnodes, ",")
+		args = append(args, "--bootnode", enodeString)
+	}
+
+	// Add additional arguments
+	for key, value := range n.cfg.GetAdditionalArgs() {
+		args = append(args, fmt.Sprintf("--%s", key), value)
+	}
+
+	return args
 }

@@ -113,13 +113,10 @@ func TestDockerClient(t *testing.T) {
 		t.Fatalf("Failed to start network: %v", err)
 	}
 
-	require.NoError(t,
-		common.Retry(
-			func() error {
-				_, err := thorclient.New(networkCfg.Nodes[0].GetHTTPAddr()).Block("best")
-				return err
-			}, time.Second, 60),
-	)
+	network, err := c.GetNetwork()
+	require.NoError(t, err)
+
+	require.NoError(t, network.HealthCheck(3, time.Minute))
 
 	account, err := thorclient.New(networkCfg.Nodes[0].GetHTTPAddr()).Account(prefundedAcc)
 	require.NoError(t, err)

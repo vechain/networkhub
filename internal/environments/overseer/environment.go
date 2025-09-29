@@ -17,11 +17,11 @@ type Overseer struct {
 	networkCfg *network.Network
 	nodes      map[string]node.Lifecycle
 	started    bool
-	
+
 	// Infrastructure utilities
 	dockerManager *docker.Manager
 	localManager  *local.Manager
-	
+
 	mu sync.Mutex
 }
 
@@ -130,6 +130,15 @@ func (o *Overseer) StopNetwork() error {
 
 	o.nodes = make(map[string]node.Lifecycle)
 	o.started = false
+
+	// Clean up Docker resources if using Docker environment
+	if o.networkCfg.Environment == environments.Docker && o.dockerManager != nil {
+		if err := o.dockerManager.Cleanup(); err != nil {
+			if lastErr == nil {
+				lastErr = fmt.Errorf("failed to cleanup Docker resources: %w", err)
+			}
+		}
+	}
 
 	return lastErr
 }
@@ -250,7 +259,7 @@ func (o *Overseer) Config() *network.Network {
 func (o *Overseer) buildThorBinaryIfNeeded() error {
 	var execPath string
 	var err error
-	
+
 	switch o.networkCfg.Environment {
 	case environments.Local:
 		execPath, err = o.localManager.BuildThorBinary(o.networkCfg.ThorBuilder)
@@ -259,11 +268,11 @@ func (o *Overseer) buildThorBinaryIfNeeded() error {
 	default:
 		return fmt.Errorf("unsupported environment: %s", o.networkCfg.Environment)
 	}
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	// Set exec artifact for nodes that don't have one configured
 	if execPath != "" {
 		for _, nodeConfig := range o.networkCfg.Nodes {
@@ -272,7 +281,7 @@ func (o *Overseer) buildThorBinaryIfNeeded() error {
 			}
 		}
 	}
-	
+
 	return nil
 }
 

@@ -376,4 +376,3 @@ func (n *Node) executeCommand(cmd *exec.Cmd) error {
 	slog.Info("started node", "id", n.nodeCfg.GetID(), "pid", n.cmdExec.Process.Pid)
 	return nil
 }
-

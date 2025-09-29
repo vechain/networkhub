@@ -3,13 +3,13 @@ package network
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/vechain/thor/v2/api"
-	"github.com/vechain/thor/v2/thorclient"
 	"time"
 
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/network/node/genesis"
 	"github.com/vechain/networkhub/thorbuilder"
+	"github.com/vechain/thor/v2/api"
+	"github.com/vechain/thor/v2/thorclient"
 )
 
 // Network BaseID constants define the type of network
