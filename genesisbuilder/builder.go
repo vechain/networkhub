@@ -18,6 +18,7 @@ type Builder struct {
 	executor          *thorgenesis.Executor
 	forkConfig        *genesis.CustomGenesisForkConfig
 	overrider         Overrider
+	config            *genesis.Config
 }
 
 func New(maxBlockProposers int) *Builder {
@@ -72,6 +73,9 @@ func (b *Builder) Build() *genesis.CustomGenesis {
 			ForkConfig: thor.SoloFork,
 		}
 	}
+	if b.config == nil {
+		b.config = &genesis.Config{}
+	}
 
 	gene := &genesis.CustomGenesis{
 		LaunchTime: uint64(time.Now().Unix()),
@@ -82,6 +86,7 @@ func (b *Builder) Build() *genesis.CustomGenesis {
 		Params:     *b.params,
 		Executor:   *b.executor,
 		ForkConfig: b.forkConfig,
+		Config:     b.config,
 	}
 
 	if b.overrider != nil {
