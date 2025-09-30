@@ -7,7 +7,6 @@ import (
 	"strings"
 	"sync"
 
-	dockertypes "github.com/docker/docker/api/types"
 	dockernetwork "github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/vechain/networkhub/network"
@@ -174,7 +173,7 @@ func (m *Manager) createNetwork() error {
 	defer cli.Close()
 
 	// List existing networks
-	networks, err := cli.NetworkList(context.Background(), dockertypes.NetworkListOptions{})
+	networks, err := cli.NetworkList(context.Background(), dockernetwork.ListOptions{})
 	if err != nil {
 		return fmt.Errorf("could not list Docker networks: %v", err)
 	}
@@ -193,7 +192,7 @@ func (m *Manager) createNetwork() error {
 
 	// Network does not exist, create it
 	// Define the network configuration
-	networkCreate := dockertypes.NetworkCreate{
+	networkCreate := dockernetwork.CreateOptions{
 		Driver: "bridge",
 		IPAM: &dockernetwork.IPAM{
 			Driver: "default",
