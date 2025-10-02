@@ -2,11 +2,14 @@ package network
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/network/node/genesis"
 	"github.com/vechain/networkhub/thorbuilder"
+	"github.com/vechain/thor/v2/api"
+	"github.com/vechain/thor/v2/thorclient"
 )
 
 type Network struct {
@@ -71,9 +74,26 @@ func UnmarshalNode(data []byte) (node.Config, error) {
 }
 
 func (n *Network) HealthCheck(block uint32, timeout time.Duration) error {
+	if len(n.Nodes) == 0 {
+		return fmt.Errorf("no nodes defined in the network")
+	}
+
+	var baseBlk *api.JSONCollapsedBlock
 	for _, n := range n.Nodes {
 		if err := n.HealthCheck(block, timeout); err != nil {
 			return err
+		}
+		nodeBlk, err := thorclient.New(n.GetHTTPAddr()).Block(fmt.Sprintf("%d", block))
+		if err != nil {
+			return err
+		}
+		if baseBlk == nil {
+			baseBlk = nodeBlk
+		} else if baseBlk.ID != nodeBlk.ID {
+			return fmt.Errorf(
+				"unexpected blocks at the same height - node: %s height: %d hashNewBlk: %s hashBlk: %s",
+				n.GetID(), block, baseBlk.ID.String(), nodeBlk.ID.String(),
+			)
 		}
 	}
 	return nil

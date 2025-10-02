@@ -9,6 +9,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/p2p/discover"
+
 	"github.com/vechain/networkhub/network/node/genesis"
 	"github.com/vechain/thor/v2/thorclient"
 )
@@ -157,8 +158,8 @@ func (b *BaseNode) HealthCheck(block uint32, timeout time.Duration) error {
 		case <-ticker.C:
 			return fmt.Errorf("timeout waiting for node %s to be healthy", b.ID)
 		default:
-			blk, err := client.Block(strconv.Itoa(int(block)))
-			if err == nil && blk != nil {
+			newBlk, err := client.Block(strconv.Itoa(int(block)))
+			if err == nil && newBlk != nil {
 				return nil
 			}
 			slog.Debug("waiting for node to be healthy", "node", b.ID, "block", block, "error", err)
