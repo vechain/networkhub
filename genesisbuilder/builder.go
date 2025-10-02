@@ -83,7 +83,7 @@ func (b *Builder) Build() *genesis.CustomGenesis {
 		ExtraData:  "Custom Genesis",
 		Accounts:   b.accounts,
 		Authority:  b.authority,
-		Params:     *b.params,
+		Params:     b.params,
 		Executor:   *b.executor,
 		ForkConfig: b.forkConfig,
 		Config:     b.config,
