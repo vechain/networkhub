@@ -2,6 +2,7 @@ package common
 
 import (
 	"crypto/ecdsa"
+	"fmt"
 	"time"
 
 	"github.com/ethereum/go-ethereum/crypto"
@@ -37,6 +38,10 @@ func Retry(fn func() error, retryPeriod time.Duration, maxRetries int) error {
 type Account struct {
 	Address    *thor.Address
 	PrivateKey *ecdsa.PrivateKey
+}
+
+func (a Account) PrivateKeyString() string {
+	return fmt.Sprintf("%x", a.PrivateKey.D.Bytes())
 }
 
 type TxSendResult struct {

@@ -46,7 +46,7 @@ func (n *Node) Start() error {
 	}
 
 	// Check if the Docker image is available locally
-	_, _, err = cli.ImageInspectWithRaw(ctx, n.cfg.GetExecArtifact())
+	_, err = cli.ImageInspect(ctx, n.cfg.GetExecArtifact())
 	if err != nil {
 		if client.IsErrNotFound(err) {
 			// Pull the Docker image
