@@ -1,7 +1,6 @@
 package preset
 
 import (
-	"crypto/ecdsa"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -15,8 +14,4 @@ var (
 func convToHexOrDecimal256(i *big.Int) *genesis.HexOrDecimal256 {
 	tmp := genesis.HexOrDecimal256(*i)
 	return &tmp
-}
-
-func privateKeyString(k *ecdsa.PrivateKey) string {
-	return hexutil.Encode(k.D.Bytes())
 }

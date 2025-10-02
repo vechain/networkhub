@@ -2,14 +2,14 @@ package client
 
 import (
 	"fmt"
-	"github.com/vechain/networkhub/thorbuilder"
-	"github.com/vechain/thor/v2/thor"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/vechain/networkhub/hayabusa"
 	"github.com/vechain/networkhub/preset"
+	"github.com/vechain/networkhub/thorbuilder"
+	"github.com/vechain/thor/v2/thor"
 	"github.com/vechain/thor/v2/thorclient"
 )
 
