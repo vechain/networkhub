@@ -5,56 +5,49 @@ import (
 	"strings"
 
 	"github.com/vechain/networkhub/internal/environments"
-	"github.com/vechain/networkhub/internal/environments/docker"
-	"github.com/vechain/networkhub/internal/environments/local"
+	"github.com/vechain/networkhub/internal/environments/launcher"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
-	"github.com/vechain/networkhub/thorbuilder"
 )
 
 type Client struct {
-	network     *network.Network
-	environment environments.Actions
-	factories   map[string]environments.Factory
+	network *network.Network
+	actions environments.Actions
 }
 
-func New() *Client {
-	factories := map[string]environments.Factory{
-		"local":  local.NewFactory(),
-		"docker": docker.NewFactory(),
-	}
-
-	return &Client{
-		factories: factories,
-	}
-}
-
-func NewWithNetwork(net *network.Network) (*Client, error) {
-	c := New()
-	if err := c.LoadNetwork(net); err != nil {
+func New(net *network.Network) (*Client, error) {
+	env, err := launcher.New(net)
+	if err != nil {
 		return nil, err
 	}
 
-	if strings.Contains(net.ID(), "mainnet") || strings.Contains(net.ID(), "testnet") {
+	c := &Client{
+		network: net,
+		actions: env,
+	}
+
+	// Auto-start for public networks (testnet/mainnet)
+	if strings.Contains(net.ID(), network.Mainnet) || strings.Contains(net.ID(), network.Testnet) {
 		if err := c.Start(); err != nil {
 			return nil, err
 		}
 	}
+
 	return c, nil
 }
 
 func (c *Client) Stop() error {
-	if c.environment == nil {
+	if c.actions == nil {
 		return fmt.Errorf("no network loaded")
 	}
-	return c.environment.StopNetwork()
+	return c.actions.StopNetwork()
 }
 
 func (c *Client) Start() error {
-	if c.environment == nil {
+	if c.actions == nil {
 		return fmt.Errorf("no network loaded")
 	}
-	return c.environment.StartNetwork()
+	return c.actions.StartNetwork()
 }
 
 func (c *Client) GetNetwork() (*network.Network, error) {
@@ -64,43 +57,11 @@ func (c *Client) GetNetwork() (*network.Network, error) {
 	return c.network, nil
 }
 
-func (c *Client) LoadNetwork(net *network.Network) error {
-	factory, ok := c.factories[net.Environment]
-	if !ok {
-		return fmt.Errorf("unsupported environment: %s", net.Environment)
-	}
-
-	// Handle thor binary management at client level
-	if net.ThorBuilder != nil {
-		execPath, err := thorbuilder.NewAndBuild(net.ThorBuilder)
-		if err != nil {
-			return fmt.Errorf("failed to build thor binary: %w", err)
-		}
-
-		// Set exec artifact for all nodes that don't have one
-		for _, nodeConfig := range net.Nodes {
-			if nodeConfig.GetExecArtifact() == "" {
-				nodeConfig.SetExecArtifact(execPath)
-			}
-		}
-	}
-
-	env := factory.New()
-	_, err := env.LoadConfig(net)
-	if err != nil {
-		return fmt.Errorf("failed to load network config: %w", err)
-	}
-
-	c.network = net
-	c.environment = env
-	return nil
-}
-
 func (c *Client) Nodes() (map[string]node.Lifecycle, error) {
-	if c.environment == nil {
+	if c.actions == nil {
 		return nil, fmt.Errorf("no network loaded")
 	}
-	return c.environment.Nodes(), nil
+	return c.actions.Nodes(), nil
 }
 
 func (c *Client) AddNode(nodeConfig node.Config) error {
@@ -108,27 +69,17 @@ func (c *Client) AddNode(nodeConfig node.Config) error {
 		return fmt.Errorf("no network loaded")
 	}
 
-	if c.environment == nil {
+	if c.actions == nil {
 		return fmt.Errorf("environment not initialized")
 	}
 
-	// Set exec artifact for the new node if it doesn't have one and we have a thor builder
-	if nodeConfig.GetExecArtifact() == "" && c.network.ThorBuilder != nil {
-		execPath, err := thorbuilder.NewAndBuild(c.network.ThorBuilder)
-		if err != nil {
-			return fmt.Errorf("failed to build thor binary for new node: %w", err)
-		}
-
-		nodeConfig.SetExecArtifact(execPath)
-	}
-
 	// Use environment's AddNode method
-	if err := c.environment.AddNode(nodeConfig); err != nil {
+	if err := c.actions.AddNode(nodeConfig); err != nil {
 		return fmt.Errorf("failed to add node to environment: %w", err)
 	}
 
 	// Update client's network reference
-	c.network = c.environment.Config()
+	c.network = c.actions.Config()
 
 	return nil
 }
@@ -138,17 +89,17 @@ func (c *Client) RemoveNode(nodeID string) error {
 		return fmt.Errorf("no network loaded")
 	}
 
-	if c.environment == nil {
+	if c.actions == nil {
 		return fmt.Errorf("environment not initialized")
 	}
 
 	// Use environment's RemoveNode method
-	if err := c.environment.RemoveNode(nodeID); err != nil {
+	if err := c.actions.RemoveNode(nodeID); err != nil {
 		return fmt.Errorf("failed to remove node from environment: %w", err)
 	}
 
 	// Update client's network reference
-	c.network = c.environment.Config()
+	c.network = c.actions.Config()
 
 	return nil
 }

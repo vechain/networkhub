@@ -5,12 +5,7 @@ import (
 	"github.com/vechain/networkhub/network/node"
 )
 
-type Factory interface {
-	New() Actions
-}
-
 type Actions interface {
-	LoadConfig(cfg *network.Network) (string, error)
 	StartNetwork() error
 	StopNetwork() error
 	Nodes() map[string]node.Lifecycle
@@ -19,6 +14,20 @@ type Actions interface {
 	RemoveNode(nodeID string) error
 }
 
+// Environment types define how nodes are executed and managed
 const (
+	// Local environment runs nodes as local processes
 	Local = "local"
+
+	// Docker environment runs nodes in Docker containers
+	Docker = "docker"
+)
+
+// Thor binary network arguments used when executing thor nodes
+const (
+	// ThorNetworkMain is the thor --network argument for mainnet
+	ThorNetworkMain = "main"
+
+	// ThorNetworkTest is the thor --network argument for testnet
+	ThorNetworkTest = "test"
 )

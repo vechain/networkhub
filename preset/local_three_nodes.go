@@ -11,8 +11,8 @@ import (
 	"github.com/vechain/thor/v2/thor"
 )
 
-func LocalThreeMasterNodesNetwork() *network.Network {
-	genesis := LocalThreeMasterNodesNetworkGenesis()
+func LocalThreeNodesNetwork() *network.Network {
+	genesis := LocalThreeNodesNetworkGenesis()
 	return &network.Network{
 		BaseID:      "threeMaster",
 		Environment: environments.Local,
@@ -44,7 +44,7 @@ func LocalThreeMasterNodesNetwork() *network.Network {
 
 var localThreeMasterEndorser = thor.MustParseAddress("0x0000000000000000000000004578656375746f72")
 
-func LocalThreeMasterNodesNetworkGenesis() *genesis.CustomGenesis {
+func LocalThreeNodesNetworkGenesis() *genesis.CustomGenesis {
 	return &genesis.CustomGenesis{
 		LaunchTime: 1703180212,
 		GasLimit:   10000000,

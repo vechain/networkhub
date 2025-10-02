@@ -9,8 +9,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
-	"github.com/vechain/networkhub/network"
-	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/preset"
 	"github.com/vechain/networkhub/thorbuilder"
 	"github.com/vechain/networkhub/utils/common"
@@ -27,8 +25,7 @@ import (
 // 3. Deploy and execute Shanghai-compatible smart contracts
 func TestClientSixNodesGalactica(t *testing.T) {
 	// Create the six nodes Galactica network
-	var sixNodesGalacticaNetwork *network.Network
-	require.NotPanics(t, func() { sixNodesGalacticaNetwork = preset.LocalSixNodesNetwork() })
+	sixNodesGalacticaNetwork := preset.LocalSixNodesNetwork()
 
 	// Configure thor builder for reusable builds
 	cfg := thorbuilder.DefaultConfig()
@@ -36,7 +33,7 @@ func TestClientSixNodesGalactica(t *testing.T) {
 	sixNodesGalacticaNetwork.ThorBuilder = cfg
 
 	// Create client with the network (automatically starts)
-	c, err := NewWithNetwork(sixNodesGalacticaNetwork)
+	c, err := New(sixNodesGalacticaNetwork)
 	require.NoError(t, err)
 
 	require.NoError(t, c.Start())
@@ -49,47 +46,13 @@ func TestClientSixNodesGalactica(t *testing.T) {
 
 	// Wait for all nodes to connect to each other
 	t.Log("Waiting for nodes to connect...")
-	clients := pollingWhileConnectingPeers(t, sixNodesGalacticaNetwork.Nodes, 5) // 6 nodes = 5 peers each
+	require.NoError(t, c.network.HealthCheck(2, time.Minute))
 
 	// Deploy and test Shanghai contract to verify network functionality
 	t.Log("Deploying Shanghai contract to test Galactica network...")
-	deployAndAssertShanghaiContract(t, clients[0], preset.SixNNAccount1)
+	deployAndAssertShanghaiContract(t, thorclient.New(c.network.Nodes[0].GetHTTPAddr()), preset.SixNNAccount1)
 
 	t.Log("Successfully tested Galactica network with Shanghai contract deployment!")
-}
-
-// pollingWhileConnectingPeers waits for all nodes to connect to the expected number of peers
-func pollingWhileConnectingPeers(t *testing.T, nodes []node.Config, expectedPeersLen int) []*thorclient.Client {
-	// Polling approach with timeout
-	timeout := time.After(1 * time.Minute)
-	tick := time.Tick(5 * time.Second)
-
-	clients := make([]*thorclient.Client, 0)
-	for {
-		select {
-		case <-timeout:
-			t.Fatal("timed out waiting for nodes to connect")
-		case <-tick:
-			allConnected := true
-			for _, node := range nodes {
-				c := thorclient.New(node.GetHTTPAddr())
-				peers, err := c.Peers()
-				require.NoError(t, err)
-				if len(peers) != expectedPeersLen {
-					allConnected = false
-					clients = clients[:0] // Reset clients slice
-					break
-				}
-				clients = append(clients, c)
-			}
-
-			if allConnected {
-				t.Logf("All %d nodes connected with %d peers each", len(nodes), expectedPeersLen)
-				return clients
-			}
-			t.Logf("Still waiting for nodes to connect... (expected %d peers each)", expectedPeersLen)
-		}
-	}
 }
 
 // deployAndAssertShanghaiContract deploys a Shanghai-compatible smart contract to test network functionality

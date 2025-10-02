@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/vechain/networkhub/internal/environments"
 	"github.com/vechain/networkhub/preset"
 	"github.com/vechain/networkhub/thorbuilder"
 	"github.com/vechain/networkhub/utils/common"
@@ -16,11 +17,8 @@ import (
 )
 
 func TestLocalClient(t *testing.T) {
-	// Create client
-	c := New()
-
 	// Create preset networks
-	networkCfg := preset.LocalThreeMasterNodesNetwork()
+	networkCfg := preset.LocalThreeNodesNetwork()
 	basePort := 9100 // avoid port collision with other tests
 
 	// configure local artifacts
@@ -45,10 +43,10 @@ func TestLocalClient(t *testing.T) {
 		node.SetP2PListenPort(basePort)
 	}
 
-	// Configure and start network
-	err := c.LoadNetwork(networkCfg)
+	// Create client with network configuration
+	c, err := New(networkCfg)
 	if err != nil {
-		t.Fatalf("Failed to load network: %v", err)
+		t.Fatalf("Failed to create client: %v", err)
 	}
 
 	// Start network
@@ -77,14 +75,11 @@ func TestLocalClient(t *testing.T) {
 }
 
 func TestDockerClient(t *testing.T) {
-	// Create client
-	c := New()
-
 	// Create preset networks
-	networkCfg := preset.LocalThreeMasterNodesNetwork()
+	networkCfg := preset.LocalThreeNodesNetwork()
 
 	// Modify for docker usage
-	networkCfg.Environment = "docker"
+	networkCfg.Environment = environments.Docker
 	dockerImage := "vechain/thor"
 	basePort := 9000 // avoid port collision with other tests
 
@@ -109,8 +104,8 @@ func TestDockerClient(t *testing.T) {
 		node.SetID(fmt.Sprintf("%s-%d", node.GetID(), i))
 	}
 
-	// Configure and start network
-	err := c.LoadNetwork(networkCfg)
+	// Create client with network configuration
+	c, err := New(networkCfg)
 	require.NoError(t, err)
 
 	// Start network
@@ -118,13 +113,10 @@ func TestDockerClient(t *testing.T) {
 		t.Fatalf("Failed to start network: %v", err)
 	}
 
-	require.NoError(t,
-		common.Retry(
-			func() error {
-				_, err := thorclient.New(networkCfg.Nodes[0].GetHTTPAddr()).Block("best")
-				return err
-			}, time.Second, 60),
-	)
+	network, err := c.GetNetwork()
+	require.NoError(t, err)
+
+	require.NoError(t, network.HealthCheck(3, time.Minute))
 
 	account, err := thorclient.New(networkCfg.Nodes[0].GetHTTPAddr()).Account(prefundedAcc)
 	require.NoError(t, err)
@@ -138,12 +130,9 @@ func TestDockerClient(t *testing.T) {
 }
 
 func TestAddRemoveNodes(t *testing.T) {
-	// Create client
-	c := New()
-
 	// Create initial network with 2 nodes
-	networkCfg := preset.LocalThreeMasterNodesNetwork()
-	basePort := 9300 // avoid port collision with other tests
+	networkCfg := preset.LocalThreeNodesNetwork()
+	basePort := 9400 // avoid port collision with other tests
 
 	// Configure thor builder
 	cfg := thorbuilder.DefaultConfig()
@@ -163,8 +152,8 @@ func TestAddRemoveNodes(t *testing.T) {
 	}
 	networkCfg.Nodes = originalNodes
 
-	// Load and start network with 2 nodes
-	err := c.LoadNetwork(networkCfg)
+	// Create client with network configuration
+	c, err := New(networkCfg)
 	require.NoError(t, err)
 
 	err = c.Start()
@@ -242,11 +231,14 @@ func TestAddRemoveNodes(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "node with ID non-existent does not exist")
 
-	// Test adding node without network loaded
-	c2 := New()
+	// Test adding node with invalid network configuration
+	// Create a minimal invalid network config for testing error conditions
+	invalidNetworkCfg := preset.LocalThreeNodesNetwork()
+	invalidNetworkCfg.Nodes = nil // empty nodes
+	c2, err2 := New(invalidNetworkCfg)
+	require.NoError(t, err2) // Constructor should succeed
 	err = c2.AddNode(thirdNode)
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "no network loaded")
+	require.NoError(t, err) // Should be able to add node even to initially empty network
 
 	// Stop the original network
 	err = c.Stop()
@@ -255,7 +247,7 @@ func TestAddRemoveNodes(t *testing.T) {
 
 func TestClientAdditionalArgs(t *testing.T) {
 	// Create network with LocalThreeMasterNodes preset
-	networkCfg := preset.LocalThreeMasterNodesNetwork()
+	networkCfg := preset.LocalThreeNodesNetwork()
 
 	// Configure thor builder
 	cfg := thorbuilder.DefaultConfig()
@@ -277,7 +269,7 @@ func TestClientAdditionalArgs(t *testing.T) {
 	}
 
 	// Create client with the network
-	c, err := NewWithNetwork(networkCfg)
+	c, err := New(networkCfg)
 	require.NoError(t, err)
 	require.NoError(t, c.Start())
 

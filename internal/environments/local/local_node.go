@@ -12,20 +12,23 @@ import (
 	"strings"
 	"time"
 
+	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
 	nodegenesis "github.com/vechain/networkhub/network/node/genesis"
 )
 
 type Node struct {
-	nodeCfg node.Config
-	cmdExec *exec.Cmd
-	enodes  []string
+	nodeCfg    node.Config
+	networkCfg *network.Network
+	cmdExec    *exec.Cmd
+	enodes     []string
 }
 
-func NewLocalNode(nodeCfg node.Config, enodes []string) *Node {
+func NewLocalNode(nodeCfg node.Config, networkCfg *network.Network, enodes []string) *Node {
 	return &Node{
-		nodeCfg: nodeCfg,
-		enodes:  enodes,
+		nodeCfg:    nodeCfg,
+		networkCfg: networkCfg,
+		enodes:     enodes,
 	}
 }
 
@@ -126,16 +129,12 @@ func (nw *nodeWriter) Write(p []byte) (int, error) {
 
 // isPublicNetwork checks if this node is configured to connect to a public network (testnet/mainnet)
 func (n *Node) isPublicNetwork() bool {
-	networkArg, exists := n.nodeCfg.GetAdditionalArgs()["network"]
-	return exists && (networkArg == "test" || networkArg == "main")
+	return n.networkCfg.IsPublicNetwork()
 }
 
-// getPublicNetworkName returns the public network name from additional args
+// getPublicNetworkName returns the public network name from network configuration
 func (n *Node) getPublicNetworkName() string {
-	if networkArg, exists := n.nodeCfg.GetAdditionalArgs()["network"]; exists {
-		return networkArg
-	}
-	return "test" // default to testnet
+	return n.networkCfg.GetThorNetworkArg()
 }
 
 // prepareNode prepares the node for startup by cleaning up, creating directories, and writing config files
@@ -376,10 +375,4 @@ func (n *Node) executeCommand(cmd *exec.Cmd) error {
 	n.cmdExec = cmd
 	slog.Info("started node", "id", n.nodeCfg.GetID(), "pid", n.cmdExec.Process.Pid)
 	return nil
-}
-
-// isPublicNetworkNode checks if a node is configured for a public network (testnet/mainnet)
-func isPublicNetworkNode(node node.Config) bool {
-	networkArg, exists := node.GetAdditionalArgs()["network"]
-	return exists && (networkArg == "test" || networkArg == "main")
 }

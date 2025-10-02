@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/vechain/networkhub/internal/environments"
+	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
 	"github.com/vechain/networkhub/preset"
 	"github.com/vechain/thor/v2/thorclient"
@@ -15,20 +17,19 @@ import (
 
 func TestMainnetConnection(t *testing.T) {
 	// Create mainnet network and client
-	network, err := preset.NewMainnetNetwork()
+	mainnet, err := preset.NewMainnetNetwork()
 	require.NoError(t, err)
-	require.Equal(t, "mainnet", network.BaseID)
+	require.Equal(t, network.Mainnet, mainnet.BaseID)
 
-	c, err := NewWithNetwork(network)
+	c, err := New(mainnet)
 	require.NoError(t, err)
 
 	// Create a node to connect to mainnet
 	apiPort, p2pPort := randomPorts()
 	mainnetNode := &node.BaseNode{
-		ID:             "mainnet-test-node",
-		P2PListenPort:  p2pPort,
-		APIAddr:        fmt.Sprintf("127.0.0.1:%d", apiPort),
-		AdditionalArgs: map[string]string{"network": "main"},
+		ID:            "mainnet-test-node",
+		P2PListenPort: p2pPort,
+		APIAddr:       fmt.Sprintf("127.0.0.1:%d", apiPort),
 	}
 
 	// Add the node to the network
@@ -71,20 +72,19 @@ func TestMainnetConnection(t *testing.T) {
 
 func TestTestnetConnection(t *testing.T) {
 	// Create testnet network and client
-	network, err := preset.NewTestnetNetwork()
+	testnet, err := preset.NewTestnetNetwork()
 	require.NoError(t, err)
-	require.Equal(t, "testnet", network.BaseID)
+	require.Equal(t, network.Testnet, testnet.BaseID)
 
-	c, err := NewWithNetwork(network)
+	c, err := New(testnet)
 	require.NoError(t, err)
 
 	// Create a node to connect to testnet
 	apiPort, p2pPort := randomPorts()
 	testnetNode := &node.BaseNode{
-		ID:             "testnet-test-node",
-		P2PListenPort:  p2pPort,
-		APIAddr:        fmt.Sprintf("127.0.0.1:%d", apiPort),
-		AdditionalArgs: map[string]string{"network": "test"},
+		ID:            "testnet-test-node",
+		P2PListenPort: p2pPort,
+		APIAddr:       fmt.Sprintf("127.0.0.1:%d", apiPort),
 	}
 
 	// Add the node to the network
@@ -164,8 +164,8 @@ func TestPublicNetworkConfiguration(t *testing.T) {
 	// Test testnet configuration
 	testnet, err := preset.NewTestnetNetwork()
 	require.NoError(t, err)
-	require.Equal(t, "testnet", testnet.BaseID)
-	require.Equal(t, "local", testnet.Environment) // Uses local environment
+	require.Equal(t, network.Testnet, testnet.BaseID)
+	require.Equal(t, environments.Local, testnet.Environment) // Uses local environment
 	require.NotNil(t, testnet.ThorBuilder)
 	require.Equal(t, "https://github.com/vechain/thor", testnet.ThorBuilder.DownloadConfig.RepoUrl)
 	require.Equal(t, "master", testnet.ThorBuilder.DownloadConfig.Branch)
@@ -175,8 +175,8 @@ func TestPublicNetworkConfiguration(t *testing.T) {
 	// Test mainnet configuration
 	mainnet, err := preset.NewMainnetNetwork()
 	require.NoError(t, err)
-	require.Equal(t, "mainnet", mainnet.BaseID)
-	require.Equal(t, "local", mainnet.Environment) // Uses local environment
+	require.Equal(t, network.Mainnet, mainnet.BaseID)
+	require.Equal(t, environments.Local, mainnet.Environment) // Uses local environment
 	require.NotNil(t, mainnet.ThorBuilder)
 	require.Equal(t, "https://github.com/vechain/thor", mainnet.ThorBuilder.DownloadConfig.RepoUrl)
 	require.Equal(t, "master", mainnet.ThorBuilder.DownloadConfig.Branch)
@@ -184,7 +184,7 @@ func TestPublicNetworkConfiguration(t *testing.T) {
 	require.Len(t, mainnet.Nodes, 0) // Should start with no nodes
 
 	// Test custom branch
-	customNet, err := preset.NewPublicNetwork("test", "custom-branch")
+	customNet, err := preset.NewPublicNetwork(environments.ThorNetworkTest, "custom-branch")
 	require.NoError(t, err)
 	require.Equal(t, "custom-branch", customNet.ThorBuilder.DownloadConfig.Branch)
 }
