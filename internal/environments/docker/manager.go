@@ -17,7 +17,6 @@ import (
 // Manager handles Docker container management utilities
 type Manager struct {
 	ipManager   *IpManager
-	dockerImage string
 	networkName string
 	mu          sync.Mutex
 }
@@ -37,9 +36,7 @@ func (m *Manager) Initialize(networkCfg *network.Network) error {
 	// Set network name and docker image
 	m.networkName = fmt.Sprintf("docker%s-network", networkCfg.BaseID)
 
-	// Use default docker image if not specified
-	m.dockerImage = "vechain/thor:latest"
-
+	// TODO download a given image instead of building it
 	// Create Docker network
 	if err := m.createNetwork(); err != nil {
 		return fmt.Errorf("failed to create Docker network: %w", err)
@@ -145,21 +142,6 @@ func (m *Manager) ValidateNode(nodeCfg node.Config) error {
 		nodeCfg.SetDataDir("/home/thor")
 	}
 
-	// ensure API ports are exposed to the localhost
-	//split := strings.Split(nodeCfg.GetAPIAddr(), ":")
-	//if len(split) != 2 {
-	//	return fmt.Errorf("unable to parse API Addr")
-	//}
-	//
-	//exposedAPIPort, err := strconv.Atoi(split[1])
-	//if err != nil {
-	//	return err
-	//}
-
-	//d.exposedPorts[node.GetID()] = &exposedPort{
-	//	hostPort:      fmt.Sprintf("%d", exposedAPIPort+i),
-	//	containerPort: split[1],
-	//}
 	return nil
 }
 
