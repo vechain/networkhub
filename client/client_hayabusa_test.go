@@ -24,7 +24,7 @@ func TestClientFourNodesHayabusa(t *testing.T) {
 	fourNodesHayabusaNetwork := preset.LocalFourNodesHayabusa()
 	fourNodesHayabusaNetwork.ThorBuilder.DownloadConfig = &thorbuilder.DownloadConfig{
 		RepoUrl:    "https://github.com/vechain/thor",
-		Branch:     "pedro/hayabusa/improve_customnet",
+		Branch:     "release/hayabusa",
 		IsReusable: false,
 	}
 
