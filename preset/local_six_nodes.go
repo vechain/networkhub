@@ -95,7 +95,6 @@ func LocalSixNodesNetworkGenesis() *genesis.CustomGenesis {
 			RewardRatio:         convToHexOrDecimal256(big.NewInt(300000000000000000)),
 			BaseGasPrice:        convToHexOrDecimal256(big.NewInt(1000000000000000)),
 			ProposerEndorsement: convToHexOrDecimal256(LargeBigValue),
-			ExecutorAddress:     &localThreeMasterEndorser,
 		},
 		Executor: thorgenesis.Executor{
 			Approvers: []thorgenesis.Approver{
