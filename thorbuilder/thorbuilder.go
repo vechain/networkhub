@@ -125,6 +125,7 @@ func (b *Builder) Download() error {
 		args = append(args, "--depth", "1", b.config.DownloadConfig.RepoUrl, b.DownloadPath)
 	}
 
+	slog.Info("Cloning repository", "url", b.config.DownloadConfig.RepoUrl, "branch", b.config.DownloadConfig.Branch)
 	cmd := exec.Command("git", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
