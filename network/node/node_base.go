@@ -72,6 +72,10 @@ func (b *BaseNode) GetAPICORS() string {
 	return b.APICORS
 }
 
+func (b *BaseNode) SetAPICORS(cors string) {
+	b.APICORS = cors
+}
+
 func (b *BaseNode) GetKey() string {
 	return b.Key
 }
