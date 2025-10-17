@@ -44,14 +44,12 @@ func DefaultAuthority(amount int) []genesis.Authority {
 }
 
 func DefaultParams(mbp uint64) *genesis.Params {
-	executor := thor.MustParseAddress("0x0000000000000000000000004578656375746f72")
 	endorsement := big.NewInt(0)
 	endorsement.SetString("0xfffffffffffffffffffffffffffffffffff", 16)
 	return &genesis.Params{
 		RewardRatio:         (*genesis.HexOrDecimal256)(big.NewInt(300000000000000000)),
 		BaseGasPrice:        (*genesis.HexOrDecimal256)(big.NewInt(1000000000000000)),
 		ProposerEndorsement: (*genesis.HexOrDecimal256)(endorsement),
-		ExecutorAddress:     &executor,
 		MaxBlockProposers:   &mbp,
 	}
 }
