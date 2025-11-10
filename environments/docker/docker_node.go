@@ -104,26 +104,6 @@ func (n *Node) Start() error {
 			cleanEnode = append(cleanEnode, enode)
 		}
 	}
-	enodeString := strings.Join(cleanEnode, ",")
-
-	args := fmt.Sprintf("cd %s; ", n.cfg.GetConfigDir()) +
-		"echo $PRIVATEKEY > master.key;" +
-		"echo $PRIVATEKEY > p2p.key;" +
-		"thor " +
-		"--network genesis.json " +
-		"--nat none " +
-		fmt.Sprintf("--config-dir='%s' ", n.cfg.GetConfigDir()) +
-		fmt.Sprintf("--api-addr='%s' ", n.cfg.GetAPIAddr()) +
-		fmt.Sprintf("--api-cors='%s' ", n.cfg.GetAPICORS()) +
-		fmt.Sprintf("--p2p-port=%d ", n.cfg.GetP2PListenPort()) +
-		fmt.Sprintf("--bootnode=%s", enodeString)
-
-	for key, value := range n.cfg.GetAdditionalArgs() {
-		args += fmt.Sprintf(" --%s=%s", key, value)
-	}
-
-	cmd := []string{"sh", "-c", args}
-
 	//serialize genesis
 	genesisBytes, err := nodegenesis.Marshal(n.cfg.GetGenesis())
 	if err != nil {
@@ -143,13 +123,16 @@ func (n *Node) Start() error {
 
 	// Construct Docker container configuration
 	config := &container.Config{
-		Image:      n.cfg.GetExecArtifact(),
-		Cmd:        cmd,
-		Entrypoint: []string{},
-		Env: []string{
-			fmt.Sprintf("GENESIS=%s", string(genesisBytes)),
-			fmt.Sprintf("PRIVATEKEY=%s", n.cfg.GetKey()),
+		Image: n.cfg.GetExecArtifact(),
+	Cmd: []string{
+		"--network",
+		fmt.Sprintf("%s/genesis.json", n.cfg.GetConfigDir()),
+		"--skip-logs",
+	},
+		Entrypoint: []string{
+			"thor",
 		},
+		Env:          []string{},
 		ExposedPorts: exposedPorts,
 	}
 
@@ -180,6 +163,22 @@ func (n *Node) Start() error {
 				err = os.WriteFile(genesisFilePath, genesisBytes, 0644)
 				if err != nil {
 					return fmt.Errorf("failed to write genesis file %s: %w", genesisFilePath, err)
+				}
+			}
+
+			// create master.key and p2p.key
+			masterKeyPath := fmt.Sprintf("%s/master.key", hostConfigPath)
+			if _, err := os.Stat(masterKeyPath); os.IsNotExist(err) {
+				err = os.WriteFile(masterKeyPath, []byte(n.cfg.GetKey()), 0600)
+				if err != nil {
+					return fmt.Errorf("failed to write master key file %s: %w", masterKeyPath, err)
+				}
+			}
+			p2pKeyPath := fmt.Sprintf("%s/p2p.key", hostConfigPath)
+			if _, err := os.Stat(p2pKeyPath); os.IsNotExist(err) {
+				err = os.WriteFile(p2pKeyPath, []byte(n.cfg.GetKey()), 0600)
+				if err != nil {
+					return fmt.Errorf("failed to write p2p key file %s: %w", p2pKeyPath, err)
 				}
 			}
 
