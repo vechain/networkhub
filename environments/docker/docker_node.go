@@ -107,7 +107,6 @@ func (n *Node) Start() error {
 	enodeString := strings.Join(cleanEnode, ",")
 
 	args := fmt.Sprintf("cd %s; ", n.cfg.GetConfigDir()) +
-		"echo $GENESIS > genesis.json;" +
 		"echo $PRIVATEKEY > master.key;" +
 		"echo $PRIVATEKEY > p2p.key;" +
 		"thor " +
@@ -173,6 +172,15 @@ func (n *Node) Start() error {
 			// Create the host directory if it doesn't exist
 			if err := os.MkdirAll(hostConfigPath, 0755); err != nil {
 				return fmt.Errorf("failed to create config directory %s: %w", hostConfigPath, err)
+			}
+
+			//create genesis.json
+			genesisFilePath := fmt.Sprintf("%s/genesis.json", hostConfigPath)
+			if _, err := os.Stat(genesisFilePath); os.IsNotExist(err) {
+				err = os.WriteFile(genesisFilePath, genesisBytes, 0644)
+				if err != nil {
+					return fmt.Errorf("failed to write genesis file %s: %w", genesisFilePath, err)
+				}
 			}
 
 			volumeBind := fmt.Sprintf("%s:%s", hostConfigPath, configDir)
