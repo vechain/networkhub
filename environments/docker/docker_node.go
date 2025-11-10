@@ -124,11 +124,11 @@ func (n *Node) Start() error {
 	// Construct Docker container configuration
 	config := &container.Config{
 		Image: n.cfg.GetExecArtifact(),
-	Cmd: []string{
-		"--network",
-		fmt.Sprintf("%s/genesis.json", n.cfg.GetConfigDir()),
-		"--skip-logs",
-	},
+		Cmd: []string{
+			"--network",
+			fmt.Sprintf("%s/genesis.json", n.cfg.GetConfigDir()),
+			"--skip-logs",
+		},
 		Entrypoint: []string{
 			"thor",
 		},
