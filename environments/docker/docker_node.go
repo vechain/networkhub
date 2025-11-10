@@ -127,6 +127,8 @@ func (n *Node) Start() error {
 		Cmd: []string{
 			"--network",
 			fmt.Sprintf("%s/genesis.json", n.cfg.GetConfigDir()),
+			"--data-dir", n.cfg.GetDataDir(),
+			"--config-dir", n.cfg.GetConfigDir(),
 			"--skip-logs",
 		},
 		Entrypoint: []string{
