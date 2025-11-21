@@ -11,14 +11,15 @@ import (
 type Overrider func(genesis *genesis.CustomGenesis)
 
 type Builder struct {
-	maxBlockProposers int
-	accounts          []thorgenesis.Account
-	authority         []thorgenesis.Authority
-	params            *thorgenesis.Params
-	executor          *thorgenesis.Executor
-	forkConfig        *genesis.CustomGenesisForkConfig
-	overrider         Overrider
-	config            *genesis.Config
+	maxBlockProposers     int
+	accounts              []thorgenesis.Account
+	authority             []thorgenesis.Authority
+	params                *thorgenesis.Params
+	executor              *thorgenesis.Executor
+	forkConfig            *genesis.CustomGenesisForkConfig
+	overrider             Overrider
+	genesisTimestampDelay time.Duration
+	config                *genesis.Config
 }
 
 func New(maxBlockProposers int) *Builder {
@@ -60,6 +61,11 @@ func (b *Builder) Overrider(overrider Overrider) *Builder {
 	return b
 }
 
+func (b *Builder) GenesisTimestampDelay(d time.Duration) *Builder {
+	b.genesisTimestampDelay = d
+	return b
+}
+
 func (b *Builder) Build() *genesis.CustomGenesis {
 	if len(b.accounts) == 0 {
 		b.accounts = DefaultAccounts()
@@ -83,7 +89,7 @@ func (b *Builder) Build() *genesis.CustomGenesis {
 	}
 
 	gene := &genesis.CustomGenesis{
-		LaunchTime: uint64(time.Now().Unix()),
+		LaunchTime: uint64(time.Now().Add(b.genesisTimestampDelay).Unix()),
 		GasLimit:   40_000_000,
 		ExtraData:  "Custom Genesis",
 		Accounts:   b.accounts,
