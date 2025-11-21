@@ -25,6 +25,11 @@ func New(maxBlockProposers int) *Builder {
 	return &Builder{maxBlockProposers: maxBlockProposers}
 }
 
+func (b *Builder) Config(config *genesis.Config) *Builder {
+	b.config = config
+	return b
+}
+
 func (b *Builder) Accounts(accounts []thorgenesis.Account) *Builder {
 	b.accounts = accounts
 	return b
