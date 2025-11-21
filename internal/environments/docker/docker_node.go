@@ -114,6 +114,7 @@ func (n *Node) Start() error {
 			fmt.Sprintf("PRIVATEKEY=%s", n.cfg.GetKey()),
 		},
 		ExposedPorts: exposedPorts,
+		Hostname:     fmt.Sprintf("thor-%s", n.cfg.GetID()),
 	}
 
 	hostConfig := &container.HostConfig{
