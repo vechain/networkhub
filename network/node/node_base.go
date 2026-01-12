@@ -28,6 +28,7 @@ type BaseNode struct {
 	FakeExecution  bool                   `json:"fakeExecution"`
 	Genesis        *genesis.CustomGenesis `json:"genesis"`
 	AdditionalArgs map[string]string      `json:"additionalArgs"`
+	Persistent     bool                   `json:"isPersistent"`
 }
 
 func (b *BaseNode) GetVerbosity() int {
@@ -178,4 +179,12 @@ func (b *BaseNode) GetGenesis() *genesis.CustomGenesis {
 
 func (b *BaseNode) SetGenesis(genesis *genesis.CustomGenesis) {
 	b.Genesis = genesis
+}
+
+func (b *BaseNode) IsPersistent() bool {
+	return b.Persistent
+}
+
+func (b *BaseNode) SetPersistent(persistent bool) {
+	b.Persistent = persistent
 }
