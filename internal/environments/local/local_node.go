@@ -234,7 +234,7 @@ func (n *Node) writeGenesis(isPublicNetwork bool) error {
 
 // cleanDataDirectory removes the data directory for local networks
 func (n *Node) cleanDataDirectory(isPublicNetwork bool) error {
-	if isPublicNetwork {
+	if isPublicNetwork || n.nodeCfg.IsPersistent() {
 		return nil // Public networks should sync from scratch, don't clean
 	}
 

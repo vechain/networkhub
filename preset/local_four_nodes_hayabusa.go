@@ -90,7 +90,7 @@ func LocalFourNodesHayabusaGenesis() *genesis.CustomGenesis {
 
 func LocalFourNodesHayabusa() *network.Network {
 	thorBuilderCfg := thorbuilder.DefaultConfig()
-	thorBuilderCfg.DownloadConfig.Branch = "release/hayabusa"
+	thorBuilderCfg.DownloadConfig.Branch = "master"
 	thorBuilderCfg.BuildConfig.ReuseBinary = false
 
 	gen := LocalFourNodesHayabusaGenesis()

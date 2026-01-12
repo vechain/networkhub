@@ -34,6 +34,8 @@ type Config interface {
 	GetHTTPAddr() string
 	GetFakeExecution() bool
 	HealthCheck(block uint32, timeout time.Duration) error
+	IsPersistent() bool
+	SetPersistent(bool)
 }
 
 type Lifecycle interface {

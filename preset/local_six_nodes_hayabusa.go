@@ -10,7 +10,7 @@ func LocalSixNodesHayabusaNetwork(customGenesisJson string, repoUrl string) *net
 		&thorbuilder.Config{
 			DownloadConfig: &thorbuilder.DownloadConfig{
 				RepoUrl:    repoUrl,
-				Branch:     "release/hayabusa",
+				Branch:     "master",
 				IsReusable: true,
 			},
 		})
