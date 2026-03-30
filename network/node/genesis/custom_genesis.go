@@ -4,20 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/vechain/thor/v2/genesis"
+	thorgenesis "github.com/vechain/thor/v2/genesis"
 	"github.com/vechain/thor/v2/thor"
 )
 
+// CustomGenesis wraps Thor's CustomGenesis, promoting all its fields (including Stakers)
+// to the top level. ForkConfig and Config shadow the embedded struct's fields so the
+// AdditionalFields mechanism and the local Config type are preserved.
 type CustomGenesis struct {
-	LaunchTime uint64                   `json:"launchTime"`
-	GasLimit   uint64                   `json:"gaslimit"`
-	ExtraData  string                   `json:"extraData"`
-	Accounts   []genesis.Account        `json:"accounts"`
-	Authority  []genesis.Authority      `json:"authority"`
-	Params     genesis.Params           `json:"params"`
-	Executor   genesis.Executor         `json:"executor"`
-	ForkConfig *CustomGenesisForkConfig `json:"forkConfig"`
-	Config     *Config                  `json:"config,omitempty"`
+	*thorgenesis.CustomGenesis                          // promoted: LaunchTime, GasLimit, ExtraData, Accounts, Authority, Stakers, Params, Executor
+	ForkConfig                 *CustomGenesisForkConfig `json:"forkConfig"`
+	Config                     *Config                  `json:"config,omitempty"`
 }
 
 func HandleAdditionalFields(raw *map[string]interface{}) {

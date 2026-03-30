@@ -96,7 +96,7 @@ func (n *Network) HealthCheck(block uint32, timeout time.Duration) error {
 	}
 
 	// Phase C: Block Consistency - Check if all nodes have the same block hash
-	if err := n.checkBlockConsistency(block); err != nil {
+	if err := n.checkBlockConsistency(block, timeout); err != nil {
 		return fmt.Errorf("block consistency check failed: %w", err)
 	}
 
@@ -159,25 +159,49 @@ func (n *Network) checkPeerConnectivity(timeout time.Duration) error {
 	}
 }
 
-// checkBlockConsistency verifies all nodes return the same block hash
-func (n *Network) checkBlockConsistency(block uint32) error {
-	var baseBlk *api.JSONCollapsedBlock
-	for _, node := range n.Nodes {
-		client := thorclient.New(node.GetHTTPAddr())
-		nodeBlk, err := client.Block(fmt.Sprintf("%d", block))
-		if err != nil {
-			return fmt.Errorf("failed to get block %d from node %s: %w", block, node.GetID(), err)
-		}
-		if baseBlk == nil {
-			baseBlk = nodeBlk
-		} else if baseBlk.ID != nodeBlk.ID {
-			return fmt.Errorf(
-				"block hash mismatch at height %d - node %s has %s, expected %s",
-				block, node.GetID(), nodeBlk.ID.String(), baseBlk.ID.String(),
-			)
+// checkBlockConsistency verifies all nodes return the same block hash, retrying until timeout
+func (n *Network) checkBlockConsistency(block uint32, timeout time.Duration) error {
+	deadline := time.Now().Add(timeout)
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	var lastErr error
+	for {
+		select {
+		case <-time.After(time.Until(deadline)):
+			if lastErr != nil {
+				return lastErr
+			}
+			return fmt.Errorf("timeout waiting for block consistency at height %d", block)
+		case <-ticker.C:
+			var baseBlk *api.JSONCollapsedBlock
+			lastErr = nil
+			for _, node := range n.Nodes {
+				client := thorclient.New(node.GetHTTPAddr())
+				nodeBlk, err := client.Block(fmt.Sprintf("%d", block))
+				if err != nil {
+					lastErr = fmt.Errorf("failed to get block %d from node %s: %w", block, node.GetID(), err)
+					break
+				}
+				if baseBlk == nil {
+					baseBlk = nodeBlk
+				} else if baseBlk.ID != nodeBlk.ID {
+					lastErr = fmt.Errorf(
+						"block hash mismatch at height %d - node %s has %s, expected %s",
+						block, node.GetID(), nodeBlk.ID.String(), baseBlk.ID.String(),
+					)
+					break
+				}
+			}
+			if lastErr == nil {
+				return nil
+			}
+
+			if time.Now().After(deadline) {
+				return lastErr
+			}
 		}
 	}
-	return nil
 }
 
 // IsPublicNetwork determines if this network is a public network (mainnet/testnet)

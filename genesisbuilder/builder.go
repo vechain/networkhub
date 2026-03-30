@@ -89,13 +89,15 @@ func (b *Builder) Build() *genesis.CustomGenesis {
 	}
 
 	gene := &genesis.CustomGenesis{
-		LaunchTime: uint64(time.Now().Add(b.genesisTimestampDelay).Unix()),
-		GasLimit:   40_000_000,
-		ExtraData:  "Custom Genesis",
-		Accounts:   b.accounts,
-		Authority:  b.authority,
-		Params:     *b.params,
-		Executor:   *b.executor,
+		CustomGenesis: &thorgenesis.CustomGenesis{
+			LaunchTime: uint64(time.Now().Add(b.genesisTimestampDelay).Unix()),
+			GasLimit:   40_000_000,
+			ExtraData:  "Custom Genesis",
+			Accounts:   b.accounts,
+			Authority:  b.authority,
+			Params:     *b.params,
+			Executor:   *b.executor,
+		},
 		ForkConfig: b.forkConfig,
 		Config:     b.config,
 	}

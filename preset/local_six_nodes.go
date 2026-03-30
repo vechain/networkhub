@@ -29,78 +29,80 @@ func LocalSixNodesNetwork() *network.Network {
 
 func LocalSixNodesNetworkGenesis() *genesis.CustomGenesis {
 	return &genesis.CustomGenesis{
-		LaunchTime: 1703180212,
-		GasLimit:   10000000,
-		ExtraData:  "Local Six Nodes Network",
-		Accounts: []thorgenesis.Account{
-			{
-				Address: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"), // dce1443bd2ef0c2631adc1c67e5c93f13dc23a41c18b536effbbdcbcdb96fb65
-				Balance: convToHexOrDecimal256(LargeBigValue),
-				Energy:  convToHexOrDecimal256(LargeBigValue),
-			},
-			{
-				Address: *SixNNAccount1.Address,
-				Balance: convToHexOrDecimal256(LargeBigValue),
-				Energy:  convToHexOrDecimal256(LargeBigValue),
-			},
-			{
-				Address: *SixNNAccount2.Address,
-				Balance: convToHexOrDecimal256(LargeBigValue),
-				Energy:  convToHexOrDecimal256(LargeBigValue),
-			},
-			{
-				Address: *SixNNAccount3.Address,
-				Balance: convToHexOrDecimal256(LargeBigValue),
-				Energy:  convToHexOrDecimal256(LargeBigValue),
-			},
-			{
-				Address: *SixNNAccount4.Address,
-				Balance: convToHexOrDecimal256(LargeBigValue),
-				Energy:  convToHexOrDecimal256(LargeBigValue),
-			},
-			{
-				Address: *SixNNAccount5.Address,
-				Balance: convToHexOrDecimal256(LargeBigValue),
-				Energy:  convToHexOrDecimal256(LargeBigValue),
-			},
-			{
-				Address: *SixNNAccount6.Address,
-				Balance: convToHexOrDecimal256(LargeBigValue),
-				Energy:  convToHexOrDecimal256(LargeBigValue),
-			},
-		},
-		Authority: []thorgenesis.Authority{
-			{
-				MasterAddress:   *SixNNAccount1.Address,
-				EndorsorAddress: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
-				Identity:        thor.MustParseBytes32("0x000000000000000068747470733a2f2f636f6e6e65782e76656368612e696e2f"),
-			},
-			{
-				MasterAddress:   thor.MustParseAddress("0x5c29518F6a6124a2BeE89253347c8295f604710A"),
-				EndorsorAddress: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
-				Identity:        thor.MustParseBytes32("0x000000000000000068747470733a2f2f656e762e7665636861696e2e6f72672f"),
-			},
-			{
-				MasterAddress:   thor.MustParseAddress("0x042306e116Dc301ecd7b83a04F4c8277Fbe41b6c"),
-				EndorsorAddress: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
-				Identity:        thor.MustParseBytes32("0x0000000000000068747470733a2f2f617070732e7665636861696e2e6f72672f"),
-			},
-			{
-				MasterAddress:   thor.MustParseAddress("0x0aeC31606e217895696771961de416Efa185Be66"),
-				EndorsorAddress: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
-				Identity:        thor.MustParseBytes32("0x0000000000000068747470733a2f2f617070732e7665636861696e2e6f72672f"),
-			},
-		},
-		Params: thorgenesis.Params{
-			RewardRatio:         convToHexOrDecimal256(big.NewInt(300000000000000000)),
-			BaseGasPrice:        convToHexOrDecimal256(big.NewInt(1000000000000000)),
-			ProposerEndorsement: convToHexOrDecimal256(LargeBigValue),
-		},
-		Executor: thorgenesis.Executor{
-			Approvers: []thorgenesis.Approver{
+		CustomGenesis: &thorgenesis.CustomGenesis{
+			LaunchTime: 1703180212,
+			GasLimit:   10000000,
+			ExtraData:  "Local Six Nodes Network",
+			Accounts: []thorgenesis.Account{
 				{
-					Address:  thor.MustParseAddress("0x199b836d8a57365baccd4f371c1fabb7be77d389"),
-					Identity: thor.MustParseBytes32("0x00000000000067656e6572616c20707572706f736520626c6f636b636861696e"),
+					Address: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"), // dce1443bd2ef0c2631adc1c67e5c93f13dc23a41c18b536effbbdcbcdb96fb65
+					Balance: convToHexOrDecimal256(LargeBigValue),
+					Energy:  convToHexOrDecimal256(LargeBigValue),
+				},
+				{
+					Address: *SixNNAccount1.Address,
+					Balance: convToHexOrDecimal256(LargeBigValue),
+					Energy:  convToHexOrDecimal256(LargeBigValue),
+				},
+				{
+					Address: *SixNNAccount2.Address,
+					Balance: convToHexOrDecimal256(LargeBigValue),
+					Energy:  convToHexOrDecimal256(LargeBigValue),
+				},
+				{
+					Address: *SixNNAccount3.Address,
+					Balance: convToHexOrDecimal256(LargeBigValue),
+					Energy:  convToHexOrDecimal256(LargeBigValue),
+				},
+				{
+					Address: *SixNNAccount4.Address,
+					Balance: convToHexOrDecimal256(LargeBigValue),
+					Energy:  convToHexOrDecimal256(LargeBigValue),
+				},
+				{
+					Address: *SixNNAccount5.Address,
+					Balance: convToHexOrDecimal256(LargeBigValue),
+					Energy:  convToHexOrDecimal256(LargeBigValue),
+				},
+				{
+					Address: *SixNNAccount6.Address,
+					Balance: convToHexOrDecimal256(LargeBigValue),
+					Energy:  convToHexOrDecimal256(LargeBigValue),
+				},
+			},
+			Authority: []thorgenesis.Authority{
+				{
+					MasterAddress:   *SixNNAccount1.Address,
+					EndorsorAddress: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
+					Identity:        thor.MustParseBytes32("0x000000000000000068747470733a2f2f636f6e6e65782e76656368612e696e2f"),
+				},
+				{
+					MasterAddress:   thor.MustParseAddress("0x5c29518F6a6124a2BeE89253347c8295f604710A"),
+					EndorsorAddress: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
+					Identity:        thor.MustParseBytes32("0x000000000000000068747470733a2f2f656e762e7665636861696e2e6f72672f"),
+				},
+				{
+					MasterAddress:   thor.MustParseAddress("0x042306e116Dc301ecd7b83a04F4c8277Fbe41b6c"),
+					EndorsorAddress: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
+					Identity:        thor.MustParseBytes32("0x0000000000000068747470733a2f2f617070732e7665636861696e2e6f72672f"),
+				},
+				{
+					MasterAddress:   thor.MustParseAddress("0x0aeC31606e217895696771961de416Efa185Be66"),
+					EndorsorAddress: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
+					Identity:        thor.MustParseBytes32("0x0000000000000068747470733a2f2f617070732e7665636861696e2e6f72672f"),
+				},
+			},
+			Params: thorgenesis.Params{
+				RewardRatio:         convToHexOrDecimal256(big.NewInt(300000000000000000)),
+				BaseGasPrice:        convToHexOrDecimal256(big.NewInt(1000000000000000)),
+				ProposerEndorsement: convToHexOrDecimal256(LargeBigValue),
+			},
+			Executor: thorgenesis.Executor{
+				Approvers: []thorgenesis.Approver{
+					{
+						Address:  thor.MustParseAddress("0x199b836d8a57365baccd4f371c1fabb7be77d389"),
+						Identity: thor.MustParseBytes32("0x00000000000067656e6572616c20707572706f736520626c6f636b636861696e"),
+					},
 				},
 			},
 		},

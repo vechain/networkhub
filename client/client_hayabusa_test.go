@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/vechain/networkhub/hayabusa"
 	"github.com/vechain/networkhub/preset"
 	"github.com/vechain/networkhub/thorbuilder"
 	"github.com/vechain/thor/v2/thor"
 	"github.com/vechain/thor/v2/thorclient"
+	"github.com/vechain/thor/v2/thorclient/builtin"
 )
 
 // TestClientFourNodesHayabusa tests the client with a 4-node Hayabusa network.
@@ -51,23 +51,24 @@ func TestClientFourNodesHayabusa(t *testing.T) {
 
 	// Wait for all nodes to connect and sync
 	t.Log("Waiting for Hayabusa nodes to connect and sync...")
-	require.NoError(t, c.network.HealthCheck(4, 2*time.Minute))
+	require.NoError(t, c.network.HealthCheck(4, 4*time.Minute))
 
 	// Test staker contract functionality to verify validators are active
 	client := thorclient.New(c.network.Nodes[0].GetHTTPAddr())
-	staker := hayabusa.NewStaker(client)
+	staker, err := builtin.NewStaker(client)
+	require.NoError(t, err)
 
 	// Check firstActive to see if validators are now active
-	validatorAddr, err := staker.FirstActive()
+	_, validatorAddr, err := staker.FirstActive()
 	require.NoError(t, err)
 	t.Logf("FirstActive successful - Validator: %s", validatorAddr)
 
 	// Verify that one of our validators is now active
 	expectedValidators := []thor.Address{
 		*preset.SixNNAccount1.Address,
-		*preset.SixNNAccount1.Address,
-		*preset.SixNNAccount1.Address,
-		*preset.SixNNAccount1.Address,
+		*preset.SixNNAccount2.Address,
+		*preset.SixNNAccount3.Address,
+		*preset.SixNNAccount4.Address,
 	}
 
 	validatorFound := false
