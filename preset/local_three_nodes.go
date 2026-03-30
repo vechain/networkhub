@@ -42,8 +42,6 @@ func LocalThreeNodesNetwork() *network.Network {
 	}
 }
 
-var localThreeMasterEndorser = thor.MustParseAddress("0x0000000000000000000000004578656375746f72")
-
 func LocalThreeNodesNetworkGenesis() *genesis.CustomGenesis {
 	return &genesis.CustomGenesis{
 		LaunchTime: 1703180212,
