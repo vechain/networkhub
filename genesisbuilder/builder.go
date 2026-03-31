@@ -21,7 +21,6 @@ type Builder struct {
 	config                *genesis.Config
 	gasLimit              uint64
 	extraData             string
-	extraDataSet          bool
 }
 
 func New(maxBlockProposers int) *Builder {
@@ -60,7 +59,6 @@ func (b *Builder) GasLimit(gasLimit uint64) *Builder {
 
 func (b *Builder) ExtraData(extraData string) *Builder {
 	b.extraData = extraData
-	b.extraDataSet = true
 	return b
 }
 
@@ -96,7 +94,7 @@ func (b *Builder) Build() *genesis.CustomGenesis {
 		b.gasLimit = 40_000_000
 	}
 	extraData := ""
-	if b.extraDataSet {
+	if len(b.extraData) > 0 {
 		extraData = b.extraData
 	}
 
