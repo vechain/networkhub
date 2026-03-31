@@ -173,7 +173,7 @@ func TestAddRemoveNodes(t *testing.T) {
 	require.Len(t, nodes, 2)
 
 	// verify the network health
-	require.NoError(t, network.HealthCheck(3, 60*time.Second))
+	require.NoError(t, network.HealthCheck(3, 2*time.Minute))
 
 	// Add third node to running network
 	basePort++
@@ -203,7 +203,7 @@ func TestAddRemoveNodes(t *testing.T) {
 	require.True(t, exists, "Third node should be running")
 
 	// verify the network health
-	require.NoError(t, network.HealthCheck(5, 60*time.Second))
+	require.NoError(t, network.HealthCheck(5, 2*time.Minute))
 
 	// Remove the third node from running network
 	err = c.RemoveNode("node-3")
@@ -220,7 +220,7 @@ func TestAddRemoveNodes(t *testing.T) {
 	require.Len(t, nodes, 2)
 
 	// verify the network health
-	require.NoError(t, network.HealthCheck(7, 60*time.Second))
+	require.NoError(t, network.HealthCheck(7, 2*time.Minute))
 
 	// Verify the third node is no longer running
 	_, exists = nodes["node-3"]

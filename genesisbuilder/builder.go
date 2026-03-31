@@ -13,13 +13,14 @@ type Overrider func(genesis *genesis.CustomGenesis)
 type Builder struct {
 	maxBlockProposers     int
 	accounts              []thorgenesis.Account
-	authority             []thorgenesis.Authority
+	stakers               []thorgenesis.Validator
 	params                *thorgenesis.Params
-	executor              *thorgenesis.Executor
 	forkConfig            *genesis.CustomGenesisForkConfig
 	overrider             Overrider
 	genesisTimestampDelay time.Duration
 	config                *genesis.Config
+	gasLimit              uint64
+	extraData             string
 }
 
 func New(maxBlockProposers int) *Builder {
@@ -36,8 +37,8 @@ func (b *Builder) Accounts(accounts []thorgenesis.Account) *Builder {
 	return b
 }
 
-func (b *Builder) Authority(authority []thorgenesis.Authority) *Builder {
-	b.authority = authority
+func (b *Builder) Stakers(stakers []thorgenesis.Validator) *Builder {
+	b.stakers = stakers
 	return b
 }
 
@@ -46,13 +47,18 @@ func (b *Builder) Params(params thorgenesis.Params) *Builder {
 	return b
 }
 
-func (b *Builder) Executor(executor thorgenesis.Executor) *Builder {
-	b.executor = &executor
+func (b *Builder) ForkConfig(forkConfig *genesis.CustomGenesisForkConfig) *Builder {
+	b.forkConfig = forkConfig
 	return b
 }
 
-func (b *Builder) ForkConfig(forkConfig *genesis.CustomGenesisForkConfig) *Builder {
-	b.forkConfig = forkConfig
+func (b *Builder) GasLimit(gasLimit uint64) *Builder {
+	b.gasLimit = gasLimit
+	return b
+}
+
+func (b *Builder) ExtraData(extraData string) *Builder {
+	b.extraData = extraData
 	return b
 }
 
@@ -70,14 +76,11 @@ func (b *Builder) Build() *genesis.CustomGenesis {
 	if len(b.accounts) == 0 {
 		b.accounts = DefaultAccounts()
 	}
-	if len(b.authority) == 0 {
-		b.authority = DefaultAuthority(b.maxBlockProposers)
+	if len(b.stakers) == 0 {
+		b.stakers = DefaultStakers(b.maxBlockProposers)
 	}
 	if b.params == nil {
 		b.params = DefaultParams(uint64(b.maxBlockProposers))
-	}
-	if b.executor == nil {
-		b.executor = DefaultExecutor()
 	}
 	if b.forkConfig == nil {
 		b.forkConfig = &genesis.CustomGenesisForkConfig{
@@ -87,15 +90,24 @@ func (b *Builder) Build() *genesis.CustomGenesis {
 	if b.config == nil {
 		b.config = &genesis.Config{}
 	}
+	if b.gasLimit == 0 {
+		b.gasLimit = 40_000_000
+	}
+	extraData := ""
+	if len(b.extraData) > 0 {
+		extraData = b.extraData
+	}
 
 	gene := &genesis.CustomGenesis{
-		LaunchTime: uint64(time.Now().Add(b.genesisTimestampDelay).Unix()),
-		GasLimit:   40_000_000,
-		ExtraData:  "Custom Genesis",
-		Accounts:   b.accounts,
-		Authority:  b.authority,
-		Params:     *b.params,
-		Executor:   *b.executor,
+		CustomGenesis: &thorgenesis.CustomGenesis{
+			LaunchTime: uint64(time.Now().Add(b.genesisTimestampDelay).Unix()),
+			GasLimit:   b.gasLimit,
+			ExtraData:  extraData,
+			Accounts:   b.accounts,
+			Stakers:    b.stakers,
+			Params:     *b.params,
+			Executor:   thorgenesis.Executor{},
+		},
 		ForkConfig: b.forkConfig,
 		Config:     b.config,
 	}

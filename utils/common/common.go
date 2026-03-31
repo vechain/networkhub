@@ -41,7 +41,7 @@ type Account struct {
 }
 
 func (a Account) PrivateKeyString() string {
-	return fmt.Sprintf("%x", a.PrivateKey.D.Bytes())
+	return fmt.Sprintf("%x", a.PrivateKey.D.Bytes()) //nolint:staticcheck
 }
 
 type TxSendResult struct {

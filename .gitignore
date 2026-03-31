@@ -32,3 +32,4 @@ coverage.out
 .idea
 network.json
 networks_db.json
+.claude/
