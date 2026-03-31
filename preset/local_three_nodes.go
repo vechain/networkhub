@@ -43,6 +43,9 @@ func LocalThreeNodesNetwork() *network.Network {
 }
 
 func LocalThreeNodesNetworkGenesis() *genesis.CustomGenesis {
+	hayabusaTP := uint32(0)
+	mbp := uint64(3)
+
 	return &genesis.CustomGenesis{
 		CustomGenesis: &thorgenesis.CustomGenesis{
 			LaunchTime: 1703180212,
@@ -70,45 +73,33 @@ func LocalThreeNodesNetworkGenesis() *genesis.CustomGenesis {
 					Energy:  convToHexOrDecimal256(LargeBigValue),
 				},
 			},
-			Authority: []thorgenesis.Authority{
-				{
-					MasterAddress:   thor.MustParseAddress("0x61fF580B63D3845934610222245C116E013717ec"),
-					EndorsorAddress: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
-					Identity:        thor.MustParseBytes32("0x000000000000000068747470733a2f2f636f6e6e65782e76656368612e696e2f"),
-				},
-				{
-					MasterAddress:   thor.MustParseAddress("0x327931085B4cCbCE0baABb5a5E1C678707C51d90"),
-					EndorsorAddress: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
-					Identity:        thor.MustParseBytes32("0x000000000000000068747470733a2f2f656e762e7665636861696e2e6f72672f"),
-				},
-				{
-					MasterAddress:   thor.MustParseAddress("0x084E48c8AE79656D7e27368AE5317b5c2D6a7497"),
-					EndorsorAddress: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
-					Identity:        thor.MustParseBytes32("0x0000000000000068747470733a2f2f617070732e7665636861696e2e6f72672f"),
-				},
+			Stakers: []thorgenesis.Validator{
+				{Master: thor.MustParseAddress("0x61fF580B63D3845934610222245C116E013717ec"), Endorser: thor.MustParseAddress("0x61fF580B63D3845934610222245C116E013717ec")},
+				{Master: thor.MustParseAddress("0x327931085B4cCbCE0baABb5a5E1C678707C51d90"), Endorser: thor.MustParseAddress("0x327931085B4cCbCE0baABb5a5E1C678707C51d90")},
+				{Master: thor.MustParseAddress("0x084E48c8AE79656D7e27368AE5317b5c2D6a7497"), Endorser: thor.MustParseAddress("0x084E48c8AE79656D7e27368AE5317b5c2D6a7497")},
 			},
 			Params: thorgenesis.Params{
 				RewardRatio:         convToHexOrDecimal256(big.NewInt(300000000000000000)),
 				BaseGasPrice:        convToHexOrDecimal256(big.NewInt(1000000000000000)),
 				ProposerEndorsement: convToHexOrDecimal256(LargeBigValue),
+				MaxBlockProposers:   &mbp,
 			},
-			Executor: thorgenesis.Executor{
-				Approvers: []thorgenesis.Approver{
-					{
-						Address:  thor.MustParseAddress("0x199b836d8a57365baccd4f371c1fabb7be77d389"),
-						Identity: thor.MustParseBytes32("0x00000000000067656e6572616c20707572706f736520626c6f636b636861696e"),
-					},
-				},
-			},
+			Executor: thorgenesis.Executor{},
 		},
 		ForkConfig: &genesis.CustomGenesisForkConfig{
-			ForkConfig: thor.ForkConfig{
-				VIP191:    0,
-				ETH_CONST: 0,
-				BLOCKLIST: 0,
-				ETH_IST:   0,
-				VIP214:    0,
-			},
+			ForkConfig: thor.SoloFork,
+		},
+		Config: &genesis.Config{
+			BlockInterval:              10,
+			EpochLength:                10,
+			SeederInterval:             10,
+			ValidatorEvictionThreshold: 40,
+			EvictionCheckInterval:      10,
+			LowStakingPeriod:           10,
+			MediumStakingPeriod:        20,
+			HighStakingPeriod:          40,
+			CooldownPeriod:             10,
+			HayabusaTP:                 &hayabusaTP,
 		},
 	}
 }
