@@ -118,10 +118,10 @@ The framework is built around a **Launcher** architecture that orchestrates node
 ## Available Presets
 
 ### Local Networks
-- `preset.LocalThreeNodesNetwork()` - 3-node local network with authority nodes
-- `preset.LocalSixNodesNetwork()` - 6-node local network for larger testing scenarios
+- `preset.LocalThreeNodesNetwork()` - 3-node local Hayabusa PoS network
+- `preset.LocalFourNodesHayabusa()` - 4-node local Hayabusa PoS network
 
-### Public Networks  
+### Public Networks
 - `preset.NewTestnetNetwork()` - Connect to VeChain testnet
 - `preset.NewMainnetNetwork()` - Connect to VeChain mainnet
 
@@ -143,6 +143,28 @@ network.Environment = environments.Docker
 - **Git**: For cloning the repository
 - **Golang**: Version 1.19 or higher
 - **Docker**: Required for Docker environment (optional for Local environment)
+
+## GenesisBuilder Package
+The `genesisbuilder` package provides a fluent API for constructing custom Hayabusa PoS genesis configurations. It is used internally by the presets and can be used directly for fully custom networks.
+
+### Example Usage:
+```go
+import (
+    "time"
+    "github.com/vechain/networkhub/genesisbuilder"
+)
+
+genesis := genesisbuilder.New(4).
+    Accounts(myAccounts).
+    Stakers(myStakers).
+    Params(myParams).
+    GasLimit(10_000_000).
+    ExtraData("My Network").
+    GenesisTimestampDelay(5 * time.Second).
+    Build()
+```
+
+All fields are optional — sensible defaults are applied for any omitted values (dev accounts, self-endorsing stakers, standard params, `thor.SoloFork` fork config).
 
 ## Thorbuilder Package
 The `thorbuilder` package is a key component of the networkHub framework that provides flexible configuration options for building Thor binaries from source. It supports both local builds and Docker image creation, with options for reusable builds and debug configurations.
