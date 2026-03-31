@@ -36,7 +36,23 @@ func HandleAdditionalFields(raw *map[string]interface{}) {
 }
 
 func Marshal(customGenesis *CustomGenesis) ([]byte, error) {
-	return json.Marshal(customGenesis)
+	data, err := json.Marshal(&customGenesis)
+	if err != nil {
+		return nil, err
+	}
+	var raw map[string]interface{}
+	if err = json.Unmarshal(data, &raw); err != nil {
+		return nil, err
+	}
+
+	HandleAdditionalFields(&raw)
+
+	modifiedData, err := json.Marshal(raw)
+	if err != nil {
+		return nil, err
+	}
+
+	return modifiedData, nil
 }
 
 type CustomGenesisForkConfig struct {
