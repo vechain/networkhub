@@ -2,7 +2,9 @@ package preset
 
 import (
 	"math/big"
+	"time"
 
+	"github.com/vechain/networkhub/genesisbuilder"
 	"github.com/vechain/networkhub/internal/environments"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
@@ -19,35 +21,27 @@ func LocalFourNodesHayabusaGenesis() *genesis.CustomGenesis {
 	endorsement := new(big.Int)
 	endorsement.SetString("fffffffffffffffffffffffffffffffffff", 16)
 
-	return &genesis.CustomGenesis{
-		CustomGenesis: &thorgenesis.CustomGenesis{
-			LaunchTime: 1703180212,
-			GasLimit:   10_000_000,
-			ExtraData:  "Local Four Nodes Network",
-			Accounts: []thorgenesis.Account{
-				{Address: *SixNNAccount1.Address, Balance: convToHexOrDecimal256(LargeBigValue), Energy: convToHexOrDecimal256(LargeBigValue)},
-				{Address: *SixNNAccount2.Address, Balance: convToHexOrDecimal256(LargeBigValue), Energy: convToHexOrDecimal256(LargeBigValue)},
-				{Address: *SixNNAccount3.Address, Balance: convToHexOrDecimal256(LargeBigValue), Energy: convToHexOrDecimal256(LargeBigValue)},
-				{Address: *SixNNAccount4.Address, Balance: convToHexOrDecimal256(LargeBigValue), Energy: convToHexOrDecimal256(LargeBigValue)},
-			},
-			Stakers: []thorgenesis.Validator{
-				{Master: *SixNNAccount1.Address, Endorser: *SixNNAccount1.Address},
-				{Master: *SixNNAccount2.Address, Endorser: *SixNNAccount2.Address},
-				{Master: *SixNNAccount3.Address, Endorser: *SixNNAccount3.Address},
-				{Master: *SixNNAccount4.Address, Endorser: *SixNNAccount4.Address},
-			},
-			Params: thorgenesis.Params{
-				RewardRatio:         convToHexOrDecimal256(big.NewInt(300000000000000000)),
-				BaseGasPrice:        convToHexOrDecimal256(big.NewInt(1000000000000000)),
-				ProposerEndorsement: convToHexOrDecimal256(endorsement),
-				MaxBlockProposers:   &mbp,
-			},
-			Executor: thorgenesis.Executor{},
-		},
-		ForkConfig: &genesis.CustomGenesisForkConfig{
-			ForkConfig: thor.SoloFork,
-		},
-		Config: &genesis.Config{
+	return genesisbuilder.New(4).
+		Accounts([]thorgenesis.Account{
+			{Address: *SixNNAccount1.Address, Balance: convToHexOrDecimal256(LargeBigValue), Energy: convToHexOrDecimal256(LargeBigValue)},
+			{Address: *SixNNAccount2.Address, Balance: convToHexOrDecimal256(LargeBigValue), Energy: convToHexOrDecimal256(LargeBigValue)},
+			{Address: *SixNNAccount3.Address, Balance: convToHexOrDecimal256(LargeBigValue), Energy: convToHexOrDecimal256(LargeBigValue)},
+			{Address: *SixNNAccount4.Address, Balance: convToHexOrDecimal256(LargeBigValue), Energy: convToHexOrDecimal256(LargeBigValue)},
+		}).
+		Stakers([]thorgenesis.Validator{
+			{Master: *SixNNAccount1.Address, Endorser: *SixNNAccount1.Address},
+			{Master: *SixNNAccount2.Address, Endorser: *SixNNAccount2.Address},
+			{Master: *SixNNAccount3.Address, Endorser: *SixNNAccount3.Address},
+			{Master: *SixNNAccount4.Address, Endorser: *SixNNAccount4.Address},
+		}).
+		Params(thorgenesis.Params{
+			RewardRatio:         convToHexOrDecimal256(big.NewInt(300000000000000000)),
+			BaseGasPrice:        convToHexOrDecimal256(big.NewInt(1000000000000000)),
+			ProposerEndorsement: convToHexOrDecimal256(endorsement),
+			MaxBlockProposers:   &mbp,
+		}).
+		ForkConfig(&genesis.CustomGenesisForkConfig{ForkConfig: thor.SoloFork}).
+		Config(&genesis.Config{
 			BlockInterval:              10,
 			EpochLength:                10,
 			SeederInterval:             10,
@@ -58,8 +52,11 @@ func LocalFourNodesHayabusaGenesis() *genesis.CustomGenesis {
 			HighStakingPeriod:          40,
 			CooldownPeriod:             10,
 			HayabusaTP:                 &hayabusaTP,
-		},
-	}
+		}).
+		GasLimit(10_000_000).
+		ExtraData("Local Four Nodes Network").
+		GenesisTimestampDelay(5 * time.Second).
+		Build()
 }
 
 func LocalFourNodesHayabusa() *network.Network {

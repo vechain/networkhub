@@ -3,7 +3,6 @@ package genesisbuilder
 import (
 	"math/big"
 
-	"github.com/vechain/networkhub/utils/datagen"
 	"github.com/vechain/thor/v2/genesis"
 	"github.com/vechain/thor/v2/thor"
 )
@@ -28,19 +27,16 @@ func DefaultAccounts() []genesis.Account {
 	return accounts
 }
 
-func DefaultAuthority(amount int) []genesis.Authority {
+func DefaultStakers(n int) []genesis.Validator {
 	devAccounts := genesis.DevAccounts()
-	accounts := make([]genesis.Authority, amount)
-
-	for i := range amount {
-		accounts[i] = genesis.Authority{
-			MasterAddress:   devAccounts[i].Address,
-			EndorsorAddress: devAccounts[i].Address,
-			Identity:        datagen.RandKey(),
+	stakers := make([]genesis.Validator, n)
+	for i := range n {
+		stakers[i] = genesis.Validator{
+			Master:   devAccounts[i].Address,
+			Endorser: devAccounts[i].Address,
 		}
 	}
-
-	return accounts
+	return stakers
 }
 
 func DefaultParams(mbp uint64) *genesis.Params {
@@ -51,16 +47,5 @@ func DefaultParams(mbp uint64) *genesis.Params {
 		BaseGasPrice:        (*genesis.HexOrDecimal256)(big.NewInt(1000000000000000)),
 		ProposerEndorsement: (*genesis.HexOrDecimal256)(endorsement),
 		MaxBlockProposers:   &mbp,
-	}
-}
-
-func DefaultExecutor() *genesis.Executor {
-	return &genesis.Executor{
-		Approvers: []genesis.Approver{
-			{
-				Address:  genesis.DevAccounts()[0].Address,
-				Identity: datagen.RandKey(),
-			},
-		},
 	}
 }

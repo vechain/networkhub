@@ -2,7 +2,9 @@ package preset
 
 import (
 	"math/big"
+	"time"
 
+	"github.com/vechain/networkhub/genesisbuilder"
 	"github.com/vechain/networkhub/internal/environments"
 	"github.com/vechain/networkhub/network"
 	"github.com/vechain/networkhub/network/node"
@@ -46,50 +48,34 @@ func LocalThreeNodesNetworkGenesis() *genesis.CustomGenesis {
 	hayabusaTP := uint32(0)
 	mbp := uint64(3)
 
-	return &genesis.CustomGenesis{
-		CustomGenesis: &thorgenesis.CustomGenesis{
-			LaunchTime: 1703180212,
-			GasLimit:   10000000,
-			ExtraData:  "",
-			Accounts: []thorgenesis.Account{
-				{
-					Address: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
-					Balance: convToHexOrDecimal256(LargeBigValue),
-					Energy:  convToHexOrDecimal256(LargeBigValue),
-				},
-				{
-					Address: thor.MustParseAddress("0x61fF580B63D3845934610222245C116E013717ec"),
-					Balance: convToHexOrDecimal256(LargeBigValue),
-					Energy:  convToHexOrDecimal256(LargeBigValue),
-				},
-				{
-					Address: thor.MustParseAddress("0x327931085B4cCbCE0baABb5a5E1C678707C51d90"),
-					Balance: convToHexOrDecimal256(LargeBigValue),
-					Energy:  convToHexOrDecimal256(LargeBigValue),
-				},
-				{
-					Address: thor.MustParseAddress("0x084E48c8AE79656D7e27368AE5317b5c2D6a7497"),
-					Balance: convToHexOrDecimal256(LargeBigValue),
-					Energy:  convToHexOrDecimal256(LargeBigValue),
-				},
+	node1 := thor.MustParseAddress("0x61fF580B63D3845934610222245C116E013717ec")
+	node2 := thor.MustParseAddress("0x327931085B4cCbCE0baABb5a5E1C678707C51d90")
+	node3 := thor.MustParseAddress("0x084E48c8AE79656D7e27368AE5317b5c2D6a7497")
+
+	return genesisbuilder.New(3).
+		Accounts([]thorgenesis.Account{
+			{
+				Address: thor.MustParseAddress("0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"),
+				Balance: convToHexOrDecimal256(LargeBigValue),
+				Energy:  convToHexOrDecimal256(LargeBigValue),
 			},
-			Stakers: []thorgenesis.Validator{
-				{Master: thor.MustParseAddress("0x61fF580B63D3845934610222245C116E013717ec"), Endorser: thor.MustParseAddress("0x61fF580B63D3845934610222245C116E013717ec")},
-				{Master: thor.MustParseAddress("0x327931085B4cCbCE0baABb5a5E1C678707C51d90"), Endorser: thor.MustParseAddress("0x327931085B4cCbCE0baABb5a5E1C678707C51d90")},
-				{Master: thor.MustParseAddress("0x084E48c8AE79656D7e27368AE5317b5c2D6a7497"), Endorser: thor.MustParseAddress("0x084E48c8AE79656D7e27368AE5317b5c2D6a7497")},
-			},
-			Params: thorgenesis.Params{
-				RewardRatio:         convToHexOrDecimal256(big.NewInt(300000000000000000)),
-				BaseGasPrice:        convToHexOrDecimal256(big.NewInt(1000000000000000)),
-				ProposerEndorsement: convToHexOrDecimal256(LargeBigValue),
-				MaxBlockProposers:   &mbp,
-			},
-			Executor: thorgenesis.Executor{},
-		},
-		ForkConfig: &genesis.CustomGenesisForkConfig{
-			ForkConfig: thor.SoloFork,
-		},
-		Config: &genesis.Config{
+			{Address: node1, Balance: convToHexOrDecimal256(LargeBigValue), Energy: convToHexOrDecimal256(LargeBigValue)},
+			{Address: node2, Balance: convToHexOrDecimal256(LargeBigValue), Energy: convToHexOrDecimal256(LargeBigValue)},
+			{Address: node3, Balance: convToHexOrDecimal256(LargeBigValue), Energy: convToHexOrDecimal256(LargeBigValue)},
+		}).
+		Stakers([]thorgenesis.Validator{
+			{Master: node1, Endorser: node1},
+			{Master: node2, Endorser: node2},
+			{Master: node3, Endorser: node3},
+		}).
+		Params(thorgenesis.Params{
+			RewardRatio:         convToHexOrDecimal256(big.NewInt(300000000000000000)),
+			BaseGasPrice:        convToHexOrDecimal256(big.NewInt(1000000000000000)),
+			ProposerEndorsement: convToHexOrDecimal256(LargeBigValue),
+			MaxBlockProposers:   &mbp,
+		}).
+		ForkConfig(&genesis.CustomGenesisForkConfig{ForkConfig: thor.SoloFork}).
+		Config(&genesis.Config{
 			BlockInterval:              10,
 			EpochLength:                10,
 			SeederInterval:             10,
@@ -100,6 +86,8 @@ func LocalThreeNodesNetworkGenesis() *genesis.CustomGenesis {
 			HighStakingPeriod:          40,
 			CooldownPeriod:             10,
 			HayabusaTP:                 &hayabusaTP,
-		},
-	}
+		}).
+		GasLimit(10_000_000).
+		GenesisTimestampDelay(5 * time.Second).
+		Build()
 }
