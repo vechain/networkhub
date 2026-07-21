@@ -49,6 +49,7 @@ func (b *Builder) Params(params thorgenesis.Params) *Builder {
 
 func (b *Builder) ForkConfig(forkConfig *genesis.CustomGenesisForkConfig) *Builder {
 	b.forkConfig = forkConfig
+	b.forkConfig.FINALITY = 1
 	return b
 }
 
