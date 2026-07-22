@@ -16,7 +16,7 @@ func TestReadPK(t *testing.T) {
 	pubKeyA := privateKeyA.PublicKey
 	addrA := crypto.PubkeyToAddress(pubKeyA)
 	// Logging this to make sure if the test fails we have the culprit keys
-	t.Logf("PK String: %x\n", privateKeyA.D.Bytes()) //nolint:staticcheck
+	t.Logf("PK String: %x\n", crypto.FromECDSA(privateKeyA))
 	t.Logf("PK Address: %s", addrA.Hex())
 }
 
@@ -28,7 +28,7 @@ func TestGenerateData(t *testing.T) {
 	pubKeyA := privateKeyA.PublicKey
 	addrA := crypto.PubkeyToAddress(pubKeyA)
 	// Logging this to make sure if the test fails we have the culprit keys
-	t.Logf("PK String: %x\n", privateKeyA.D.Bytes())
+	t.Logf("PK String: %x\n", crypto.FromECDSA(privateKeyA))
 	t.Logf("PK Address: %s", addrA.Hex())
 }
 
@@ -41,7 +41,7 @@ func TestNodeID(t *testing.T) {
 	pubKeyA := privateKeyA.PublicKey
 	addrA := crypto.PubkeyToAddress(pubKeyA)
 	// Logging this to make sure if the test fails we have the culprit keys
-	t.Logf("PK String: %x\n", privateKeyA.D.Bytes())
+	t.Logf("PK String: %x\n", crypto.FromECDSA(privateKeyA))
 	t.Logf("PK Address: %s", addrA.Hex())
 
 	t.Logf("eNode: %s", fmt.Sprintf("enode://%x@[extip]:%v", discover.PubkeyID(&privateKeyA.PublicKey).Bytes(), 8080))

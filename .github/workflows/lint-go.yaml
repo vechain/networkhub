@@ -3,6 +3,11 @@ name: Lint
 on:
   # Should only be used by other workflows
   workflow_call:
+    inputs:
+      only-new-issues:
+        description: 'Report only issues on changed lines (PRs) vs. a full-tree scan (merges/releases)'
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -21,8 +26,7 @@ jobs:
         uses: golangci/golangci-lint-action@v9
         with:
           version: v2.11.3
-          # use the default if on main branch, otherwise use the pull request config
           args: --timeout=30m --config=.golangci.yml
-          only-new-issues: true
+          only-new-issues: ${{ inputs.only-new-issues }}
           skip-cache: true
 

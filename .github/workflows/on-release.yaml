@@ -21,3 +21,6 @@ jobs:
   lint:
     name: Lint
     uses: ./.github/workflows/lint-go.yaml
+    with:
+      # releases must full-scan, not rely on the tag-push diff fallback
+      only-new-issues: false
