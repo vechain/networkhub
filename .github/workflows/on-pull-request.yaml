@@ -3,7 +3,7 @@ name: Pull Request CI
 on:
   push:
     branches:
-      - 'master'
+      - main
   pull_request:
     branches:
       - main
@@ -16,4 +16,7 @@ jobs:
   lint:
     name: Lint
     uses: ./.github/workflows/lint-go.yaml
+    with:
+      # incremental on PRs; full-tree scan on merges to main
+      only-new-issues: ${{ github.event_name == 'pull_request' }}
 
