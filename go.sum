@@ -174,8 +174,8 @@ github.com/vechain/go-ethereum v1.8.15-0.20260324060835-4fc778eca93e h1:0/g3bVEx
 github.com/vechain/go-ethereum v1.8.15-0.20260324060835-4fc778eca93e/go.mod h1:LVuf3xPnVtHmoIP5+mN7aPnIeRBgo0xVq/wVELtSeIA=
 github.com/vechain/goleveldb v1.0.1-0.20220809091043-51eb019c8655 h1:CbHcWpCi7wOYfpoErRABh3Slyq9vO0Ay/EHN5GuJSXQ=
 github.com/vechain/goleveldb v1.0.1-0.20220809091043-51eb019c8655/go.mod h1:RRCYJbIwD5jmqPI9XoAFR0OcDxqUctll6zUj/+B4S48=
-github.com/vechain/thor/v2 v2.5.0 h1:pt3d8JpYZpMKFi2RW+6efdZhM2ws/YvK+lwkfa4IEO8=
-github.com/vechain/thor/v2 v2.5.0/go.mod h1:WkPA5CgCgCzFYEkbt2cGEhs3fUurcJJKMdKnp++WI6I=
+github.com/vechain/thor/v2 v2.5.1 h1:jmM4nrttXahJAUCJdTjCN9uPTmZRuqHE/wkmIq5uTtU=
+github.com/vechain/thor/v2 v2.5.1/go.mod h1:ydxmbYhwrd9QVTC1qIS2WZpYnCHU1OhoRzBjsegl7Xg=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
