@@ -11,7 +11,7 @@ require (
 	github.com/docker/go-connections v0.5.0
 	github.com/ethereum/go-ethereum v1.8.14
 	github.com/stretchr/testify v1.11.1
-	github.com/vechain/thor/v2 v2.5.0
+	github.com/vechain/thor/v2 v2.5.1
 )
 
 require (
